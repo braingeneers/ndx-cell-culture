@@ -1,0 +1,511 @@
+groups:
+- neurodata_type_def: GeneticVariant
+  neurodata_type_inc: NWBContainer
+  doc: Stable or defining engineered genomic change attached to a CellLine or 
+    CellCulture. Use for engineered edits, not every raw sequencing variant.
+  attributes:
+  - name: variant_id
+    dtype: text
+    doc: Stable variant identifier.
+  - name: target_symbol
+    dtype: text
+    doc: Gene symbol or target name.
+  - name: target_coordinates
+    dtype: text
+    doc: Genomic coordinates, transcript notation, or locus notation.
+    required: false
+  - name: edit_type
+    dtype: text
+    doc: Recommended terms include knockout, knockin, point_mutation, deletion, 
+      duplication, inversion, tag_insertion, reporter_insertion, 
+      CRISPRi_targeting, CRISPRa_targeting, other.
+  - name: edit_description
+    dtype: text
+    doc: Human-readable edit description.
+    required: false
+  - name: method
+    dtype: text
+    doc: Engineering method, e.g. CRISPR-Cas9, base_editing, prime_editing, 
+      TALEN, ZFNs, homologous_recombination, other.
+  - name: delivery_method
+    dtype: text
+    doc: Method used to deliver edit machinery, e.g. RNP, plasmid, lentivirus, 
+      AAV, electroporation, lipofection, other.
+    required: false
+  - name: zygosity_or_edit_state
+    dtype: text
+    doc: Observed zygosity or edit state, e.g. heterozygous, homozygous, 
+      biallelic, hemizygous, mosaic, unknown, other.
+    required: false
+  - name: validation_status
+    dtype: text
+    doc: Validation state, e.g. planned, screened, validated, failed, unknown.
+    required: false
+  - name: validation_method
+    dtype: text
+    doc: Assay or method used for validation, e.g. Sanger, amplicon_seq, WGS, 
+      WES, ONT, ddPCR, PCR, fluorescence imaging, other.
+    required: false
+  - name: notes
+    dtype: text
+    doc: Free-text remarks.
+    required: false
+  datasets:
+  - name: attached_cell_line
+    dtype:
+      target_type: NWBContainer
+      reftype: object
+    dims:
+    - attached_cell_line
+    shape:
+    - null
+    doc: Object reference to the CellLine to which this variant applies, when 
+      attached at line level.
+    quantity: '?'
+  - name: attached_cell_culture
+    dtype:
+      target_type: NWBContainer
+      reftype: object
+    dims:
+    - attached_cell_culture
+    shape:
+    - null
+    doc: Object reference to the CellCulture to which this variant applies, when
+      attached at culture level.
+    quantity: '?'
+  - name: related_application
+    dtype:
+      target_type: NWBContainer
+      reftype: object
+    dims:
+    - related_application
+    shape:
+    - null
+    doc: Object reference to the ConstructApplication related to this variant, 
+      when applicable.
+    quantity: '?'
+- neurodata_type_def: ConstructApplication
+  neurodata_type_inc: NWBContainer
+  doc: Construct, vector, reagent, reporter, or perturbation applied to a 
+    CellLine or CellCulture.
+  attributes:
+  - name: application_id
+    dtype: text
+    doc: Stable construct application identifier.
+  - name: source
+    dtype: text
+    doc: Construct source, catalog, plasmid, vendor, manufacturer, person, or 
+      lab.
+    required: false
+  - name: delivery_route
+    dtype: text
+    doc: Broad route, e.g. transduction, transfection, microinjection, 
+      cell_fusion, other.
+    required: false
+  - name: delivery_mechanism
+    dtype: text
+    doc: Technical mechanism, e.g. lipofection, polymer_transfection, 
+      calcium_phosphate, electroporation, nucleofection, nanoparticle_mediated, 
+      other. Do not use microinjection here.
+    required: false
+  - name: vector_type
+    dtype: text
+    doc: Vector or reagent class, e.g. AAV, lentivirus, retrovirus, plasmid, 
+      transposon, RNP, minicircle_dna, linear_dna, rna, mrna, sirna, crispr_rna,
+      adenovirus, baculovirus, herpes_simplex_virus, other.
+  - name: payload
+    dtype: text
+    doc: Gene, tool, cassette, or reagent delivered.
+  - name: promoter
+    dtype: text
+    doc: Promoter driving expression, if known.
+    required: false
+  - name: genomic_persistence_state
+    dtype: text
+    doc: Persistence state, e.g. genomically_integrated, 
+      episomal_or_extragenomic, transient_nonintegrating, unknown, other.
+    required: false
+  - name: application_time_relative_to_recording
+    dtype: text
+    doc: Human-readable time relative to recording.
+    required: false
+  - name: age_modified
+    dtype: text
+    doc: Culture age when application occurred.
+    required: false
+  - name: age_modified_reference
+    dtype: text
+    doc: Reference event for age_modified.
+    required: false
+  - name: expression_status
+    dtype: text
+    doc: Expression or delivery observation state, e.g. planned, observed, 
+      validated, failed, unknown.
+    required: false
+  - name: validation_method
+    dtype: text
+    doc: Assay or observation used to confirm expression or delivery.
+    required: false
+  - name: notes
+    dtype: text
+    doc: Free-text remarks.
+    required: false
+  datasets:
+  - name: attached_cell_line
+    dtype:
+      target_type: NWBContainer
+      reftype: object
+    dims:
+    - attached_cell_line
+    shape:
+    - null
+    doc: Object reference to the CellLine to which this construct application 
+      applies, when applied at line level.
+    quantity: '?'
+  - name: attached_cell_culture
+    dtype:
+      target_type: NWBContainer
+      reftype: object
+    dims:
+    - attached_cell_culture
+    shape:
+    - null
+    doc: Object reference to the CellCulture to which this construct application
+      applies, when applied at culture level.
+    quantity: '?'
+- neurodata_type_def: CellLine
+  neurodata_type_inc: NWBContainer
+  doc: Donor, parental line, derived line, immortalized line, or other cell-line
+    lineage node.
+  attributes:
+  - name: cell_line_id
+    dtype: text
+    doc: Stable cell-line identifier.
+  - name: cell_line_type
+    dtype: text
+    doc: 'Recommended terms: donor, parental_cell_line, derived_cell_line, immortalized_line,
+      other.'
+  - name: sample_label
+    dtype: text
+    doc: Human-readable label.
+  - name: species
+    dtype: text
+    doc: Species of the source line; formal binomial preferred.
+  - name: cell_source_type
+    dtype: text
+    doc: 'Recommended terms: iPSC, ESC, primary_tissue, primary_cells, tumor_line,
+      immortalized_line, other.'
+  - name: cell_line_name
+    dtype: text
+    doc: Canonical or common cell-line name.
+    required: false
+  - name: cell_line_rrid
+    dtype: text
+    doc: Cell-line RRID when available.
+    required: false
+  - name: clone_id
+    dtype: text
+    doc: Clone identifier for a clonal derived line.
+    required: false
+  - name: clonal_status
+    dtype: text
+    doc: Clonal state of the line, e.g. clonal, polyclonal, mixed, unknown.
+    required: false
+  - name: passage_number
+    dtype: text
+    doc: Passage number or passage label. Do not use culture-age fields on 
+      CellLine.
+    required: false
+  - name: disease_or_diagnosis
+    dtype: text
+    doc: Disease background or diagnosis.
+    required: false
+  - name: reference_genome
+    dtype: text
+    doc: Assembly or annotation context, e.g. GRCh38; not a substitute for 
+      Subject.genotype.
+    required: false
+  - name: notes
+    dtype: text
+    doc: Free-text remarks.
+    required: false
+  datasets:
+  - name: parent_cell_line
+    dtype:
+      target_type: NWBContainer
+      reftype: object
+    dims:
+    - parent_cell_line
+    shape:
+    - null
+    doc: Object reference to the immediate parent CellLine in a 
+      donor/parent/derived lineage.
+    quantity: '?'
+  groups:
+  - neurodata_type_inc: GeneticVariant
+    doc: Genetic variants attached to this cell line.
+    quantity: '*'
+  - neurodata_type_inc: ConstructApplication
+    doc: Construct applications attached to this cell line.
+    quantity: '*'
+- neurodata_type_def: CultureProtocol
+  neurodata_type_inc: NWBContainer
+  doc: Structured derivation or preparation protocol metadata for a CellCulture.
+  attributes:
+  - name: protocol_id
+    dtype: text
+    doc: Stable protocol identifier.
+  - name: protocol_name
+    dtype: text
+    doc: Human-readable protocol name.
+    required: false
+  - name: protocol_uri
+    dtype: text
+    doc: Direct protocol URI when available.
+    required: false
+  - name: protocol_doi
+    dtype: text
+    doc: Protocol DOI when available.
+    required: false
+  - name: protocol_version
+    dtype: text
+    doc: Protocol version or revision label.
+    required: false
+  - name: patterning_summary
+    dtype: text
+    doc: Short patterning summary, not a complete protocol specification.
+    required: false
+  - name: media_summary
+    dtype: text
+    doc: Short media summary.
+    required: false
+  - name: notes
+    dtype: text
+    doc: Free-text remarks.
+    required: false
+  datasets:
+  - name: starting_material_line
+    dtype:
+      target_type: NWBContainer
+      reftype: object
+    dims:
+    - starting_material_line
+    shape:
+    - null
+    doc: Object reference to one primary starting material CellLine when useful.
+      For multi-source cultures, CellCulture.source_lines is authoritative.
+    quantity: '?'
+- neurodata_type_def: CellCulture
+  neurodata_type_inc: NWBContainer
+  doc: Biological cultured preparation being recorded or described.
+  attributes:
+  - name: culture_id
+    dtype: text
+    doc: Stable culture identifier.
+  - name: culture_type
+    dtype: text
+    doc: 'Recommended terms: dissociated_culture, spheroid, organoid, assembloid,
+      slice, explant, other. batch is prohibited.'
+  - name: sample_label
+    dtype: text
+    doc: Human-readable culture label.
+  - name: species
+    dtype: text
+    doc: Culture-level convenience/search species value; may mirror 
+      CellCultureSubject.species.
+  - name: culture_subtype
+    dtype: text
+    doc: Regional or subtype identity, e.g. cortical, thalamic, midbrain, 
+      hippocampal, retinal, spinal, assembloid, tumor_organoid, other.
+    required: false
+  - name: batch_label
+    dtype: text
+    doc: Lightweight grouping/search label only; not a standalone object.
+    required: false
+  - name: age
+    dtype: text
+    doc: Culture age. Prefer ISO-8601 duration such as P120D; pilot terms like 
+      day45 are acceptable.
+    required: false
+  - name: age_reference
+    dtype: text
+    doc: Reference event for culture age, e.g. days_post_induction or 
+      days_post_aggregation.
+    required: false
+  - name: disease_or_diagnosis
+    dtype: text
+    doc: Disease background or diagnosis.
+    required: false
+  - name: reference_genome
+    dtype: text
+    doc: Assembly/annotation context for culture-specific cases or cultures 
+      without a modeled source line.
+    required: false
+  - name: notes
+    dtype: text
+    doc: Free-text remarks.
+    required: false
+  datasets:
+  - name: source_lines
+    dtype:
+      target_type: NWBContainer
+      reftype: object
+    dims:
+    - source_lines
+    shape:
+    - null
+    doc: Object references to CellLine objects used to derive this culture.
+    quantity: '?'
+  - name: parent_cultures
+    dtype:
+      target_type: NWBContainer
+      reftype: object
+    dims:
+    - parent_cultures
+    shape:
+    - null
+    doc: Object references to CellCulture objects used to derive or assemble 
+      this culture.
+    quantity: '?'
+  groups:
+  - neurodata_type_inc: CellLine
+    doc: Cell-line lineage objects available from this culture context.
+    quantity: '*'
+  - neurodata_type_inc: GeneticVariant
+    doc: Genetic variants attached to this culture.
+    quantity: '*'
+  - neurodata_type_inc: ConstructApplication
+    doc: Construct applications attached to this culture.
+    quantity: '*'
+  - neurodata_type_inc: CultureProtocol
+    doc: Structured culture derivation/preparation protocol.
+    quantity: '?'
+- neurodata_type_def: CellCultureSubject
+  neurodata_type_inc: Subject
+  doc: NWB Subject wrapper for a recorded or described cultured neural 
+    preparation.
+  groups:
+  - name: culture
+    neurodata_type_inc: CellCulture
+    doc: Recorded or described CellCulture wrapped by this NWB subject.
+- neurodata_type_def: ExperimentContext
+  neurodata_type_inc: NWBContainer
+  doc: Recording-time or session-level metadata separate from stable biological 
+    identity.
+  attributes:
+  - name: experiment_id
+    dtype: text
+    doc: Stable experiment context identifier.
+  - name: session_id
+    dtype: text
+    doc: Acquisition/session label.
+    required: false
+  - name: age_at_recording
+    dtype: text
+    doc: Culture age at recording; separate from CellCulture.age and inherited 
+      Subject.age.
+  - name: age_reference
+    dtype: text
+    doc: Reference event for age_at_recording.
+    required: false
+  - name: recording_platform
+    dtype: text
+    doc: 'Recommended terms: MEA, patch_clamp, calcium_imaging, multimodal, other.'
+  - name: media_or_bath
+    dtype: text
+    doc: Media, bath solution, or ACSF during recording.
+    required: false
+  - name: experimental_setup
+    dtype: text
+    doc: Short recording setup summary.
+    required: false
+  - name: notes
+    dtype: text
+    doc: Free-text remarks.
+    required: false
+  - name: temperature_c
+    dtype: float32
+    doc: Recording temperature in Celsius.
+    required: false
+  - name: recording_duration_s
+    dtype: float32
+    doc: Recording duration in seconds.
+    required: false
+  - name: spontaneous_activity
+    dtype: bool
+    doc: Search flag for spontaneous activity.
+    required: false
+  - name: electrical_stimulation
+    dtype: bool
+    doc: Search flag for electrical stimulation; detailed waveforms belong in 
+      core NWB stimulus data.
+    required: false
+  - name: optical_stimulation
+    dtype: bool
+    doc: Search flag for optical stimulation; detailed waveforms belong in core 
+      NWB stimulus data.
+    required: false
+  - name: pharmacology_present
+    dtype: bool
+    doc: Search flag for pharmacology presence.
+    required: false
+  links:
+  - name: subject
+    target_type: CellCultureSubject
+    doc: CellCultureSubject recorded in this experiment.
+  - name: culture
+    target_type: CellCulture
+    doc: CellCulture recorded in this experiment.
+  - name: device
+    target_type: Device
+    doc: Core NWB Device object relevant to this recording context.
+    quantity: '?'
+- neurodata_type_def: Pharmacology
+  neurodata_type_inc: NWBContainer
+  doc: Repeatable pharmacological intervention linked to an ExperimentContext.
+  attributes:
+  - name: pharmacology_id
+    dtype: text
+    doc: Stable pharmacology row identifier.
+  - name: agent
+    dtype: text
+    doc: Compound or reagent name.
+  - name: concentration
+    dtype: text
+    doc: Flexible concentration value or range for search/review.
+    required: false
+  - name: concentration_unit
+    dtype: text
+    doc: 'Recommended terms: M, mM, uM, nM, pM, %, mg/mL, ug/mL, ng/mL, other.'
+    required: false
+  - name: purpose
+    dtype: text
+    doc: Purpose or interpretation note.
+    required: false
+  - name: notes
+    dtype: text
+    doc: Free-text remarks.
+    required: false
+  - name: start_time_s
+    dtype: float32
+    doc: Start time relative to recording start.
+    required: false
+  - name: end_time_s
+    dtype: float32
+    doc: End time relative to recording start.
+    required: false
+  links:
+  - name: experiment
+    target_type: ExperimentContext
+    doc: Experiment context this pharmacological intervention belongs to.
+- neurodata_type_def: CultureExperimentContext
+  neurodata_type_inc: LabMetaData
+  doc: LabMetaData container for cultured-preparation recording context and 
+    pharmacology metadata.
+  groups:
+  - neurodata_type_inc: ExperimentContext
+    doc: Recording/session context for this NWBFile.
+    quantity: '?'
+  - neurodata_type_inc: Pharmacology
+    doc: Pharmacological interventions linked to experiment contexts.
+    quantity: '*'
