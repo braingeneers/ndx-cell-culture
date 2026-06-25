@@ -4,6 +4,12 @@
 
 This repository is the formal extension implementation derived from the Braingeneers organoid/cell-culture metadata workbook and formal notes.
 
+Design artifacts that led to this formal draft are maintained in the companion design repository `braingeneers/nwb-organoid-extension`, especially:
+
+- `workbook/nwb_organoid_sample_workbook_v0.74.xlsx`
+- `workbook/nwb_organoid_formal_extension_notes_v0.74.md`
+- `docs/formal_nwb_extension_build_plan.md`
+
 ## Scope
 
 Extension-owned types:
@@ -68,6 +74,13 @@ Review examples currently cover:
 - H9-DO11 Ketamine manual validation row with pharmacology
 - directoid/connectoid-style assembloid metadata
 - two-line assembloid metadata
+
+Reviewer documentation:
+
+- [Design notes](docs/design.md)
+- [Field reference](docs/field_reference.md)
+- [Review examples](docs/examples.md)
+- [Maintainer review notes](docs/maintainer_review.md)
 
 ## Design Principles
 

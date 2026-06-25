@@ -154,6 +154,58 @@ def test_removed_terms_are_absent_from_schema():
         assert removed not in schema
 
 
+def test_reviewer_docs_cover_extension_types_and_design_sources():
+    docs_text = "\n".join(
+        Path(path).read_text()
+        for path in [
+            "README.md",
+            "docs/design.md",
+            "docs/field_reference.md",
+            "docs/examples.md",
+            "docs/maintainer_review.md",
+        ]
+    )
+    for name in [
+        "CellCultureSubject",
+        "CellCulture",
+        "CellLine",
+        "GeneticVariant",
+        "ConstructApplication",
+        "CultureProtocol",
+        "CultureExperimentContext",
+        "ExperimentContext",
+        "Pharmacology",
+    ]:
+        assert name in docs_text
+    for design_source in [
+        "nwb_organoid_sample_workbook_v0.74.xlsx",
+        "nwb_organoid_formal_extension_notes_v0.74.md",
+        "formal_nwb_extension_build_plan.md",
+    ]:
+        assert design_source in docs_text
+
+
+def test_schema_declares_critical_relationships():
+    schema = "\n".join(p.read_text() for p in Path("spec").glob("*.yaml"))
+    for relationship in [
+        "neurodata_type_def: CellCultureSubject",
+        "neurodata_type_inc: Subject",
+        "neurodata_type_def: CultureExperimentContext",
+        "neurodata_type_inc: LabMetaData",
+        "name: culture",
+        "name: source_lines",
+        "name: parent_cultures",
+        "name: parent_cell_line",
+        "name: subject",
+        "target_type: CellCultureSubject",
+        "name: device",
+        "target_type: Device",
+        "name: experiment",
+        "target_type: ExperimentContext",
+    ]:
+        assert relationship in schema
+
+
 def test_required_culture_on_subject():
     line = ndx.CellLine(
         name="CL",
