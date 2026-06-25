@@ -1,10 +1,14 @@
 from datetime import datetime
 from pathlib import Path
+import sys
 
 from dateutil.tz import tzlocal
 from pynwb import NWBHDF5IO, NWBFile
 
 import ndx_cell_culture as ndx
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "examples"))
+from scenario_builders import SCENARIOS  # noqa: E402
 
 
 def test_dynamic_classes_are_available():
@@ -169,3 +173,40 @@ def test_required_culture_on_subject():
     )
     subject = ndx.CellCultureSubject(subject_id="SUBJ", species="Homo sapiens", culture=culture)
     assert subject.culture.culture_id == "CULT"
+
+
+def test_review_scenarios_write_and_read(tmp_path):
+    expected = {
+        "basic_organoid": ("organoid", "MEA", 0),
+        "slice_patch_clamp": ("slice", "patch_clamp", 2),
+        "kolf_shank3_org1": ("organoid", "MEA", 0),
+        "h9_do11_ketamine": ("organoid", "MEA", 1),
+        "directoid": ("assembloid", None, 0),
+        "two_line_assembloid": ("assembloid", None, 0),
+    }
+    for name, (culture_type, platform, pharmacology_count) in expected.items():
+        path = tmp_path / f"{name}.nwb"
+        with NWBHDF5IO(str(path), "w") as io:
+            io.write(SCENARIOS[name]())
+
+        with NWBHDF5IO(str(path), "r", load_namespaces=True) as io:
+            read = io.read()
+            assert read.subject.culture.culture_type == culture_type
+            if platform is None:
+                assert not read.lab_meta_data
+            else:
+                context = read.lab_meta_data["culture_experiment_context"]
+                assert context.experiment_context.recording_platform == platform
+                assert len(context.pharmacologys) == pharmacology_count
+
+
+def test_kolf_org2_is_biological_metadata_only(tmp_path):
+    path = tmp_path / "kolf_org2.nwb"
+    with NWBHDF5IO(str(path), "w") as io:
+        io.write(SCENARIOS["kolf_shank3_org2"]())
+
+    with NWBHDF5IO(str(path), "r", load_namespaces=True) as io:
+        read = io.read()
+        assert read.subject.subject_id == "SUBJ-KOLF2.2J-SHANK3-ORG2"
+        assert read.subject.culture.culture_id == "KOLF2.2j-SHANK3+/- Org 2"
+        assert not read.lab_meta_data

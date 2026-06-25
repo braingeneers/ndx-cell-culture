@@ -31,6 +31,9 @@ jobs:
       - name: Run example
         run: python examples/create_basic_organoid_nwb.py
 
+      - name: Run review scenarios
+        run: python examples/create_review_scenarios.py
+
       - name: Verify wheel contains schema
         run: |
           python -m pip wheel . -w /tmp/ndx-cell-culture-wheel --no-deps

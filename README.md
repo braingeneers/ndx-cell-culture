@@ -53,6 +53,22 @@ Run the example:
 python examples/create_basic_organoid_nwb.py
 ```
 
+Write all review scenarios:
+
+```bash
+python examples/create_review_scenarios.py
+```
+
+Review examples currently cover:
+
+- basic organoid
+- organoid-derived slice with patch-clamp hardware and two pharmacology entries
+- KOLF/SHANK3 Org1 manual validation row
+- KOLF/SHANK3 Org2 manual validation row without experiment context
+- H9-DO11 Ketamine manual validation row with pharmacology
+- directoid/connectoid-style assembloid metadata
+- two-line assembloid metadata
+
 ## Design Principles
 
 - Reuse NWB core metadata wherever possible.
@@ -68,4 +84,4 @@ This is an initial formal NDX draft. The schema and examples are intended for re
 
 Known review point: recursive and multi-parent provenance relationships such as `CellCulture.parent_cultures`, `CellCulture.source_lines`, and `CellLine.parent_cell_line` are represented in the draft schema as optional NWB object-reference datasets. The validated example exercises the stable containment and link path; NWB maintainers should confirm whether those recursive provenance relationships should remain reference datasets, become links, move into a shared container, or be represented with another HDMF/NWB idiom before release.
 
-Continuous integration regenerates the schema, runs the PyNWB round-trip tests, executes the example, and verifies that built wheels include the namespace and extension YAML files.
+Continuous integration regenerates the schema, runs the PyNWB round-trip tests, executes the example and review scenario writers, and verifies that built wheels include the namespace and extension YAML files.
