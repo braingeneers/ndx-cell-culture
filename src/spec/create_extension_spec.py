@@ -5,11 +5,9 @@ from pathlib import Path
 
 from pynwb.spec import (
     NWBAttributeSpec,
-    NWBDatasetSpec,
     NWBGroupSpec,
     NWBLinkSpec,
     NWBNamespaceBuilder,
-    NWBRefSpec,
     export_spec,
 )
 
@@ -26,15 +24,8 @@ def text_attrs(fields):
     return [attr(name, doc, required) for name, required, doc in fields]
 
 
-def object_refs(name, doc, required=False, target_type="NWBContainer"):
-    return NWBDatasetSpec(
-        name=name,
-        doc=doc,
-        dtype=NWBRefSpec(target_type=target_type, reftype="object"),
-        shape=(None,),
-        dims=(name,),
-        quantity=1 if required else "?",
-    )
+def object_link(name, doc, quantity="?", target_type="NWBContainer"):
+    return NWBLinkSpec(name=name, doc=doc, target_type=target_type, quantity=quantity)
 
 
 def build_specs():
@@ -60,10 +51,10 @@ def build_specs():
                 ("notes", False, "Free-text remarks."),
             ]
         ),
-        datasets=[
-            object_refs("attached_cell_line", "Object reference to the CellLine to which this variant applies, when attached at line level."),
-            object_refs("attached_cell_culture", "Object reference to the CellCulture to which this variant applies, when attached at culture level."),
-            object_refs("related_application", "Object reference to the ConstructApplication related to this variant, when applicable."),
+        links=[
+            object_link("attached_cell_line", "Link to the CellLine to which this variant applies, when attached at line level."),
+            object_link("attached_cell_culture", "Link to the CellCulture to which this variant applies, when attached at culture level."),
+            object_link("related_application", "Link to the ConstructApplication related to this variant, when applicable."),
         ],
     )
 
@@ -89,9 +80,9 @@ def build_specs():
                 ("notes", False, "Free-text remarks."),
             ]
         ),
-        datasets=[
-            object_refs("attached_cell_line", "Object reference to the CellLine to which this construct application applies, when applied at line level."),
-            object_refs("attached_cell_culture", "Object reference to the CellCulture to which this construct application applies, when applied at culture level."),
+        links=[
+            object_link("attached_cell_line", "Link to the CellLine to which this construct application applies, when applied at line level."),
+            object_link("attached_cell_culture", "Link to the CellCulture to which this construct application applies, when applied at culture level."),
         ],
     )
 
@@ -120,8 +111,8 @@ def build_specs():
             NWBGroupSpec(neurodata_type_inc="GeneticVariant", doc="Genetic variants attached to this cell line.", quantity="*"),
             NWBGroupSpec(neurodata_type_inc="ConstructApplication", doc="Construct applications attached to this cell line.", quantity="*"),
         ],
-        datasets=[
-            object_refs("parent_cell_line", "Object reference to the immediate parent CellLine in a donor/parent/derived lineage."),
+        links=[
+            object_link("parent_cell_line", "Link to the immediate parent CellLine in a donor/parent/derived lineage."),
         ],
     )
 
@@ -141,8 +132,8 @@ def build_specs():
                 ("notes", False, "Free-text remarks."),
             ]
         ),
-        datasets=[
-            object_refs("starting_material_line", "Object reference to one primary starting material CellLine when useful. For multi-source cultures, CellCulture.source_lines is authoritative."),
+        links=[
+            object_link("starting_material_line", "Link to one primary starting material CellLine when useful. For multi-source cultures, CellCulture.source_lines is authoritative."),
         ],
     )
 
@@ -171,9 +162,9 @@ def build_specs():
             NWBGroupSpec(neurodata_type_inc="ConstructApplication", doc="Construct applications attached to this culture.", quantity="*"),
             NWBGroupSpec(neurodata_type_inc="CultureProtocol", doc="Structured culture derivation/preparation protocol.", quantity="?"),
         ],
-        datasets=[
-            object_refs("source_lines", "Object references to CellLine objects used to derive this culture."),
-            object_refs("parent_cultures", "Object references to CellCulture objects used to derive or assemble this culture."),
+        links=[
+            object_link("source_lines", "Links to CellLine objects used to derive this culture.", quantity="*"),
+            object_link("parent_cultures", "Links to CellCulture objects used to derive or assemble this culture.", quantity="*"),
         ],
     )
 

@@ -31,14 +31,14 @@ Recording hardware identity uses core NWB `Device` and `DeviceModel` objects und
 
 ## Relationship Fields
 
-The review workbook used helper columns such as `source_line_ids`, `parent_culture_ids`, and `core_device_names`. In this formal extension those become NWB links or object-reference datasets, not semicolon-separated string fields.
+The review workbook used helper columns such as `source_line_ids`, `parent_culture_ids`, and `core_device_names`. In this formal extension those become NWB links or another formal NWB relationship structure, not semicolon-separated string fields.
 
 The first draft uses two relationship idioms:
 
 - Required runtime links from `ExperimentContext` to `CellCultureSubject`, `CellCulture`, and core NWB `Device`, and from `Pharmacology` to `ExperimentContext`.
-- Optional object-reference datasets for recursive or multi-parent provenance fields such as `CellCulture.source_lines`, `CellCulture.parent_cultures`, `CellLine.parent_cell_line`, and attachment targets on `GeneticVariant` / `ConstructApplication`.
+- Optional generic NWB links for recursive or multi-parent provenance fields such as `CellCulture.source_lines`, `CellCulture.parent_cultures`, `CellLine.parent_cell_line`, and attachment targets on `GeneticVariant` / `ConstructApplication`.
 
-The recursive provenance fields are intentionally explicit in the schema, but their final storage idiom should be reviewed with NWB maintainers. The key requirement is that these relationships remain formal NWB object references/links, not workbook-style semicolon-delimited strings.
+The recursive provenance fields are intentionally explicit in the schema, but their final storage idiom should be reviewed with NWB maintainers. The key requirement is that these relationships remain formal NWB links, object references, or relationship structures, not workbook-style semicolon-delimited strings.
 
 ## Intentionally Absent
 

@@ -50,39 +50,21 @@ groups:
     dtype: text
     doc: Free-text remarks.
     required: false
-  datasets:
+  links:
   - name: attached_cell_line
-    dtype:
-      target_type: NWBContainer
-      reftype: object
-    dims:
-    - attached_cell_line
-    shape:
-    - null
-    doc: Object reference to the CellLine to which this variant applies, when 
-      attached at line level.
+    target_type: NWBContainer
+    doc: Link to the CellLine to which this variant applies, when attached at 
+      line level.
     quantity: '?'
   - name: attached_cell_culture
-    dtype:
-      target_type: NWBContainer
-      reftype: object
-    dims:
-    - attached_cell_culture
-    shape:
-    - null
-    doc: Object reference to the CellCulture to which this variant applies, when
-      attached at culture level.
+    target_type: NWBContainer
+    doc: Link to the CellCulture to which this variant applies, when attached at
+      culture level.
     quantity: '?'
   - name: related_application
-    dtype:
-      target_type: NWBContainer
-      reftype: object
-    dims:
-    - related_application
-    shape:
-    - null
-    doc: Object reference to the ConstructApplication related to this variant, 
-      when applicable.
+    target_type: NWBContainer
+    doc: Link to the ConstructApplication related to this variant, when 
+      applicable.
     quantity: '?'
 - neurodata_type_def: ConstructApplication
   neurodata_type_inc: NWBContainer
@@ -150,28 +132,16 @@ groups:
     dtype: text
     doc: Free-text remarks.
     required: false
-  datasets:
+  links:
   - name: attached_cell_line
-    dtype:
-      target_type: NWBContainer
-      reftype: object
-    dims:
-    - attached_cell_line
-    shape:
-    - null
-    doc: Object reference to the CellLine to which this construct application 
-      applies, when applied at line level.
+    target_type: NWBContainer
+    doc: Link to the CellLine to which this construct application applies, when 
+      applied at line level.
     quantity: '?'
   - name: attached_cell_culture
-    dtype:
-      target_type: NWBContainer
-      reftype: object
-    dims:
-    - attached_cell_culture
-    shape:
-    - null
-    doc: Object reference to the CellCulture to which this construct application
-      applies, when applied at culture level.
+    target_type: NWBContainer
+    doc: Link to the CellCulture to which this construct application applies, 
+      when applied at culture level.
     quantity: '?'
 - neurodata_type_def: CellLine
   neurodata_type_inc: NWBContainer
@@ -229,18 +199,6 @@ groups:
     dtype: text
     doc: Free-text remarks.
     required: false
-  datasets:
-  - name: parent_cell_line
-    dtype:
-      target_type: NWBContainer
-      reftype: object
-    dims:
-    - parent_cell_line
-    shape:
-    - null
-    doc: Object reference to the immediate parent CellLine in a 
-      donor/parent/derived lineage.
-    quantity: '?'
   groups:
   - neurodata_type_inc: GeneticVariant
     doc: Genetic variants attached to this cell line.
@@ -248,6 +206,12 @@ groups:
   - neurodata_type_inc: ConstructApplication
     doc: Construct applications attached to this cell line.
     quantity: '*'
+  links:
+  - name: parent_cell_line
+    target_type: NWBContainer
+    doc: Link to the immediate parent CellLine in a donor/parent/derived 
+      lineage.
+    quantity: '?'
 - neurodata_type_def: CultureProtocol
   neurodata_type_inc: NWBContainer
   doc: Structured derivation or preparation protocol metadata for a CellCulture.
@@ -283,17 +247,11 @@ groups:
     dtype: text
     doc: Free-text remarks.
     required: false
-  datasets:
+  links:
   - name: starting_material_line
-    dtype:
-      target_type: NWBContainer
-      reftype: object
-    dims:
-    - starting_material_line
-    shape:
-    - null
-    doc: Object reference to one primary starting material CellLine when useful.
-      For multi-source cultures, CellCulture.source_lines is authoritative.
+    target_type: NWBContainer
+    doc: Link to one primary starting material CellLine when useful. For 
+      multi-source cultures, CellCulture.source_lines is authoritative.
     quantity: '?'
 - neurodata_type_def: CellCulture
   neurodata_type_inc: NWBContainer
@@ -345,28 +303,6 @@ groups:
     dtype: text
     doc: Free-text remarks.
     required: false
-  datasets:
-  - name: source_lines
-    dtype:
-      target_type: NWBContainer
-      reftype: object
-    dims:
-    - source_lines
-    shape:
-    - null
-    doc: Object references to CellLine objects used to derive this culture.
-    quantity: '?'
-  - name: parent_cultures
-    dtype:
-      target_type: NWBContainer
-      reftype: object
-    dims:
-    - parent_cultures
-    shape:
-    - null
-    doc: Object references to CellCulture objects used to derive or assemble 
-      this culture.
-    quantity: '?'
   groups:
   - neurodata_type_inc: CellLine
     doc: Cell-line lineage objects available from this culture context.
@@ -380,6 +316,15 @@ groups:
   - neurodata_type_inc: CultureProtocol
     doc: Structured culture derivation/preparation protocol.
     quantity: '?'
+  links:
+  - name: source_lines
+    target_type: NWBContainer
+    doc: Links to CellLine objects used to derive this culture.
+    quantity: '*'
+  - name: parent_cultures
+    target_type: NWBContainer
+    doc: Links to CellCulture objects used to derive or assemble this culture.
+    quantity: '*'
 - neurodata_type_def: CellCultureSubject
   neurodata_type_inc: Subject
   doc: NWB Subject wrapper for a recorded or described cultured neural 
