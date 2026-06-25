@@ -1,0 +1,45 @@
+name: tests
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install package
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e ".[test]"
+
+      - name: Regenerate schema
+        run: python src/spec/create_extension_spec.py
+
+      - name: Run tests
+        run: pytest -q
+
+      - name: Run example
+        run: python examples/create_basic_organoid_nwb.py
+
+      - name: Verify wheel contains schema
+        run: |
+          python -m pip wheel . -w /tmp/ndx-cell-culture-wheel --no-deps
+          python - <<'PY'
+          from pathlib import Path
+          from zipfile import ZipFile
+
+          wheel = next(Path("/tmp/ndx-cell-culture-wheel").glob("*.whl"))
+          names = set(ZipFile(wheel).namelist())
+          assert "ndx_cell_culture/spec/ndx-cell-culture.namespace.yaml" in names
+          assert "ndx_cell_culture/spec/ndx-cell-culture.extensions.yaml" in names
+          PY
