@@ -11,3 +11,4 @@ dist/
 *.nwb
 examples/generated_scenarios/
 docs/_build/
+docs/source/source/_format_auto_docs/

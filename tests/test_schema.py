@@ -3,6 +3,7 @@ from pathlib import Path
 import sys
 
 from dateutil.tz import tzlocal
+from nwbinspector import Importance, inspect_nwbfile
 from pynwb import NWBHDF5IO, NWBFile, validate
 
 import ndx_cell_culture as ndx
@@ -18,6 +19,16 @@ def _assert_no_validation_errors(path):
     else:
         errors = result
     assert errors == []
+
+
+def _assert_no_inspector_violations(path):
+    messages = list(
+        inspect_nwbfile(
+            nwbfile_path=str(path),
+            importance_threshold=Importance.BEST_PRACTICE_VIOLATION,
+        )
+    )
+    assert messages == []
 
 
 def test_dynamic_classes_are_available():
@@ -37,6 +48,43 @@ def test_dynamic_classes_are_available():
     ]:
         assert hasattr(ndx, name)
     assert hasattr(ndx, "validate_recommended_terms")
+
+
+def test_pharmacologies_alias_is_public_spelling():
+    culture = ndx.CellCulture(
+        name="CULT-ALIAS",
+        culture_id="CULT-ALIAS",
+        culture_type="organoid",
+        sample_label="Alias culture",
+        species="Homo sapiens",
+    )
+    subject = ndx.CellCultureSubject(
+        subject_id="SUBJ-ALIAS",
+        species="Homo sapiens",
+        culture=culture,
+    )
+    experiment = ndx.ExperimentContext(
+        name="EXP-ALIAS",
+        experiment_id="EXP-ALIAS",
+        subject=subject,
+        culture=culture,
+        age_at_recording="P1D",
+        recording_platform="MEA",
+    )
+    pharmacology = ndx.Pharmacology(
+        name="PHARM-ALIAS",
+        pharmacology_id="PHARM-ALIAS",
+        experiment=experiment,
+        agent="CNQX",
+    )
+    context = ndx.CultureExperimentContext(
+        name="culture_experiment_context",
+        pharmacologies=[pharmacology],
+    )
+    assert context.pharmacologies["PHARM-ALIAS"] is pharmacology
+    assert context.get_pharmacologies("PHARM-ALIAS") is pharmacology
+    assert hasattr(context, "add_pharmacologies")
+    assert hasattr(context, "create_pharmacologies")
 
 
 def _build_roundtrip_file():
@@ -138,7 +186,7 @@ def _build_roundtrip_file():
             cell_cultures=[culture],
             cell_culture_source_line_relations=[source_relation],
             experiment_context=experiment,
-            pharmacologys=[pharmacology],
+            pharmacologies=[pharmacology],
         )
     )
     return nwbfile
@@ -150,6 +198,7 @@ def test_write_read_roundtrip(tmp_path):
         io.write(_build_roundtrip_file())
 
     _assert_no_validation_errors(path)
+    _assert_no_inspector_violations(path)
 
     with NWBHDF5IO(str(path), "r", load_namespaces=True) as io:
         read = io.read()
@@ -162,7 +211,7 @@ def test_write_read_roundtrip(tmp_path):
         assert context.cell_culture_source_line_relations["REL-EX-ORG-SOURCE-001"].source_line.cell_line_id == "CL-EX-CTRL-001"
         assert context.experiment_context.experiment_id == "EXP-EX-ORG-001"
         assert context.experiment_context.device.name == "MaxTwo MX2-CHIP-17"
-        assert context.pharmacologys["PHARM-EX-CNQX-01"].agent == "CNQX"
+        assert context.pharmacologies["PHARM-EX-CNQX-01"].agent == "CNQX"
 
 
 def test_removed_terms_are_absent_from_schema():
@@ -435,6 +484,7 @@ def test_synthetic_scenarios_write_read_and_validate(tmp_path):
             io.write(SCENARIOS[name]())
 
         _assert_no_validation_errors(path)
+        _assert_no_inspector_violations(path)
 
         with NWBHDF5IO(str(path), "r", load_namespaces=True) as io:
             read = io.read()
@@ -445,7 +495,7 @@ def test_synthetic_scenarios_write_read_and_validate(tmp_path):
             if platform is not None:
                 context = read.lab_meta_data["culture_experiment_context"]
                 assert context.experiment_context.recording_platform == platform
-                assert len(context.pharmacologys) == pharmacology_count
+                assert len(context.pharmacologies) == pharmacology_count
 
 
 def test_biological_metadata_only_scenario_has_catalog_but_no_experiment_context(tmp_path):

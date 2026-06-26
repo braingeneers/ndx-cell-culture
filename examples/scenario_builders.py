@@ -75,7 +75,7 @@ def _add_context(
     cell_culture_source_line_relations=None,
     cell_culture_parent_relations=None,
     experiment_context=None,
-    pharmacologys=None,
+    pharmacologies=None,
 ):
     nwbfile.add_lab_meta_data(
         CultureExperimentContext(
@@ -86,7 +86,7 @@ def _add_context(
             cell_culture_source_line_relations=cell_culture_source_line_relations or [],
             cell_culture_parent_relations=cell_culture_parent_relations or [],
             experiment_context=experiment_context,
-            pharmacologys=pharmacologys or [],
+            pharmacologies=pharmacologies or [],
         )
     )
 
@@ -295,7 +295,7 @@ def build_slice_patch_clamp():
             _culture_parent_relation("REL-EX-SLICE-PARENT-001", slice_culture, parent_organoid, "sliced_from"),
         ],
         experiment_context=experiment,
-        pharmacologys=pharmacology,
+        pharmacologies=pharmacology,
     )
     return nwbfile
 
@@ -560,7 +560,7 @@ def build_pharmacology_titration_organoid():
         cell_cultures=[culture],
         cell_culture_source_line_relations=[_source_relation("REL-SYN-PHARM-SOURCE-001", culture, line)],
         experiment_context=experiment,
-        pharmacologys=[pharmacology],
+        pharmacologies=[pharmacology],
     )
     return nwbfile
 

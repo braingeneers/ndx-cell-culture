@@ -178,6 +178,7 @@ with NWBHDF5IO("synthetic_organoid.nwb", "w") as io:
 - Use `CultureProtocol` for concise structured culture protocol metadata. Detailed protocol documents can be referenced with `protocol_uri` or `protocol_doi`.
 - Use `ExperimentContext` and `Pharmacology` for session-level recording context and compounds applied during the experiment.
 - Use core NWB `Device` / `DeviceModel` for hardware identity. Detailed acquisition, electrode, imaging, and stimulus data should use the appropriate core NWB structures.
+- Use the public `pharmacologies=[...]` constructor argument when adding repeated `Pharmacology` records to `CultureExperimentContext`.
 
 ## Examples
 
@@ -225,7 +226,17 @@ Run tests:
 pytest
 ```
 
-Continuous integration regenerates the schema, runs PyNWB round-trip tests, executes the example writers, verifies clean wheel installation, and checks wheel/source distributions before release.
+Build the HTML documentation:
+
+```bash
+python -m pip install -e ".[docs]"
+make -C docs/source html
+```
+
+The generated site is written to `docs/_build/html`.
+The repository also includes `.readthedocs.yaml`, so Read the Docs can import the GitHub repository and build from `docs/source/source/conf.py`.
+
+Continuous integration regenerates the schema, runs PyNWB round-trip tests, executes the example writers, runs NWB Inspector, builds the docs, verifies clean wheel installation, and checks wheel/source distributions before release.
 
 ## Status
 

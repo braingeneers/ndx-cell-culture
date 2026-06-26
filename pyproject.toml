@@ -20,7 +20,7 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
-    "Development Status :: 3 - Alpha",
+    "Development Status :: 4 - Beta",
     "Intended Audience :: Science/Research",
     "License :: OSI Approved :: BSD License",
 ]
@@ -41,22 +41,29 @@ dependencies = [
 [project.optional-dependencies]
 test = [
     "build>=1.2",
+    "nwbinspector>=0.5",
     "pytest>=8.0",
     "twine>=5.0",
 ]
 docs = [
     "hdmf-docutils>=0.4.8",
+    "sphinx>=7,<8",
+    "sphinx-rtd-theme>=2.0",
 ]
 dev = [
     "build>=1.2",
     "pytest>=8.0",
     "hdmf-docutils>=0.4.8",
+    "nwbinspector>=0.5",
+    "sphinx>=7,<8",
+    "sphinx-rtd-theme>=2.0",
     "twine>=5.0",
 ]
 
 [project.urls]
 Homepage = "https://github.com/braingeneers/ndx-cell-culture"
 Repository = "https://github.com/braingeneers/ndx-cell-culture"
+"Bug Tracker" = "https://github.com/braingeneers/ndx-cell-culture/issues"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/ndx_cell_culture"]
