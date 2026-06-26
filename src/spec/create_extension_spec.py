@@ -13,7 +13,7 @@ from pynwb.spec import (
 
 
 NAMESPACE = "ndx-cell-culture"
-VERSION = "0.1.0"
+VERSION = "1.0rc1"
 
 
 def attr(name, doc, required=True, dtype="text"):
