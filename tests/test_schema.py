@@ -11,6 +11,15 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "examples"))
 from scenario_builders import SCENARIOS  # noqa: E402
 
 
+def _assert_no_validation_errors(path):
+    result = validate(paths=[str(path)])
+    if isinstance(result, tuple):
+        errors = result[0]
+    else:
+        errors = result
+    assert errors == []
+
+
 def test_dynamic_classes_are_available():
     for name in [
         "CellCultureSubject",
@@ -140,7 +149,7 @@ def test_write_read_roundtrip(tmp_path):
     with NWBHDF5IO(str(path), "w") as io:
         io.write(_build_roundtrip_file())
 
-    assert validate(paths=[str(path)]) == ([], 0)
+    _assert_no_validation_errors(path)
 
     with NWBHDF5IO(str(path), "r", load_namespaces=True) as io:
         read = io.read()
@@ -361,7 +370,7 @@ def test_stable_relationship_links_write_read_and_validate(tmp_path):
     with NWBHDF5IO(str(path), "w") as io:
         io.write(nwbfile)
 
-    assert validate(paths=[str(path)]) == ([], 0)
+    _assert_no_validation_errors(path)
 
     with NWBHDF5IO(str(path), "r", load_namespaces=True) as io:
         read = io.read()
@@ -425,7 +434,7 @@ def test_synthetic_scenarios_write_read_and_validate(tmp_path):
         with NWBHDF5IO(str(path), "w") as io:
             io.write(SCENARIOS[name]())
 
-        assert validate(paths=[str(path)]) == ([], 0)
+        _assert_no_validation_errors(path)
 
         with NWBHDF5IO(str(path), "r", load_namespaces=True) as io:
             read = io.read()
