@@ -1,4 +1,4 @@
-"""Write all ndx-cell-culture review scenario NWB files."""
+"""Write all ndx-cell-culture synthetic scenario NWB files."""
 
 from pathlib import Path
 

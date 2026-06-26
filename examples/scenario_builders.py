@@ -1,4 +1,4 @@
-"""Reusable example NWBFile builders for ndx-cell-culture review scenarios."""
+"""Reusable synthetic NWBFile builders for ndx-cell-culture scenarios."""
 
 from datetime import datetime
 
@@ -223,78 +223,79 @@ def build_slice_patch_clamp():
     return nwbfile
 
 
-def build_kolf_shank3_org1():
+def build_edited_ipsc_organoid_mea():
     parental = CellLine(
-        name="KOLF2.2j",
-        cell_line_id="KOLF2.2j",
+        name="SYN-iPSC-A",
+        cell_line_id="SYN-iPSC-A",
         cell_line_type="parental_cell_line",
-        sample_label="KOLF2.2j",
+        sample_label="Synthetic iPSC line A",
         species="Homo sapiens",
         cell_source_type="iPSC",
-        cell_line_name="KOLF2.2j",
+        cell_line_name="SYN-iPSC-A",
         clonal_status="clonal",
-        disease_or_diagnosis="ASD",
+        disease_or_diagnosis="synthetic neurodevelopmental condition",
         reference_genome="GRCh38",
     )
     variant = GeneticVariant(
-        name="MOD-SHANK3-het",
-        variant_id="MOD-SHANK3+/-",
-        target_symbol="SHANK3",
+        name="VAR-SYN-GENE1-HET",
+        variant_id="VAR-SYN-GENE1-HET",
+        target_symbol="GENE1",
         edit_type="knockin",
-        edit_description="exon X frameshift mutation resulting in stop codon",
+        edit_description="synthetic heterozygous frameshift edit",
         method="CRISPR-Cas9",
         zygosity_or_edit_state="heterozygous",
         validation_status="screened",
         validation_method="ONT",
     )
     derived = CellLine(
-        name="KOLF2.2j-SHANK3-het",
-        cell_line_id="KOLF2.2j-SHANK3+/-",
+        name="SYN-iPSC-A-GENE1-HET-C1",
+        cell_line_id="SYN-iPSC-A-GENE1-HET-C1",
         cell_line_type="derived_cell_line",
-        sample_label="KOLF2.2j-SHANK3+/-",
+        sample_label="Synthetic edited iPSC clone C1",
         species="Homo sapiens",
         cell_source_type="iPSC",
+        clone_id="C1",
         clonal_status="clonal",
-        disease_or_diagnosis="ASD",
+        disease_or_diagnosis="synthetic neurodevelopmental condition",
         reference_genome="GRCh38",
         genetic_variants=[variant],
-        notes="Derived from KOLF2.2j; parent_cell_line reference idiom is under NWB review.",
+        notes="Synthetic edited line; parent_cell_line reference idiom is under NWB review.",
     )
     protocol = CultureProtocol(
-        name="BGR-proto-progCtx",
-        protocol_id="BGR-proto-progCtx",
-        protocol_name="Prog ctx v1",
+        name="PROTO-SYN-FOREBRAIN-001",
+        protocol_id="PROTO-SYN-FOREBRAIN-001",
+        protocol_name="Synthetic forebrain organoid protocol",
         patterning_summary="dual-SMAD inhibition w/ WNT inhibitor, forebrain patterning",
         media_summary="neural induction + maturation media",
     )
     culture = CellCulture(
         name="culture",
-        culture_id="KOLF2.2j-SHANK3+/- Org 1",
+        culture_id="CULT-SYN-EDITED-ORG-001",
         culture_type="organoid",
-        sample_label="Batch 1 Org 1",
+        sample_label="Synthetic edited organoid 1",
         species="Homo sapiens",
         culture_subtype="cortical",
-        batch_label="Batch 1",
+        batch_label="SYN-BATCH-1",
         age="day45",
         age_reference="days_post_aggregation",
-        disease_or_diagnosis="ASD",
+        disease_or_diagnosis="synthetic neurodevelopmental condition",
         reference_genome="GRCh38",
         cell_lines=[parental, derived],
         culture_protocol=protocol,
     )
     subject = CellCultureSubject(
-        subject_id="SUBJ-KOLF2.2J-SHANK3-ORG1",
+        subject_id="SUBJ-SYN-EDITED-ORG-001",
         species="Homo sapiens",
         sex="M",
-        description="Legacy Org 1 subject mapped from manual validation data",
+        description="Synthetic edited organoid subject",
         culture=culture,
     )
-    nwbfile = _nwbfile("NWB-KOLF-SHANK3-ORG1", "KOLF SHANK3 organoid manual validation example")
+    nwbfile = _nwbfile("NWB-SYN-EDITED-ORG-001", "Synthetic edited organoid MEA example")
     nwbfile.subject = subject
-    device = _device(nwbfile, "MaxOne P004714", "MEA recording system/chip")
+    device = _device(nwbfile, "Example MEA Device A", "MEA recording system")
     experiment = ExperimentContext(
-        name="EXP-ORG001-MEA-01",
-        experiment_id="EXP-ORG001-MEA-01",
+        name="EXP-SYN-EDITED-MEA-001",
+        experiment_id="EXP-SYN-EDITED-MEA-001",
         subject=subject,
         culture=culture,
         session_id="2026-03-09",
@@ -316,126 +317,126 @@ def build_kolf_shank3_org1():
     return nwbfile
 
 
-def build_kolf_shank3_org2():
+def build_biological_metadata_only_organoid():
     parental = CellLine(
-        name="KOLF2.2j",
-        cell_line_id="KOLF2.2j",
+        name="SYN-iPSC-A",
+        cell_line_id="SYN-iPSC-A",
         cell_line_type="parental_cell_line",
-        sample_label="KOLF2.2j",
+        sample_label="Synthetic iPSC line A",
         species="Homo sapiens",
         cell_source_type="iPSC",
-        cell_line_name="KOLF2.2j",
+        cell_line_name="SYN-iPSC-A",
         clonal_status="clonal",
-        disease_or_diagnosis="ASD",
+        disease_or_diagnosis="synthetic neurodevelopmental condition",
         reference_genome="GRCh38",
     )
     variant = GeneticVariant(
-        name="MOD-SHANK3-het",
-        variant_id="MOD-SHANK3+/-",
-        target_symbol="SHANK3",
+        name="VAR-SYN-GENE1-HET",
+        variant_id="VAR-SYN-GENE1-HET",
+        target_symbol="GENE1",
         edit_type="knockin",
-        edit_description="exon X frameshift mutation resulting in stop codon",
+        edit_description="synthetic heterozygous frameshift edit",
         method="CRISPR-Cas9",
         zygosity_or_edit_state="heterozygous",
         validation_status="screened",
         validation_method="ONT",
     )
     derived = CellLine(
-        name="KOLF2.2j-SHANK3-het",
-        cell_line_id="KOLF2.2j-SHANK3+/-",
+        name="SYN-iPSC-A-GENE1-HET-C1",
+        cell_line_id="SYN-iPSC-A-GENE1-HET-C1",
         cell_line_type="derived_cell_line",
-        sample_label="KOLF2.2j-SHANK3+/-",
+        sample_label="Synthetic edited iPSC clone C1",
         species="Homo sapiens",
         cell_source_type="iPSC",
+        clone_id="C1",
         clonal_status="clonal",
-        disease_or_diagnosis="ASD",
+        disease_or_diagnosis="synthetic neurodevelopmental condition",
         reference_genome="GRCh38",
         genetic_variants=[variant],
-        notes="Derived from KOLF2.2j; parent_cell_line reference idiom is under NWB review.",
+        notes="Synthetic edited line; parent_cell_line reference idiom is under NWB review.",
     )
     protocol = CultureProtocol(
-        name="BGR-proto-progCtx",
-        protocol_id="BGR-proto-progCtx",
-        protocol_name="Prog ctx v1",
+        name="PROTO-SYN-FOREBRAIN-001",
+        protocol_id="PROTO-SYN-FOREBRAIN-001",
+        protocol_name="Synthetic forebrain organoid protocol",
         patterning_summary="dual-SMAD inhibition w/ WNT inhibitor, forebrain patterning",
         media_summary="neural induction + maturation media",
     )
     culture = CellCulture(
         name="culture",
-        culture_id="KOLF2.2j-SHANK3+/- Org 2",
+        culture_id="CULT-SYN-EDITED-ORG-002",
         culture_type="organoid",
-        sample_label="Batch 1 Org 2",
+        sample_label="Synthetic edited organoid 2",
         species="Homo sapiens",
         culture_subtype="cortical",
-        batch_label="Batch 1",
+        batch_label="SYN-BATCH-1",
         age="day45",
         age_reference="days_post_aggregation",
-        disease_or_diagnosis="ASD",
+        disease_or_diagnosis="synthetic neurodevelopmental condition",
         reference_genome="GRCh38",
         cell_lines=[parental, derived],
         culture_protocol=protocol,
     )
     subject = CellCultureSubject(
-        subject_id="SUBJ-KOLF2.2J-SHANK3-ORG2",
+        subject_id="SUBJ-SYN-EDITED-ORG-002",
         species="Homo sapiens",
         sex="M",
-        description="Legacy Org 2 subject mapped from manual validation data",
+        description="Synthetic edited organoid subject without recording context",
         culture=culture,
     )
     nwbfile = _nwbfile(
-        "NWB-KOLF-SHANK3-ORG2",
-        "KOLF SHANK3 organoid 2 manual validation example without experiment row",
+        "NWB-SYN-EDITED-ORG-002",
+        "Synthetic edited organoid biological metadata example",
     )
     nwbfile.subject = subject
     return nwbfile
 
 
-def build_h9_do11_ketamine():
+def build_pharmacology_titration_organoid():
     line = CellLine(
-        name="H9",
-        cell_line_id="H9",
+        name="SYN-ESC-A",
+        cell_line_id="SYN-ESC-A",
         cell_line_type="parental_cell_line",
-        sample_label="H9",
-        species="HOMO SAPIENS",
+        sample_label="Synthetic ESC line A",
+        species="Homo sapiens",
         cell_source_type="ESC",
-        cell_line_name="H9",
+        cell_line_name="SYN-ESC-A",
         clonal_status="unknown",
         passage_number="p35+4",
-        disease_or_diagnosis="WT",
-        notes="Manual validation row contained N/A placeholders; optional placeholders omitted.",
+        disease_or_diagnosis="unaffected synthetic control",
     )
     protocol = CultureProtocol(
-        name="RNH",
-        protocol_id="RNH",
-        protocol_name="RNH cortical",
+        name="PROTO-SYN-CORTICAL-ESC-001",
+        protocol_id="PROTO-SYN-CORTICAL-ESC-001",
+        protocol_name="Synthetic ESC cortical organoid protocol",
         patterning_summary="single-SMAD inhibition w/ WNT inhibitor, dorsal forebrain patterning",
     )
     culture = CellCulture(
         name="culture",
-        culture_id="H9-DO11",
+        culture_id="CULT-SYN-PHARM-ORG-001",
         culture_type="organoid",
-        sample_label="DO11",
-        species="HOMO SAPIENS",
+        sample_label="Synthetic pharmacology organoid",
+        species="Homo sapiens",
         culture_subtype="cortical",
         age="day84",
         age_reference="days_post_aggregation",
-        disease_or_diagnosis="WT",
+        disease_or_diagnosis="unaffected synthetic control",
         cell_lines=[line],
         culture_protocol=protocol,
     )
     subject = CellCultureSubject(
-        subject_id="SUBJ-H9-DO11",
-        species="HOMO SAPIENS",
+        subject_id="SUBJ-SYN-PHARM-ORG-001",
+        species="Homo sapiens",
         sex="F",
-        description="Legacy H9-DO11 subject mapped from manual validation data",
+        description="Synthetic organoid subject for pharmacology titration",
         culture=culture,
     )
-    nwbfile = _nwbfile("NWB-H9-DO11-KETAMINE", "H9 DO11 ketamine manual validation example")
+    nwbfile = _nwbfile("NWB-SYN-PHARM-ORG-001", "Synthetic pharmacology titration example")
     nwbfile.subject = subject
-    device = _device(nwbfile, "MaxTwo m07575", "MEA recording system/chip")
+    device = _device(nwbfile, "Example MEA Device B", "MEA recording system")
     experiment = ExperimentContext(
-        name="DO11-Ketamine",
-        experiment_id="DO11-Ketamine",
+        name="EXP-SYN-PHARM-TITRATION-001",
+        experiment_id="EXP-SYN-PHARM-TITRATION-001",
         subject=subject,
         culture=culture,
         age_at_recording="day121",
@@ -447,19 +448,19 @@ def build_h9_do11_ketamine():
         electrical_stimulation=False,
         optical_stimulation=False,
         pharmacology_present=True,
-        experimental_setup="Titration of ketamine from 5 uM to 100 uM with washout at end",
+        experimental_setup="Titration of ExampleDrug-A from 5 uM to 100 uM with washout at end",
         device=device,
     )
     pharmacology = Pharmacology(
-        name="H9-DO11",
-        pharmacology_id="H9-DO11",
+        name="PHARM-SYN-EXAMPLEDRUG-A-001",
+        pharmacology_id="PHARM-SYN-EXAMPLEDRUG-A-001",
         experiment=experiment,
-        agent="Ketamine",
+        agent="ExampleDrug-A",
         concentration="5-100",
         concentration_unit="uM",
         start_time_s=300.0,
         end_time_s=2700.0,
-        purpose="examine ketamine effects at rising concentrations",
+        purpose="examine concentration-dependent effects in a synthetic example",
     )
     nwbfile.add_lab_meta_data(
         CultureExperimentContext(
@@ -564,9 +565,9 @@ def build_two_line_assembloid():
 SCENARIOS = {
     "basic_organoid": build_basic_organoid,
     "slice_patch_clamp": build_slice_patch_clamp,
-    "kolf_shank3_org1": build_kolf_shank3_org1,
-    "kolf_shank3_org2": build_kolf_shank3_org2,
-    "h9_do11_ketamine": build_h9_do11_ketamine,
+    "edited_ipsc_organoid_mea": build_edited_ipsc_organoid_mea,
+    "biological_metadata_only_organoid": build_biological_metadata_only_organoid,
+    "pharmacology_titration_organoid": build_pharmacology_titration_organoid,
     "directoid": build_directoid,
     "two_line_assembloid": build_two_line_assembloid,
 }

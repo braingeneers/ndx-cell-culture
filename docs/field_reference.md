@@ -1,12 +1,12 @@
-# Field Reference
+# Schema Reference
 
-This page summarizes the first formal `ndx-cell-culture` schema draft. The authoritative machine-readable schema lives in `spec/ndx-cell-culture.extensions.yaml`.
+This page summarizes the user-facing fields in `ndx-cell-culture`. The authoritative machine-readable schema lives in `spec/ndx-cell-culture.extensions.yaml`.
 
 Requirement terms:
 
 - Required: constructor/schema required in the current draft.
 - Optional: omitted values are allowed.
-- Recommended terms: documented vocabulary guidance, not hard enum validation unless NWB maintainers request constraints.
+- Recommended terms: documented vocabulary guidance, not hard enum validation in the current draft.
 
 ## CellCultureSubject
 

@@ -1,6 +1,6 @@
 # Maintainer Review Notes
 
-This page collects the questions and checks intended for NWB architects/admins reviewing the first formal `ndx-cell-culture` draft.
+This page collects the questions and checks intended for NWB architects/admins reviewing the `ndx-cell-culture` draft.
 
 ## Review Bundle
 
@@ -11,15 +11,9 @@ The current repository provides:
 - schema generator: `src/spec/create_extension_spec.py`;
 - PyNWB dynamic bindings: `src/ndx_cell_culture/__init__.py`;
 - round-trip tests: `tests/test_schema.py`;
-- review examples: `examples/scenario_builders.py`;
+- synthetic examples: `examples/scenario_builders.py`;
 - design notes: `docs/design.md`;
 - field reference: `docs/field_reference.md`.
-
-The human review workbook and longer formal notes live in the design repository:
-
-- `workbook/nwb_organoid_sample_workbook_v0.74.xlsx`
-- `workbook/nwb_organoid_formal_extension_notes_v0.74.md`
-- `docs/formal_nwb_extension_build_plan.md`
 
 ## Decisions Requested
 

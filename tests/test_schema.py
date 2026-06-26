@@ -154,7 +154,7 @@ def test_removed_terms_are_absent_from_schema():
         assert removed not in schema
 
 
-def test_reviewer_docs_cover_extension_types_and_design_sources():
+def test_user_docs_cover_extension_types_without_planning_artifacts():
     docs_text = "\n".join(
         Path(path).read_text()
         for path in [
@@ -162,7 +162,6 @@ def test_reviewer_docs_cover_extension_types_and_design_sources():
             "docs/design.md",
             "docs/field_reference.md",
             "docs/examples.md",
-            "docs/maintainer_review.md",
         ]
     )
     for name in [
@@ -177,12 +176,17 @@ def test_reviewer_docs_cover_extension_types_and_design_sources():
         "Pharmacology",
     ]:
         assert name in docs_text
-    for design_source in [
-        "nwb_organoid_sample_workbook_v0.74.xlsx",
-        "nwb_organoid_formal_extension_notes_v0.74.md",
-        "formal_nwb_extension_build_plan.md",
+    for planning_or_lab_specific_term in [
+        "workbook",
+        "nwb_organoid",
+        "v0.74",
+        "KOLF",
+        "H9",
+        "DO11",
+        "manual validation",
+        "Legacy",
     ]:
-        assert design_source in docs_text
+        assert planning_or_lab_specific_term not in docs_text
 
 
 def test_schema_declares_critical_relationships():
@@ -231,8 +235,8 @@ def test_review_scenarios_write_and_read(tmp_path):
     expected = {
         "basic_organoid": ("organoid", "MEA", 0),
         "slice_patch_clamp": ("slice", "patch_clamp", 2),
-        "kolf_shank3_org1": ("organoid", "MEA", 0),
-        "h9_do11_ketamine": ("organoid", "MEA", 1),
+        "edited_ipsc_organoid_mea": ("organoid", "MEA", 0),
+        "pharmacology_titration_organoid": ("organoid", "MEA", 1),
         "directoid": ("assembloid", None, 0),
         "two_line_assembloid": ("assembloid", None, 0),
     }
@@ -252,13 +256,13 @@ def test_review_scenarios_write_and_read(tmp_path):
                 assert len(context.pharmacologys) == pharmacology_count
 
 
-def test_kolf_org2_is_biological_metadata_only(tmp_path):
-    path = tmp_path / "kolf_org2.nwb"
+def test_biological_metadata_only_scenario_has_no_lab_metadata(tmp_path):
+    path = tmp_path / "biological_metadata_only_organoid.nwb"
     with NWBHDF5IO(str(path), "w") as io:
-        io.write(SCENARIOS["kolf_shank3_org2"]())
+        io.write(SCENARIOS["biological_metadata_only_organoid"]())
 
     with NWBHDF5IO(str(path), "r", load_namespaces=True) as io:
         read = io.read()
-        assert read.subject.subject_id == "SUBJ-KOLF2.2J-SHANK3-ORG2"
-        assert read.subject.culture.culture_id == "KOLF2.2j-SHANK3+/- Org 2"
+        assert read.subject.subject_id == "SUBJ-SYN-EDITED-ORG-002"
+        assert read.subject.culture.culture_id == "CULT-SYN-EDITED-ORG-002"
         assert not read.lab_meta_data

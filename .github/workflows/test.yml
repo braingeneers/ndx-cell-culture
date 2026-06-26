@@ -31,8 +31,8 @@ jobs:
       - name: Run example
         run: python examples/create_basic_organoid_nwb.py
 
-      - name: Run review scenarios
-        run: python examples/create_review_scenarios.py
+      - name: Run synthetic scenarios
+        run: python examples/create_synthetic_scenarios.py
 
       - name: Verify wheel contains schema
         run: |
