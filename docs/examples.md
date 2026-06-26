@@ -14,13 +14,13 @@ Generated `.nwb` files are written to `examples/generated_scenarios/`, which is 
 
 | Scenario | Builder | Purpose |
 | --- | --- | --- |
-| Basic organoid | `build_basic_organoid` | Complete synthetic organoid with `CellCultureSubject`, `CellCulture`, `CellLine`, `GeneticVariant`, `ConstructApplication`, `CultureProtocol`, `ExperimentContext`, core `Device`, and `CultureExperimentContext`. |
-| Slice patch clamp | `build_slice_patch_clamp` | Organoid-derived slice with patch-clamp device metadata, AAV construct application, and two pharmacology entries. |
-| Edited iPSC organoid | `build_edited_ipsc_organoid_mea` | Synthetic edited iPSC lineage, line-level variant, protocol metadata, MEA context, and no pharmacology. |
-| Biological metadata only | `build_biological_metadata_only_organoid` | Synthetic organoid with biological metadata but no recording/session context. |
+| Basic organoid | `build_basic_organoid` | Complete synthetic organoid with a subject-to-culture link, source-line relation, line-level variant, culture-level construct application, protocol metadata, MEA context, and core `Device`. |
+| Slice patch clamp | `build_slice_patch_clamp` | Organoid-derived slice with `CellCultureParentRelation`, patch-clamp device metadata, AAV construct application, and two pharmacology entries. |
+| Edited iPSC organoid | `build_edited_ipsc_organoid_mea` | Synthetic edited iPSC lineage using `CellLineParentRelation`, line-level variant, source-line relation, protocol metadata, MEA context, and no pharmacology. |
+| Biological metadata only | `build_biological_metadata_only_organoid` | Synthetic organoid with culture and line catalogs but no recording/session context. |
 | Pharmacology titration | `build_pharmacology_titration_organoid` | Synthetic organoid recording with a pharmacology concentration range and MEA device. |
-| Directoid | `build_directoid` | Directoid/connectoid-style `assembloid` example with two brain-region source lines and microfluidic-channel provenance in protocol/notes. |
-| Two-line assembloid | `build_two_line_assembloid` | `assembloid` example from two distinct synthetic source lines. |
+| Directoid | `build_directoid` | Directoid/connectoid-style `assembloid` example with two parent organoids represented by repeated `CellCultureParentRelation` objects. |
+| Two-line assembloid | `build_two_line_assembloid` | `assembloid` example from two distinct synthetic source lines represented by repeated `CellCultureSourceLineRelation` objects. |
 
 ## Expected Validation
 
@@ -30,8 +30,8 @@ The test suite writes and reads the scenario files with `NWBHDF5IO`. This verifi
 - all extension-owned neurodata types can be instantiated;
 - `CellCultureSubject` can be stored in `NWBFile.subject`;
 - `CultureExperimentContext` can be stored under `NWBFile.lab_meta_data`;
+- `CellLine` and `CellCulture` catalog entries round-trip;
+- `CellLineParentRelation`, `CellCultureSourceLineRelation`, and `CellCultureParentRelation` round-trip;
 - `ExperimentContext` links to `CellCultureSubject`, `CellCulture`, and core NWB `Device`;
 - repeated `Pharmacology` children round-trip;
-- synthetic examples cover edited lines, pharmacology, slice recordings, multi-source cultures, and biological-metadata-only files.
-
-The recursive provenance fields are present in the schema but are not asserted as release-ready examples yet. Their final representation should be confirmed with NWB maintainers.
+- synthetic examples cover edited lines, pharmacology, slice recordings, multi-source cultures, directoid-style parent cultures, and biological-metadata-only files.

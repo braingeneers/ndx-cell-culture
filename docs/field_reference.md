@@ -6,7 +6,7 @@ Requirement terms:
 
 - Required: constructor/schema required in the current draft.
 - Optional: omitted values are allowed.
-- Recommended terms: documented vocabulary guidance, not hard enum validation in the current draft.
+- Recommended terms: documented vocabulary guidance, not hard enum validation in the current draft. Use `ndx_cell_culture.validate_recommended_terms` for opt-in checking.
 
 ## CellCultureSubject
 
@@ -27,11 +27,11 @@ Inherited from `NWB.Subject` and not redefined by this extension:
 | `strain` | Usually animal-centric. |
 | `weight` | Usually not meaningful for cell cultures/organoids. |
 
-Extension-owned child:
+Extension-owned link:
 
 | Field | Requirement | Type | Guidance |
 | --- | --- | --- | --- |
-| `culture` | Required | `CellCulture` child group | Recorded or described cultured neural preparation wrapped by the NWB subject. |
+| `culture` | Required | link to `CellCulture` | Recorded or described cultured neural preparation cataloged in `CultureExperimentContext`. |
 
 ## CellCulture
 
@@ -48,12 +48,9 @@ Extension-owned child:
 | `disease_or_diagnosis` | Optional | text attribute | Disease background or diagnosis. |
 | `reference_genome` | Optional | text attribute | Assembly/annotation context; not a substitute for `Subject.genotype`. |
 | `notes` | Optional | text attribute | Free-text remarks. |
-| `CellLine` children | Optional/repeated | child groups | Cell-line lineage objects available from this culture context. |
 | `GeneticVariant` children | Optional/repeated | child groups | Culture-attached genetic variants. |
 | `ConstructApplication` children | Optional/repeated | child groups | Culture-attached construct applications. |
 | `CultureProtocol` child | Optional | child group | Structured derivation/preparation protocol. |
-| `source_lines` | Optional/repeated | generic NWB links | Links to source `CellLine` objects. Final recursive relationship idiom requires NWB maintainer review. |
-| `parent_cultures` | Optional/repeated | generic NWB links | Links to parent `CellCulture` objects for slice/assembloid/directoid provenance. Final recursive relationship idiom requires NWB maintainer review. |
 
 ## CellLine
 
@@ -74,7 +71,40 @@ Extension-owned child:
 | `notes` | Optional | text attribute | Free-text remarks. |
 | `GeneticVariant` children | Optional/repeated | child groups | Variants attached at line level. |
 | `ConstructApplication` children | Optional/repeated | child groups | Construct applications attached at line level. |
-| `parent_cell_line` | Optional | generic NWB link | Immediate parent line. Final recursive relationship idiom requires NWB maintainer review. |
+
+## Provenance Relations
+
+Relationship objects live under `CultureExperimentContext` and make lineage explicit without duplicating objects.
+
+### CellLineParentRelation
+
+| Field | Requirement | Type | Guidance |
+| --- | --- | --- | --- |
+| `relation_id` | Required | text attribute | Stable relation identifier. |
+| `relationship_type` | Optional | text attribute | Recommended terms: `derived_from`, `cloned_from`, `reprogrammed_from`, `edited_from`, `other`. |
+| `notes` | Optional | text attribute | Free-text remarks. |
+| `child_cell_line` | Required | link to `CellLine` | Child or derived line. |
+| `parent_cell_line` | Required | link to `CellLine` | Parent or source line. |
+
+### CellCultureSourceLineRelation
+
+| Field | Requirement | Type | Guidance |
+| --- | --- | --- | --- |
+| `relation_id` | Required | text attribute | Stable relation identifier. |
+| `role` | Optional | text attribute | Recommended terms: `primary_source`, `component`, `control`, `other`. |
+| `notes` | Optional | text attribute | Free-text remarks. |
+| `culture` | Required | link to `CellCulture` | Culture that used this source line. |
+| `source_line` | Required | link to `CellLine` | Source line for the culture. |
+
+### CellCultureParentRelation
+
+| Field | Requirement | Type | Guidance |
+| --- | --- | --- | --- |
+| `relation_id` | Required | text attribute | Stable relation identifier. |
+| `relationship_type` | Optional | text attribute | Recommended terms: `derived_from`, `sliced_from`, `assembled_from`, `fused_with`, `co_cultured_with`, `other`. |
+| `notes` | Optional | text attribute | Free-text remarks. |
+| `child_culture` | Required | link to `CellCulture` | Child or derived culture. |
+| `parent_culture` | Required | link to `CellCulture` | Parent or input culture. |
 
 ## GeneticVariant
 
@@ -91,9 +121,7 @@ Extension-owned child:
 | `validation_status` | Optional | text attribute | Recommended terms: `planned`, `screened`, `validated`, `failed`, `unknown`. |
 | `validation_method` | Optional | text attribute | Recommended terms include `Sanger`, `amplicon_seq`, `WGS`, `WES`, `ONT`, `ddPCR`, `PCR`, `fluorescence imaging`, `other`. |
 | `notes` | Optional | text attribute | Free-text remarks. |
-| `attached_cell_line` | Optional | generic NWB link | Line-level attachment target. |
-| `attached_cell_culture` | Optional | generic NWB link | Culture-level attachment target. |
-| `related_application` | Optional | generic NWB link | Related `ConstructApplication`. |
+| `related_application` | Optional | link to `ConstructApplication` | Related construct application. |
 
 ## ConstructApplication
 
@@ -113,8 +141,6 @@ Extension-owned child:
 | `expression_status` | Optional | text attribute | Recommended terms: `planned`, `observed`, `validated`, `failed`, `unknown`. |
 | `validation_method` | Optional | text attribute | Method used to confirm expression/delivery. |
 | `notes` | Optional | text attribute | Free-text remarks. |
-| `attached_cell_line` | Optional | generic NWB link | Line-level application target. |
-| `attached_cell_culture` | Optional | generic NWB link | Culture-level application target. |
 
 ## CultureProtocol
 
@@ -128,7 +154,6 @@ Extension-owned child:
 | `patterning_summary` | Optional | text attribute | Short patterning summary, not a full protocol. |
 | `media_summary` | Optional | text attribute | Short media summary. |
 | `notes` | Optional | text attribute | Free-text remarks. |
-| `starting_material_line` | Optional | generic NWB link | One primary starting line when useful; `CellCulture.source_lines` is authoritative for multi-source cultures. |
 
 ## CultureExperimentContext
 
@@ -137,6 +162,11 @@ Extends core `LabMetaData`.
 | Field | Requirement | Type | Guidance |
 | --- | --- | --- | --- |
 | `name` | Required by `LabMetaData` | group name | Recommended value: `culture_experiment_context`. |
+| `CellLine` children | Optional/repeated | child groups | Reusable cell-line catalog entries for this NWB file. |
+| `CellCulture` children | Optional/repeated | child groups | Reusable culture catalog entries for this NWB file. |
+| `CellLineParentRelation` children | Optional/repeated | child groups | Cell-line lineage relationships. |
+| `CellCultureSourceLineRelation` children | Optional/repeated | child groups | Culture source-line relationships. |
+| `CellCultureParentRelation` children | Optional/repeated | child groups | Culture parent/input relationships. |
 | `ExperimentContext` child | Optional | child group | Recording/session context for this file. |
 | `Pharmacology` children | Optional/repeated | child groups | Pharmacology rows linked to experiment context. |
 

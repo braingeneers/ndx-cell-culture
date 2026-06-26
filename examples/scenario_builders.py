@@ -7,8 +7,11 @@ from pynwb import NWBFile
 
 from ndx_cell_culture import (
     CellCulture,
+    CellCultureParentRelation,
+    CellCultureSourceLineRelation,
     CellCultureSubject,
     CellLine,
+    CellLineParentRelation,
     ConstructApplication,
     CultureExperimentContext,
     CultureProtocol,
@@ -33,6 +36,61 @@ def _device(nwbfile, name, description):
     return nwbfile.create_device(name=name, description=description)
 
 
+def _source_relation(relation_id, culture, source_line, role="primary_source"):
+    return CellCultureSourceLineRelation(
+        name=relation_id,
+        relation_id=relation_id,
+        culture=culture,
+        source_line=source_line,
+        role=role,
+    )
+
+
+def _line_parent_relation(relation_id, child_cell_line, parent_cell_line, relationship_type="derived_from"):
+    return CellLineParentRelation(
+        name=relation_id,
+        relation_id=relation_id,
+        child_cell_line=child_cell_line,
+        parent_cell_line=parent_cell_line,
+        relationship_type=relationship_type,
+    )
+
+
+def _culture_parent_relation(relation_id, child_culture, parent_culture, relationship_type):
+    return CellCultureParentRelation(
+        name=relation_id,
+        relation_id=relation_id,
+        child_culture=child_culture,
+        parent_culture=parent_culture,
+        relationship_type=relationship_type,
+    )
+
+
+def _add_context(
+    nwbfile,
+    *,
+    cell_lines=None,
+    cell_cultures=None,
+    cell_line_parent_relations=None,
+    cell_culture_source_line_relations=None,
+    cell_culture_parent_relations=None,
+    experiment_context=None,
+    pharmacologys=None,
+):
+    nwbfile.add_lab_meta_data(
+        CultureExperimentContext(
+            name="culture_experiment_context",
+            cell_lines=cell_lines or [],
+            cell_cultures=cell_cultures or [],
+            cell_line_parent_relations=cell_line_parent_relations or [],
+            cell_culture_source_line_relations=cell_culture_source_line_relations or [],
+            cell_culture_parent_relations=cell_culture_parent_relations or [],
+            experiment_context=experiment_context,
+            pharmacologys=pharmacologys or [],
+        )
+    )
+
+
 def build_basic_organoid():
     variant = GeneticVariant(
         name="VAR-EX-SYNGAP1-KO-01",
@@ -46,18 +104,6 @@ def build_basic_organoid():
         zygosity_or_edit_state="biallelic",
         validation_status="validated",
         validation_method="amplicon_seq",
-    )
-    line = CellLine(
-        name="CL-EX-SYNGAP1-KO-C7",
-        cell_line_id="CL-EX-SYNGAP1-KO-C7",
-        cell_line_type="derived_cell_line",
-        sample_label="Example SYNGAP1 KO clone C7",
-        species="Homo sapiens",
-        cell_source_type="iPSC",
-        clone_id="C7",
-        clonal_status="clonal",
-        reference_genome="GRCh38",
-        genetic_variants=[variant],
     )
     construct = ConstructApplication(
         name="APP-EX-LV-GCAMP6F-01",
@@ -73,6 +119,18 @@ def build_basic_organoid():
         expression_status="validated",
         validation_method="fluorescence imaging",
     )
+    line = CellLine(
+        name="CL-EX-SYNGAP1-KO-C7",
+        cell_line_id="CL-EX-SYNGAP1-KO-C7",
+        cell_line_type="derived_cell_line",
+        sample_label="Example SYNGAP1 KO clone C7",
+        species="Homo sapiens",
+        cell_source_type="iPSC",
+        clone_id="C7",
+        clonal_status="clonal",
+        reference_genome="GRCh38",
+        genetic_variants=[variant],
+    )
     protocol = CultureProtocol(
         name="PROTO-EX-CORT-V3",
         protocol_id="PROTO-EX-CORT-V3",
@@ -84,7 +142,7 @@ def build_basic_organoid():
         media_summary="neural induction + maturation media",
     )
     culture = CellCulture(
-        name="culture",
+        name="CULT-EX-ORG-001",
         culture_id="CULT-EX-ORG-001",
         culture_type="organoid",
         sample_label="Example organoid A",
@@ -93,7 +151,6 @@ def build_basic_organoid():
         batch_label="EX-B1",
         age="P120D",
         age_reference="days_post_induction",
-        cell_lines=[line],
         construct_applications=[construct],
         culture_protocol=protocol,
     )
@@ -126,8 +183,12 @@ def build_basic_organoid():
         experimental_setup="spontaneous + blue light stimulation",
         device=device,
     )
-    nwbfile.add_lab_meta_data(
-        CultureExperimentContext(name="culture_experiment_context", experiment_context=experiment)
+    _add_context(
+        nwbfile,
+        cell_lines=[line],
+        cell_cultures=[culture],
+        cell_culture_source_line_relations=[_source_relation("REL-EX-ORG-SOURCE-001", culture, line)],
+        experiment_context=experiment,
     )
     return nwbfile
 
@@ -143,6 +204,17 @@ def build_slice_patch_clamp():
         clone_id="C7",
         clonal_status="clonal",
     )
+    parent_organoid = CellCulture(
+        name="CULT-EX-ORG-001",
+        culture_id="CULT-EX-ORG-001",
+        culture_type="organoid",
+        sample_label="Example parent organoid",
+        species="Homo sapiens",
+        culture_subtype="cortical",
+        batch_label="EX-B1",
+        age="P120D",
+        age_reference="days_post_induction",
+    )
     construct = ConstructApplication(
         name="APP-EX-AAV-CHR2-01",
         application_id="APP-EX-AAV-CHR2-01",
@@ -151,8 +223,8 @@ def build_slice_patch_clamp():
         payload="ChR2(H134R)-EYFP",
         expression_status="observed",
     )
-    culture = CellCulture(
-        name="culture",
+    slice_culture = CellCulture(
+        name="CULT-EX-SLICE-001",
         culture_id="CULT-EX-SLICE-001",
         culture_type="slice",
         sample_label="Example slice A",
@@ -161,15 +233,13 @@ def build_slice_patch_clamp():
         batch_label="EX-B1",
         age="P120D",
         age_reference="days_post_induction",
-        notes="Derived from parent organoid CULT-EX-ORG-001; formal parent_cultures reference idiom is under NWB review.",
-        cell_lines=[line],
         construct_applications=[construct],
     )
     subject = CellCultureSubject(
         subject_id="SUBJ-EX-SLICE-001",
         species="Homo sapiens",
         description="Example organoid-derived slice",
-        culture=culture,
+        culture=slice_culture,
     )
     nwbfile = _nwbfile("NWB-EX-SLICE-001", "Example organoid slice patch-clamp recording")
     nwbfile.subject = subject
@@ -178,7 +248,7 @@ def build_slice_patch_clamp():
         name="EXP-EX-SLICE-001",
         experiment_id="EXP-EX-SLICE-001",
         subject=subject,
-        culture=culture,
+        culture=slice_culture,
         age_at_recording="P120D",
         age_reference="days_post_induction",
         recording_platform="patch_clamp",
@@ -213,12 +283,19 @@ def build_slice_patch_clamp():
             end_time_s=900.0,
         ),
     ]
-    nwbfile.add_lab_meta_data(
-        CultureExperimentContext(
-            name="culture_experiment_context",
-            experiment_context=experiment,
-            pharmacologys=pharmacology,
-        )
+    _add_context(
+        nwbfile,
+        cell_lines=[line],
+        cell_cultures=[parent_organoid, slice_culture],
+        cell_culture_source_line_relations=[
+            _source_relation("REL-EX-SLICE-SOURCE-001", slice_culture, line),
+            _source_relation("REL-EX-ORG-SOURCE-001", parent_organoid, line),
+        ],
+        cell_culture_parent_relations=[
+            _culture_parent_relation("REL-EX-SLICE-PARENT-001", slice_culture, parent_organoid, "sliced_from"),
+        ],
+        experiment_context=experiment,
+        pharmacologys=pharmacology,
     )
     return nwbfile
 
@@ -259,7 +336,6 @@ def build_edited_ipsc_organoid_mea():
         disease_or_diagnosis="synthetic neurodevelopmental condition",
         reference_genome="GRCh38",
         genetic_variants=[variant],
-        notes="Synthetic edited line; parent_cell_line reference idiom is under NWB review.",
     )
     protocol = CultureProtocol(
         name="PROTO-SYN-FOREBRAIN-001",
@@ -269,7 +345,7 @@ def build_edited_ipsc_organoid_mea():
         media_summary="neural induction + maturation media",
     )
     culture = CellCulture(
-        name="culture",
+        name="CULT-SYN-EDITED-ORG-001",
         culture_id="CULT-SYN-EDITED-ORG-001",
         culture_type="organoid",
         sample_label="Synthetic edited organoid 1",
@@ -280,7 +356,6 @@ def build_edited_ipsc_organoid_mea():
         age_reference="days_post_aggregation",
         disease_or_diagnosis="synthetic neurodevelopmental condition",
         reference_genome="GRCh38",
-        cell_lines=[parental, derived],
         culture_protocol=protocol,
     )
     subject = CellCultureSubject(
@@ -311,8 +386,17 @@ def build_edited_ipsc_organoid_mea():
         pharmacology_present=False,
         device=device,
     )
-    nwbfile.add_lab_meta_data(
-        CultureExperimentContext(name="culture_experiment_context", experiment_context=experiment)
+    _add_context(
+        nwbfile,
+        cell_lines=[parental, derived],
+        cell_cultures=[culture],
+        cell_line_parent_relations=[
+            _line_parent_relation("REL-SYN-LINE-PARENT-001", derived, parental, "edited_from"),
+        ],
+        cell_culture_source_line_relations=[
+            _source_relation("REL-SYN-EDITED-ORG-SOURCE-001", culture, derived),
+        ],
+        experiment_context=experiment,
     )
     return nwbfile
 
@@ -353,17 +437,16 @@ def build_biological_metadata_only_organoid():
         disease_or_diagnosis="synthetic neurodevelopmental condition",
         reference_genome="GRCh38",
         genetic_variants=[variant],
-        notes="Synthetic edited line; parent_cell_line reference idiom is under NWB review.",
     )
     protocol = CultureProtocol(
-        name="PROTO-SYN-FOREBRAIN-001",
-        protocol_id="PROTO-SYN-FOREBRAIN-001",
+        name="PROTO-SYN-FOREBRAIN-002",
+        protocol_id="PROTO-SYN-FOREBRAIN-002",
         protocol_name="Synthetic forebrain organoid protocol",
         patterning_summary="dual-SMAD inhibition w/ WNT inhibitor, forebrain patterning",
         media_summary="neural induction + maturation media",
     )
     culture = CellCulture(
-        name="culture",
+        name="CULT-SYN-EDITED-ORG-002",
         culture_id="CULT-SYN-EDITED-ORG-002",
         culture_type="organoid",
         sample_label="Synthetic edited organoid 2",
@@ -374,7 +457,6 @@ def build_biological_metadata_only_organoid():
         age_reference="days_post_aggregation",
         disease_or_diagnosis="synthetic neurodevelopmental condition",
         reference_genome="GRCh38",
-        cell_lines=[parental, derived],
         culture_protocol=protocol,
     )
     subject = CellCultureSubject(
@@ -389,6 +471,17 @@ def build_biological_metadata_only_organoid():
         "Synthetic edited organoid biological metadata example",
     )
     nwbfile.subject = subject
+    _add_context(
+        nwbfile,
+        cell_lines=[parental, derived],
+        cell_cultures=[culture],
+        cell_line_parent_relations=[
+            _line_parent_relation("REL-SYN-LINE-PARENT-002", derived, parental, "edited_from"),
+        ],
+        cell_culture_source_line_relations=[
+            _source_relation("REL-SYN-EDITED-ORG-SOURCE-002", culture, derived),
+        ],
+    )
     return nwbfile
 
 
@@ -412,7 +505,7 @@ def build_pharmacology_titration_organoid():
         patterning_summary="single-SMAD inhibition w/ WNT inhibitor, dorsal forebrain patterning",
     )
     culture = CellCulture(
-        name="culture",
+        name="CULT-SYN-PHARM-ORG-001",
         culture_id="CULT-SYN-PHARM-ORG-001",
         culture_type="organoid",
         sample_label="Synthetic pharmacology organoid",
@@ -421,7 +514,6 @@ def build_pharmacology_titration_organoid():
         age="day84",
         age_reference="days_post_aggregation",
         disease_or_diagnosis="unaffected synthetic control",
-        cell_lines=[line],
         culture_protocol=protocol,
     )
     subject = CellCultureSubject(
@@ -462,18 +554,19 @@ def build_pharmacology_titration_organoid():
         end_time_s=2700.0,
         purpose="examine concentration-dependent effects in a synthetic example",
     )
-    nwbfile.add_lab_meta_data(
-        CultureExperimentContext(
-            name="culture_experiment_context",
-            experiment_context=experiment,
-            pharmacologys=[pharmacology],
-        )
+    _add_context(
+        nwbfile,
+        cell_lines=[line],
+        cell_cultures=[culture],
+        cell_culture_source_line_relations=[_source_relation("REL-SYN-PHARM-SOURCE-001", culture, line)],
+        experiment_context=experiment,
+        pharmacologys=[pharmacology],
     )
     return nwbfile
 
 
 def build_directoid():
-    cortical = CellLine(
+    cortical_line = CellLine(
         name="CL-EX-CORTICAL",
         cell_line_id="CL-EX-CORTICAL",
         cell_line_type="derived_cell_line",
@@ -481,13 +574,33 @@ def build_directoid():
         species="Homo sapiens",
         cell_source_type="iPSC",
     )
-    thalamic = CellLine(
+    thalamic_line = CellLine(
         name="CL-EX-THALAMIC",
         cell_line_id="CL-EX-THALAMIC",
         cell_line_type="derived_cell_line",
         sample_label="Thalamic source line",
         species="Homo sapiens",
         cell_source_type="iPSC",
+    )
+    cortical_organoid = CellCulture(
+        name="CULT-EX-CORTICAL-ORG-001",
+        culture_id="CULT-EX-CORTICAL-ORG-001",
+        culture_type="organoid",
+        sample_label="Cortical organoid input",
+        species="Homo sapiens",
+        culture_subtype="cortical",
+        age="P90D",
+        age_reference="days_post_aggregation",
+    )
+    thalamic_organoid = CellCulture(
+        name="CULT-EX-THALAMIC-ORG-001",
+        culture_id="CULT-EX-THALAMIC-ORG-001",
+        culture_type="organoid",
+        sample_label="Thalamic organoid input",
+        species="Homo sapiens",
+        culture_subtype="thalamic",
+        age="P90D",
+        age_reference="days_post_aggregation",
     )
     protocol = CultureProtocol(
         name="PROTO-EX-DIRECTOID",
@@ -496,8 +609,8 @@ def build_directoid():
         patterning_summary="cortical and thalamic organoids aligned across microfluidic channels",
         media_summary="shared maturation media during channel-directed axon growth",
     )
-    culture = CellCulture(
-        name="culture",
+    directoid = CellCulture(
+        name="CULT-EX-DIRECTOID-001",
         culture_id="CULT-EX-DIRECTOID-001",
         culture_type="assembloid",
         sample_label="Example directoid",
@@ -505,22 +618,30 @@ def build_directoid():
         culture_subtype="assembloid",
         age="P90D",
         age_reference="days_post_aggregation",
-        notes=(
-            "Directoid/connectoid-style preparation assembled from cortical and thalamic organoids "
-            "with axons directed through microfluidic channels. Parent culture object references are "
-            "part of the schema review point."
-        ),
-        cell_lines=[cortical, thalamic],
+        notes="Directoid/connectoid-style preparation with axons directed through microfluidic channels.",
         culture_protocol=protocol,
     )
     subject = CellCultureSubject(
         subject_id="SUBJ-EX-DIRECTOID-001",
         species="Homo sapiens",
         description="Example cortico-thalamic directoid",
-        culture=culture,
+        culture=directoid,
     )
     nwbfile = _nwbfile("NWB-EX-DIRECTOID-001", "Directoid synthetic example")
     nwbfile.subject = subject
+    _add_context(
+        nwbfile,
+        cell_lines=[cortical_line, thalamic_line],
+        cell_cultures=[cortical_organoid, thalamic_organoid, directoid],
+        cell_culture_source_line_relations=[
+            _source_relation("REL-EX-CORTICAL-SOURCE-001", cortical_organoid, cortical_line),
+            _source_relation("REL-EX-THALAMIC-SOURCE-001", thalamic_organoid, thalamic_line),
+        ],
+        cell_culture_parent_relations=[
+            _culture_parent_relation("REL-EX-DIRECTOID-PARENT-CORTICAL", directoid, cortical_organoid, "assembled_from"),
+            _culture_parent_relation("REL-EX-DIRECTOID-PARENT-THALAMIC", directoid, thalamic_organoid, "assembled_from"),
+        ],
+    )
     return nwbfile
 
 
@@ -542,14 +663,13 @@ def build_two_line_assembloid():
         cell_source_type="iPSC",
     )
     culture = CellCulture(
-        name="culture",
+        name="CULT-EX-ASSEMBLOID-2LINE-001",
         culture_id="CULT-EX-ASSEMBLOID-2LINE-001",
         culture_type="assembloid",
         sample_label="Example two-line assembloid",
         species="Homo sapiens",
         culture_subtype="assembloid",
         notes="Synthetic example assembled from two distinct source cell lines.",
-        cell_lines=[line_a, line_b],
     )
     subject = CellCultureSubject(
         subject_id="SUBJ-EX-ASSEMBLOID-2LINE-001",
@@ -559,6 +679,15 @@ def build_two_line_assembloid():
     )
     nwbfile = _nwbfile("NWB-EX-ASSEMBLOID-2LINE-001", "Two-line assembloid synthetic example")
     nwbfile.subject = subject
+    _add_context(
+        nwbfile,
+        cell_lines=[line_a, line_b],
+        cell_cultures=[culture],
+        cell_culture_source_line_relations=[
+            _source_relation("REL-EX-ASSEMBLOID-SOURCE-A", culture, line_a, role="component"),
+            _source_relation("REL-EX-ASSEMBLOID-SOURCE-B", culture, line_b, role="component"),
+        ],
+    )
     return nwbfile
 
 

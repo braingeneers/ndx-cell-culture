@@ -10,17 +10,19 @@ The extension is designed for files where the recorded subject is a culture-deri
 NWBFile
 +-- subject : CellCultureSubject <extends NWB.Subject>
 |   +-- inherited NWB.Subject fields
-|   +-- culture : CellCulture [1]
-|       +-- source_lines : CellLine [0..N]
-|       |   +-- parent_cell_line : CellLine [0..1]
-|       |   +-- GeneticVariant [0..N]
-|       |   +-- ConstructApplication [0..N]
-|       +-- parent_cultures : CellCulture [0..N]
-|       +-- GeneticVariant [0..N]
-|       +-- ConstructApplication [0..N]
-|       +-- CultureProtocol [0..1]
+|   +-- culture -> CellCulture catalog entry [1]
 +-- general/devices : NWB.Device / NWB.DeviceModel [core NWB]
 +-- lab_meta_data : CultureExperimentContext <extends LabMetaData>
+    +-- CellLine [0..N]
+    |   +-- GeneticVariant [0..N]
+    |   +-- ConstructApplication [0..N]
+    +-- CellCulture [0..N]
+    |   +-- GeneticVariant [0..N]
+    |   +-- ConstructApplication [0..N]
+    |   +-- CultureProtocol [0..1]
+    +-- CellLineParentRelation [0..N]
+    +-- CellCultureSourceLineRelation [0..N]
+    +-- CellCultureParentRelation [0..N]
     +-- ExperimentContext [0..1]
     +-- Pharmacology [0..N]
 ```
@@ -29,17 +31,23 @@ NWBFile
 
 `CellCultureSubject` extends core `NWB.Subject`. It does not redefine inherited subject fields such as `subject_id`, `species`, `sex`, `age`, `genotype`, or `description`.
 
-The extension-owned child `culture : CellCulture` identifies the cultured preparation being recorded or described. Culture-specific timing belongs in `CellCulture.age` or `ExperimentContext.age_at_recording`, not in `NWB.Subject.age`.
+The extension-owned `culture` link identifies the `CellCulture` catalog entry being recorded or described. Culture-specific timing belongs in `CellCulture.age` or `ExperimentContext.age_at_recording`, not in `NWB.Subject.age`.
 
-`CellCulture` describes the preparation itself. Use it for the culture type, subtype, source lines, parent cultures, culture age, batch label, disease/diagnosis, reference genome, attached variants, construct applications, and culture protocol metadata.
+`CellCulture` describes the preparation itself: type, subtype, culture age, batch label, disease/diagnosis, reference genome, attached variants, construct applications, and culture protocol metadata.
 
-## Provenance
+## Catalogs And Provenance
 
-Use `CellLine` for source-line identity and lineage metadata such as passage, clone, clonal status, source type, and line-level variants or construct applications.
+`CultureExperimentContext` is the file-level metadata catalog for cultured preparations. It stores reusable `CellLine` and `CellCulture` objects and explicit relationship records between them.
 
-Use `CellCulture.source_lines` when a culture is derived from one or more source lines. Use `CellCulture.parent_cultures` when a culture is biologically derived from one or more prior culture preparations, such as an organoid-derived slice or a multi-parent assembloid/directoid.
+Use `CellLine` for source-line identity and lineage metadata such as passage, clone, clonal status, source type, line-level variants, or construct applications.
 
-The recursive and multi-parent relationship fields are represented in the draft schema as formal NWB links. Their final storage idiom should be reviewed with NWB maintainers before release.
+Use relationship records for provenance:
+
+- `CellLineParentRelation` links a child or derived line to a parent line.
+- `CellCultureSourceLineRelation` links a culture to one source line. Repeat it when a culture has multiple source lines.
+- `CellCultureParentRelation` links a culture to one parent culture. Repeat it for slices, assembloids, directoids/connectoids, and other multi-parent culture derivations.
+
+This catalog model avoids duplicating shared cell lines or parent cultures across several subjects, and it keeps multi-parent provenance explicit.
 
 ## Variants And Construct Applications
 
@@ -61,7 +69,11 @@ Use `ExperimentContext` for session-level searchable context: recording platform
 
 Use core NWB `Device` / `DeviceModel` for recording hardware. The extension does not define a custom hardware object.
 
-Use `Pharmacology` for compounds applied during a recording session. More detailed time series or stimulus data should use core NWB structures.
+Use `Pharmacology` for compounds applied during a recording session. The intended scale is modest searchable metadata, not a full protocol or time-series pharmacology representation.
+
+## Recommended Terms
+
+Recommended vocabulary terms are stored as text attributes in the schema. Use `ndx_cell_culture.validate_recommended_terms` for opt-in checking before sharing or depositing files.
 
 ## Intentionally Absent
 

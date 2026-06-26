@@ -51,18 +51,8 @@ groups:
     doc: Free-text remarks.
     required: false
   links:
-  - name: attached_cell_line
-    target_type: NWBContainer
-    doc: Link to the CellLine to which this variant applies, when attached at 
-      line level.
-    quantity: '?'
-  - name: attached_cell_culture
-    target_type: NWBContainer
-    doc: Link to the CellCulture to which this variant applies, when attached at
-      culture level.
-    quantity: '?'
   - name: related_application
-    target_type: NWBContainer
+    target_type: ConstructApplication
     doc: Link to the ConstructApplication related to this variant, when 
       applicable.
     quantity: '?'
@@ -132,17 +122,6 @@ groups:
     dtype: text
     doc: Free-text remarks.
     required: false
-  links:
-  - name: attached_cell_line
-    target_type: NWBContainer
-    doc: Link to the CellLine to which this construct application applies, when 
-      applied at line level.
-    quantity: '?'
-  - name: attached_cell_culture
-    target_type: NWBContainer
-    doc: Link to the CellCulture to which this construct application applies, 
-      when applied at culture level.
-    quantity: '?'
 - neurodata_type_def: CellLine
   neurodata_type_inc: NWBContainer
   doc: Donor, parental line, derived line, immortalized line, or other cell-line
@@ -206,12 +185,6 @@ groups:
   - neurodata_type_inc: ConstructApplication
     doc: Construct applications attached to this cell line.
     quantity: '*'
-  links:
-  - name: parent_cell_line
-    target_type: NWBContainer
-    doc: Link to the immediate parent CellLine in a donor/parent/derived 
-      lineage.
-    quantity: '?'
 - neurodata_type_def: CultureProtocol
   neurodata_type_inc: NWBContainer
   doc: Structured derivation or preparation protocol metadata for a CellCulture.
@@ -247,12 +220,6 @@ groups:
     dtype: text
     doc: Free-text remarks.
     required: false
-  links:
-  - name: starting_material_line
-    target_type: NWBContainer
-    doc: Link to one primary starting material CellLine when useful. For 
-      multi-source cultures, CellCulture.source_lines is authoritative.
-    quantity: '?'
 - neurodata_type_def: CellCulture
   neurodata_type_inc: NWBContainer
   doc: Biological cultured preparation being recorded or described.
@@ -304,9 +271,6 @@ groups:
     doc: Free-text remarks.
     required: false
   groups:
-  - neurodata_type_inc: CellLine
-    doc: Cell-line lineage objects available from this culture context.
-    quantity: '*'
   - neurodata_type_inc: GeneticVariant
     doc: Genetic variants attached to this culture.
     quantity: '*'
@@ -316,23 +280,81 @@ groups:
   - neurodata_type_inc: CultureProtocol
     doc: Structured culture derivation/preparation protocol.
     quantity: '?'
-  links:
-  - name: source_lines
-    target_type: NWBContainer
-    doc: Links to CellLine objects used to derive this culture.
-    quantity: '*'
-  - name: parent_cultures
-    target_type: NWBContainer
-    doc: Links to CellCulture objects used to derive or assemble this culture.
-    quantity: '*'
 - neurodata_type_def: CellCultureSubject
   neurodata_type_inc: Subject
   doc: NWB Subject wrapper for a recorded or described cultured neural 
     preparation.
-  groups:
+  links:
   - name: culture
-    neurodata_type_inc: CellCulture
-    doc: Recorded or described CellCulture wrapped by this NWB subject.
+    target_type: CellCulture
+    doc: Link to the recorded or described cataloged CellCulture.
+- neurodata_type_def: CellLineParentRelation
+  neurodata_type_inc: NWBContainer
+  doc: Relationship edge linking a child CellLine to a parent CellLine.
+  attributes:
+  - name: relation_id
+    dtype: text
+    doc: Stable relation identifier.
+  - name: relationship_type
+    dtype: text
+    doc: Recommended terms include derived_from, cloned_from, reprogrammed_from,
+      edited_from, other.
+    required: false
+  - name: notes
+    dtype: text
+    doc: Free-text remarks.
+    required: false
+  links:
+  - name: child_cell_line
+    target_type: CellLine
+    doc: Child or derived CellLine in the relationship.
+  - name: parent_cell_line
+    target_type: CellLine
+    doc: Parent or source CellLine in the relationship.
+- neurodata_type_def: CellCultureSourceLineRelation
+  neurodata_type_inc: NWBContainer
+  doc: Relationship edge linking a CellCulture to one source CellLine.
+  attributes:
+  - name: relation_id
+    dtype: text
+    doc: Stable relation identifier.
+  - name: role
+    dtype: text
+    doc: Recommended terms include primary_source, component, control, other.
+    required: false
+  - name: notes
+    dtype: text
+    doc: Free-text remarks.
+    required: false
+  links:
+  - name: culture
+    target_type: CellCulture
+    doc: CellCulture that used this source line.
+  - name: source_line
+    target_type: CellLine
+    doc: Source CellLine for the culture.
+- neurodata_type_def: CellCultureParentRelation
+  neurodata_type_inc: NWBContainer
+  doc: Relationship edge linking a CellCulture to one parent CellCulture.
+  attributes:
+  - name: relation_id
+    dtype: text
+    doc: Stable relation identifier.
+  - name: relationship_type
+    dtype: text
+    doc: Culture-to-culture relationship type.
+    required: false
+  - name: notes
+    dtype: text
+    doc: Free-text remarks.
+    required: false
+  links:
+  - name: child_culture
+    target_type: CellCulture
+    doc: Child or derived CellCulture.
+  - name: parent_culture
+    target_type: CellCulture
+    doc: Parent or input CellCulture.
 - neurodata_type_def: ExperimentContext
   neurodata_type_inc: NWBContainer
   doc: Recording-time or session-level metadata separate from stable biological 
@@ -445,9 +467,23 @@ groups:
     doc: Experiment context this pharmacological intervention belongs to.
 - neurodata_type_def: CultureExperimentContext
   neurodata_type_inc: LabMetaData
-  doc: LabMetaData container for cultured-preparation recording context and 
-    pharmacology metadata.
+  doc: LabMetaData container for culture catalogs, provenance, and context.
   groups:
+  - neurodata_type_inc: CellLine
+    doc: Reusable CellLine catalog entries for this NWB file.
+    quantity: '*'
+  - neurodata_type_inc: CellCulture
+    doc: Reusable CellCulture catalog entries for this NWB file.
+    quantity: '*'
+  - neurodata_type_inc: CellLineParentRelation
+    doc: CellLine-to-CellLine provenance relationships.
+    quantity: '*'
+  - neurodata_type_inc: CellCultureSourceLineRelation
+    doc: CellCulture-to-CellLine source relationships.
+    quantity: '*'
+  - neurodata_type_inc: CellCultureParentRelation
+    doc: CellCulture-to-CellCulture provenance relationships.
+    quantity: '*'
   - neurodata_type_inc: ExperimentContext
     doc: Recording/session context for this NWBFile.
     quantity: '?'

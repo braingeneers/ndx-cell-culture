@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.10", "3.11", "3.12"]
+        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
     steps:
       - uses: actions/checkout@v4
 
@@ -45,4 +45,20 @@ jobs:
           names = set(ZipFile(wheel).namelist())
           assert "ndx_cell_culture/spec/ndx-cell-culture.namespace.yaml" in names
           assert "ndx_cell_culture/spec/ndx-cell-culture.extensions.yaml" in names
+          PY
+
+      - name: Verify clean wheel install
+        run: |
+          python -m pip wheel . -w /tmp/ndx-cell-culture-install-wheel
+          python -m venv /tmp/ndx-cell-culture-install
+          /tmp/ndx-cell-culture-install/bin/python -m pip install --upgrade pip
+          /tmp/ndx-cell-culture-install/bin/python -m pip install /tmp/ndx-cell-culture-install-wheel/ndx_cell_culture-*.whl
+          /tmp/ndx-cell-culture-install/bin/python - <<'PY'
+          import ndx_cell_culture as ndx
+
+          assert ndx.CellCulture.__name__ == "CellCulture"
+          assert ndx.CellLineParentRelation.__name__ == "CellLineParentRelation"
+          assert ndx.CellCultureSourceLineRelation.__name__ == "CellCultureSourceLineRelation"
+          assert ndx.CellCultureParentRelation.__name__ == "CellCultureParentRelation"
+          assert callable(ndx.validate_recommended_terms)
           PY
