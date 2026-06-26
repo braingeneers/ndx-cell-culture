@@ -62,3 +62,30 @@ jobs:
           assert ndx.CellCultureParentRelation.__name__ == "CellCultureParentRelation"
           assert callable(ndx.validate_recommended_terms)
           PY
+
+      - name: Build and check distributions
+        run: |
+          python -m build --sdist --wheel
+          python -m twine check dist/*
+          python - <<'PY'
+          from pathlib import Path
+          from tarfile import open as open_tar
+          from zipfile import ZipFile
+
+          dist = Path("dist")
+          wheel = next(dist.glob("ndx_cell_culture-*.whl"))
+          sdist = next(dist.glob("ndx_cell_culture-*.tar.gz"))
+          required_wheel = {
+              "ndx_cell_culture/spec/ndx-cell-culture.namespace.yaml",
+              "ndx_cell_culture/spec/ndx-cell-culture.extensions.yaml",
+              "ndx_cell_culture/validation.py",
+          }
+          with ZipFile(wheel) as zf:
+              wheel_names = set(zf.namelist())
+          assert required_wheel <= wheel_names
+
+          with open_tar(sdist) as tf:
+              sdist_names = set(tf.getnames())
+          assert any(name.endswith("spec/ndx-cell-culture.namespace.yaml") for name in sdist_names)
+          assert any(name.endswith("spec/ndx-cell-culture.extensions.yaml") for name in sdist_names)
+          PY

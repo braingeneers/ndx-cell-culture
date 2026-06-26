@@ -40,14 +40,18 @@ dependencies = [
 
 [project.optional-dependencies]
 test = [
+    "build>=1.2",
     "pytest>=8.0",
+    "twine>=5.0",
 ]
 docs = [
     "hdmf-docutils>=0.4.8",
 ]
 dev = [
+    "build>=1.2",
     "pytest>=8.0",
     "hdmf-docutils>=0.4.8",
+    "twine>=5.0",
 ]
 
 [project.urls]
@@ -59,6 +63,25 @@ packages = ["src/ndx_cell_culture"]
 
 [tool.hatch.build.targets.wheel.force-include]
 "spec" = "ndx_cell_culture/spec"
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "/.github/workflows/test.yml",
+    "/LICENSE.txt",
+    "/README.md",
+    "/docs",
+    "/examples",
+    "/pyproject.toml",
+    "/spec",
+    "/src",
+    "/tests",
+]
+exclude = [
+    "/**/__pycache__",
+    "/**/*.pyc",
+    "/**/*.nwb",
+    "/examples/generated_scenarios",
+]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

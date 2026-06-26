@@ -223,8 +223,8 @@ Run tests:
 pytest
 ```
 
-Continuous integration regenerates the schema, runs PyNWB round-trip tests, executes the example writers, and verifies that built wheels include the namespace and extension YAML files.
+Continuous integration regenerates the schema, runs PyNWB round-trip tests, executes the example writers, verifies clean wheel installation, and checks wheel/source distributions before release.
 
 ## Status
 
-This package is a pre-release NDX draft intended for external lab evaluation and NWB maintainer review. The core modeling decisions are encoded in the schema and documentation, and remaining work is release engineering, packaging, and external review rather than unresolved internal design questions.
+This package is a release-candidate NDX intended for final stakeholder and NWB maintainer review. The core modeling decisions are encoded in the schema and documentation, automated tests cover the public examples and relationship model, and the repository is intended to be releasable after approval.
