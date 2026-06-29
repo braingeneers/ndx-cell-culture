@@ -1,5 +1,5 @@
-User Guide
-==========
+Installation and Quickstart
+===========================
 
 Installation
 ------------
@@ -32,10 +32,116 @@ for repeated ``Pharmacology`` records, including constructor input and
 ``get_pharmacologies`` / ``add_pharmacologies`` / ``create_pharmacologies``
 methods.
 
+Minimal Example
+---------------
+
+This example creates a synthetic cortical organoid recording with one source
+line, one culture, one source-line relation, core NWB device metadata, and one
+recording context.
+
+.. code-block:: python
+
+   from datetime import datetime
+
+   from dateutil.tz import tzlocal
+   from pynwb import NWBHDF5IO, NWBFile
+
+   from ndx_cell_culture import (
+       CellCulture,
+       CellCultureSourceLineRelation,
+       CellCultureSubject,
+       CellLine,
+       CultureExperimentContext,
+       CultureProtocol,
+       ExperimentContext,
+   )
+
+   line = CellLine(
+       name="CL-SYN-001",
+       cell_line_id="CL-SYN-001",
+       cell_line_type="parental_cell_line",
+       sample_label="Synthetic iPSC line",
+       species="Homo sapiens",
+       cell_source_type="iPSC",
+       passage_number="p35",
+   )
+
+   protocol = CultureProtocol(
+       name="PROTO-SYN-CORTICAL-001",
+       protocol_id="PROTO-SYN-CORTICAL-001",
+       protocol_name="Synthetic cortical organoid protocol",
+       patterning_summary="forebrain patterning",
+       media_summary="neural induction and maturation media",
+   )
+
+   culture = CellCulture(
+       name="CULT-SYN-ORG-001",
+       culture_id="CULT-SYN-ORG-001",
+       culture_type="organoid",
+       sample_label="Synthetic cortical organoid",
+       species="Homo sapiens",
+       culture_subtype="cortical",
+       age="P120D",
+       age_reference="days_post_induction",
+       culture_protocol=protocol,
+   )
+
+   source_relation = CellCultureSourceLineRelation(
+       name="REL-SYN-ORG-SOURCE-001",
+       relation_id="REL-SYN-ORG-SOURCE-001",
+       culture=culture,
+       source_line=line,
+       role="primary_source",
+   )
+
+   subject = CellCultureSubject(
+       subject_id="SUBJ-SYN-ORG-001",
+       species="Homo sapiens",
+       description="Synthetic cortical organoid recording",
+       culture=culture,
+   )
+
+   nwbfile = NWBFile(
+       session_description="synthetic organoid recording",
+       identifier="NWB-SYN-ORG-001",
+       session_start_time=datetime(2026, 1, 1, tzinfo=tzlocal()),
+   )
+   nwbfile.subject = subject
+
+   device = nwbfile.create_device(name="Example MEA device")
+
+   experiment = ExperimentContext(
+       name="EXP-SYN-ORG-001",
+       experiment_id="EXP-SYN-ORG-001",
+       subject=subject,
+       culture=culture,
+       age_at_recording="P120D",
+       age_reference="days_post_induction",
+       recording_platform="MEA",
+       recording_duration_s=1800.0,
+       spontaneous_activity=True,
+       pharmacology_present=False,
+       device=device,
+   )
+
+   nwbfile.add_lab_meta_data(
+       CultureExperimentContext(
+           name="culture_experiment_context",
+           cell_lines=[line],
+           cell_cultures=[culture],
+           cell_culture_source_line_relations=[source_relation],
+           experiment_context=experiment,
+       )
+   )
+
+   with NWBHDF5IO("synthetic_organoid.nwb", "w") as io:
+       io.write(nwbfile)
+
 Validation
 ----------
 
-Validate NWB files with both PyNWB and NWB Inspector before sharing:
+Validate NWB files with both PyNWB and NWB Inspector before sharing or
+depositing:
 
 .. code-block:: bash
 

@@ -4,5 +4,6 @@ src: https://github.com/braingeneers/ndx-cell-culture
 pip: https://pypi.org/project/ndx-cell-culture/
 license: BSD-3-Clause
 maintainers:
-  - name: Braingeneers
-    email: braingeneers@ucsc.edu
+  - name: David Parks
+    email: dfparks@ucsc.edu
+    affiliation: Braingeneers Lab, UC Santa Cruz

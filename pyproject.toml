@@ -6,7 +6,7 @@ build-backend = "hatchling.build"
 name = "ndx-cell-culture"
 version = "1.0rc1"
 authors = [
-    { name = "Braingeneers", email = "braingeneers@ucsc.edu" },
+    { name = "David Parks", email = "dfparks@ucsc.edu" },
 ]
 description = "NWB extension for cultured neural preparations, organoids, cell lines, variants, constructs, protocols, recording context, and pharmacology."
 readme = "README.md"

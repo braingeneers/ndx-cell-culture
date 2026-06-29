@@ -18,8 +18,8 @@
 # -- Project information -----------------------------------------------------
 
 project = 'ndx-cell-culture'
-copyright = '2026, Braingeneers'
-author = 'Braingeneers'
+copyright = '2026, David Parks, Braingeneers Lab, UC Santa Cruz'
+author = 'David Parks'
 
 # The short X.Y version
 version = '1.0rc1'

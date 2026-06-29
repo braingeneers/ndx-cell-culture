@@ -301,8 +301,8 @@ def main():
         name=NAMESPACE,
         version=VERSION,
         doc="NWB extension for cultured neural preparations, organoids, cell lines, variants, constructs, protocols, recording context, and pharmacology.",
-        author=["Braingeneers"],
-        contact=["braingeneers@ucsc.edu"],
+        author=["David Parks, Braingeneers Lab, UC Santa Cruz"],
+        contact=["dfparks@ucsc.edu"],
     )
     ns_builder.include_namespace("core")
     output_dir = str((Path(__file__).parent.parent.parent / "spec").absolute())

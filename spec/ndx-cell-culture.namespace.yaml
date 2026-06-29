@@ -1,8 +1,8 @@
 namespaces:
 - author:
-  - Braingeneers
+  - David Parks, Braingeneers Lab, UC Santa Cruz
   contact:
-  - braingeneers@ucsc.edu
+  - dfparks@ucsc.edu
   doc: NWB extension for cultured neural preparations, organoids, cell lines, 
     variants, constructs, protocols, recording context, and pharmacology.
   name: ndx-cell-culture
