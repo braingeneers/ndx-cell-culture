@@ -155,6 +155,11 @@ an environment where ``ndx-cell-culture`` is installed:
 
    nwbinspector synthetic_organoid.nwb --modules ndx_cell_culture --threshold BEST_PRACTICE_VIOLATION
 
+If NWB Inspector reports that ``CellCultureSubject`` is missing ``age`` and
+``date_of_birth``, do not put culture age in ``NWB.Subject.age``. Use
+``CellCulture.age`` and ``ExperimentContext.age_at_recording`` for culture
+timing.
+
 Run the opt-in recommended-term validator for vocabulary guidance:
 
 .. code-block:: python

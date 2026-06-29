@@ -22,6 +22,13 @@ environment where ``ndx-cell-culture`` is installed. Replace
 
    nwbinspector path/to/file.nwb --modules ndx_cell_culture --threshold BEST_PRACTICE_VIOLATION
 
+Core NWB Inspector may report that ``CellCultureSubject`` is missing
+``age`` and ``date_of_birth``. For cultured preparations, do not put culture
+age in ``NWB.Subject.age`` just to silence that message. Use
+``CellCulture.age`` and ``ExperimentContext.age_at_recording`` for culture
+timing, and use inherited subject age or date of birth only when those core
+subject fields are scientifically meaningful for the donor/source metadata.
+
 When developing this package itself, run the repository test suite:
 
 .. code-block:: bash

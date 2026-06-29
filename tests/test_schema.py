@@ -33,7 +33,10 @@ def _assert_no_inspector_violations(path):
     messages = [
         message
         for message in messages
-        if not str(message.message).startswith("Subject is missing age and date_of_birth")
+        if not (
+            message.check_function_name == "check_subject_age"
+            and message.object_type == "CellCultureSubject"
+        )
     ]
     assert messages == []
 
