@@ -50,7 +50,6 @@ metadata is attached through the subject and file-level lab metadata.
     examples
     field_reference
     validation_dandi
-    modeling_principles
     api_reference
 
 .. toctree::
@@ -62,7 +61,7 @@ metadata is attached through the subject and file-level lab metadata.
 
 .. toctree::
     :maxdepth: 2
-    :caption: History & Legal
+    :caption: Release & Legal
 
     release_notes
     credits

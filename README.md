@@ -202,7 +202,6 @@ More detail is available in:
 - [Data modeling guide](docs/design.md)
 - [Schema reference](docs/field_reference.md)
 - [Synthetic examples](docs/examples.md)
-- [Modeling principles](docs/modeling_principles.md)
 - [Release checklist](docs/release.md)
 
 ## DANDI And NWB Notes
