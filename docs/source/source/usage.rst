@@ -141,13 +141,19 @@ recording context.
 Validation
 ----------
 
-Validate NWB files with both PyNWB and NWB Inspector before sharing or
-depositing:
+Validate NWB files by reading them back with PyNWB and running NWB Inspector in
+an environment where ``ndx-cell-culture`` is installed:
 
 .. code-block:: bash
 
-   pytest -q
-   nwbinspector examples/basic_organoid_example.nwb --modules ndx_cell_culture --threshold BEST_PRACTICE_VIOLATION
+   python - <<'PY'
+   from pynwb import NWBHDF5IO
+
+   with NWBHDF5IO("synthetic_organoid.nwb", "r") as io:
+       io.read()
+   PY
+
+   nwbinspector synthetic_organoid.nwb --modules ndx_cell_culture --threshold BEST_PRACTICE_VIOLATION
 
 Run the opt-in recommended-term validator for vocabulary guidance:
 
@@ -162,7 +168,7 @@ Run the opt-in recommended-term validator for vocabulary guidance:
 Examples
 --------
 
-The repository includes synthetic examples under ``examples/``:
+Additional synthetic examples are available under ``examples/``:
 
 .. code-block:: bash
 

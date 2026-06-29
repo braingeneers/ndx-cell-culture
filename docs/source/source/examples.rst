@@ -1,9 +1,13 @@
 Examples And Recipes
 ====================
 
-The repository includes synthetic example builders under ``examples/``. They
-are intended to exercise the extension and show common modeling patterns. All
-identifiers and biological details are synthetic.
+These examples show common modeling patterns for cultured neural preparations:
+whole-organoid recordings, organoid-derived slices, edited source lines,
+directoids/connectoids, assembloids, biological-metadata-only files, and
+pharmacology titrations. All identifiers and biological details are synthetic.
+
+Example builder scripts under ``examples/`` generate complete NWB files for
+inspection.
 
 Run all scenarios:
 

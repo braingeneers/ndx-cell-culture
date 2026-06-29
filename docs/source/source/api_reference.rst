@@ -1,11 +1,13 @@
 Python API Reference
 ====================
 
-The package loads the ``ndx-cell-culture`` namespace on import and exposes the
-schema-generated PyNWB classes from ``ndx_cell_culture``.
+Import the extension classes directly from ``ndx_cell_culture`` after
+installing the package. Importing the package also loads the
+``ndx-cell-culture`` namespace so PyNWB can read and write files that use the
+extension.
 
-Schema-Generated Classes
-------------------------
+Importable Classes
+------------------
 
 Import these classes directly from ``ndx_cell_culture``:
 

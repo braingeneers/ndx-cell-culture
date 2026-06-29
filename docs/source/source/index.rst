@@ -11,8 +11,12 @@ Use this extension when the biological preparation is a cultured neural system
 rather than an animal subject, and when the metadata needed to interpret the
 recording cannot be represented clearly with core ``NWB.Subject`` alone.
 
-High-level structure
---------------------
+NWB placement at a glance
+-------------------------
+
+The extension keeps core NWB responsible for devices, acquisition, stimulus,
+imaging, processing, and other modality-specific data. Cultured-preparation
+metadata is attached through the subject and file-level lab metadata.
 
 .. code-block:: text
 
