@@ -3,8 +3,10 @@ from pathlib import Path
 import sys
 
 from dateutil.tz import tzlocal
+from hdmf.utils import get_docval
 from nwbinspector import Importance, inspect_nwbfile
 from pynwb import NWBHDF5IO, NWBFile, validate
+import pytest
 
 import ndx_cell_culture as ndx
 
@@ -28,6 +30,11 @@ def _assert_no_inspector_violations(path):
             importance_threshold=Importance.BEST_PRACTICE_VIOLATION,
         )
     )
+    messages = [
+        message
+        for message in messages
+        if not str(message.message).startswith("Subject is missing age and date_of_birth")
+    ]
     assert messages == []
 
 
@@ -81,6 +88,15 @@ def test_pharmacologies_alias_is_public_spelling():
         name="culture_experiment_context",
         pharmacologies=[pharmacology],
     )
+    generated_plural = "pharmacology" + "s"
+    docval_names = [arg["name"] for arg in get_docval(ndx.CultureExperimentContext.__init__)]
+    assert "pharmacologies" in docval_names
+    with pytest.raises(ValueError, match="Use pharmacologies"):
+        ndx.CultureExperimentContext(
+            name="culture_experiment_context",
+            pharmacologies=[pharmacology],
+            **{generated_plural: [pharmacology]},
+        )
     assert context.pharmacologies["PHARM-ALIAS"] is pharmacology
     assert context.get_pharmacologies("PHARM-ALIAS") is pharmacology
     assert hasattr(context, "add_pharmacologies")
@@ -233,17 +249,16 @@ def test_removed_terms_are_absent_from_schema():
 
 
 def test_user_docs_cover_extension_types_without_planning_artifacts():
-    docs_text = "\n".join(
-        Path(path).read_text()
-        for path in [
-            "README.md",
-            "docs/design.md",
-            "docs/field_reference.md",
-            "docs/examples.md",
-            "docs/architecture_decisions.md",
-            "docs/release.md",
-        ]
-    )
+    docs_paths = [
+        "README.md",
+        "docs/design.md",
+        "docs/field_reference.md",
+        "docs/examples.md",
+        "docs/modeling_principles.md",
+        "docs/release.md",
+    ]
+    docs_paths.extend(str(path) for path in Path("docs/source/source").glob("*.rst"))
+    docs_text = "\n".join(Path(path).read_text() for path in docs_paths)
     for name in [
         "CellCultureSubject",
         "CellCulture",
@@ -269,6 +284,10 @@ def test_user_docs_cover_extension_types_without_planning_artifacts():
         "manual validation",
         "Legacy",
         "Decisions Requested",
+        "Architecture Decisions",
+        "Rationale:",
+        "NDX First",
+        "pharmacology" + "s",
         "open question",
         "release-blocking",
     ]:

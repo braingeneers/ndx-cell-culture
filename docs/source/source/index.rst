@@ -46,13 +46,13 @@ High-level structure
     examples
     field_reference
     validation_dandi
-    architecture_decisions
+    modeling_principles
     api_reference
 
 .. toctree::
     :numbered:
     :maxdepth: 3
-    :caption: Formal Reference
+    :caption: Generated Reference
 
     format
 

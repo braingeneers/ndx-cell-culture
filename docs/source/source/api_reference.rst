@@ -26,21 +26,17 @@ The constructor signatures are generated from the NWB extension schema. The
 curated field guidance is in :doc:`field_reference`; the formal generated
 schema reference is in :doc:`format`.
 
-Pharmacology Plural Alias
--------------------------
+Pharmacology Records
+--------------------
 
-PyNWB generates repeated child helpers using the neurodata type name, which
-would produce ``pharmacologys``. ``ndx-cell-culture`` adds the natural plural
-alias ``pharmacologies`` for public use:
+Use ``pharmacologies`` for repeated ``Pharmacology`` records in
+``CultureExperimentContext``:
 
 * ``CultureExperimentContext(pharmacologies=[...])``
 * ``CultureExperimentContext.pharmacologies``
 * ``CultureExperimentContext.add_pharmacologies(...)``
 * ``CultureExperimentContext.create_pharmacologies(...)``
 * ``CultureExperimentContext.get_pharmacologies(...)``
-
-The generated ``pharmacologys`` spelling remains available for compatibility,
-but new user code should prefer ``pharmacologies``.
 
 Recommended-Term Validation
 ---------------------------

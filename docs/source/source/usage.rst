@@ -27,8 +27,8 @@ Core Usage Pattern
 4. Use core NWB ``Device`` / ``DeviceModel`` for hardware identity.
 5. Use ``ExperimentContext`` and ``Pharmacology`` for recording-session context.
 
-The public Python API accepts the natural plural spelling ``pharmacologies``
-for repeated ``Pharmacology`` records, including constructor input and
+The public Python API uses ``pharmacologies`` for repeated ``Pharmacology``
+records, including constructor input and
 ``get_pharmacologies`` / ``add_pharmacologies`` / ``create_pharmacologies``
 methods.
 
@@ -97,6 +97,7 @@ recording context.
    subject = CellCultureSubject(
        subject_id="SUBJ-SYN-ORG-001",
        species="Homo sapiens",
+       sex="U",
        description="Synthetic cortical organoid recording",
        culture=culture,
    )

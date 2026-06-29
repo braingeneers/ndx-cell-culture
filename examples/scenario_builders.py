@@ -238,6 +238,7 @@ def build_slice_patch_clamp():
     subject = CellCultureSubject(
         subject_id="SUBJ-EX-SLICE-001",
         species="Homo sapiens",
+        sex="U",
         description="Example organoid-derived slice",
         culture=slice_culture,
     )
@@ -624,6 +625,7 @@ def build_directoid():
     subject = CellCultureSubject(
         subject_id="SUBJ-EX-DIRECTOID-001",
         species="Homo sapiens",
+        sex="U",
         description="Example cortico-thalamic directoid",
         culture=directoid,
     )
@@ -674,6 +676,7 @@ def build_two_line_assembloid():
     subject = CellCultureSubject(
         subject_id="SUBJ-EX-ASSEMBLOID-2LINE-001",
         species="Homo sapiens",
+        sex="U",
         description="Example assembloid from two distinct source lines",
         culture=culture,
     )

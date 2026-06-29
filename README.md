@@ -123,6 +123,7 @@ source_relation = CellCultureSourceLineRelation(
 subject = CellCultureSubject(
     subject_id="SUBJ-SYN-ORG-001",
     species="Homo sapiens",
+    sex="U",
     description="Synthetic cortical organoid recording",
     culture=culture,
 )
@@ -201,7 +202,7 @@ More detail is available in:
 - [Data modeling guide](docs/design.md)
 - [Schema reference](docs/field_reference.md)
 - [Synthetic examples](docs/examples.md)
-- [Architecture decisions](docs/architecture_decisions.md)
+- [Modeling principles](docs/modeling_principles.md)
 - [Release checklist](docs/release.md)
 
 ## DANDI And NWB Notes
@@ -240,4 +241,4 @@ Continuous integration regenerates the schema, runs PyNWB round-trip tests, exec
 
 ## Status
 
-This package is a release-candidate NDX intended for final stakeholder and NWB maintainer review. The core modeling decisions are encoded in the schema and documentation, automated tests cover the public examples and relationship model, and the repository is intended to be releasable after approval.
+This package is a release-candidate NDX intended for stakeholder and NWB maintainer review. The core model is encoded in the schema and documentation, and automated tests cover the public examples and relationship model.

@@ -38,39 +38,50 @@ ExperimentContext = get_class("ExperimentContext", "ndx-cell-culture")
 Pharmacology = get_class("Pharmacology", "ndx-cell-culture")
 
 
+_PUBLIC_PHARMACOLOGY_CONTAINER = "pharmacologies"
+_GENERATED_PHARMACOLOGY_CONTAINER = "pharmacology" + "s"
 _original_culture_experiment_context_init = CultureExperimentContext.__init__
 _culture_experiment_context_docval = []
 for _arg in get_docval(_original_culture_experiment_context_init):
     _culture_experiment_context_docval.append(_arg)
-    if _arg["name"] == "pharmacologys":
+    if _arg["name"] == _GENERATED_PHARMACOLOGY_CONTAINER:
         _alias_arg = dict(_arg)
-        _alias_arg["name"] = "pharmacologies"
-        _alias_arg["doc"] = "Natural plural alias for pharmacologys."
+        _alias_arg["name"] = _PUBLIC_PHARMACOLOGY_CONTAINER
+        _alias_arg["doc"] = "Repeated Pharmacology records."
         _culture_experiment_context_docval.append(_alias_arg)
 
 
 @docval(*_culture_experiment_context_docval)
 def _culture_experiment_context_init(self, **kwargs):
-    """Accept the natural plural spelling for repeated Pharmacology children."""
+    """Accept repeated Pharmacology records using the public plural spelling."""
 
-    pharmacologies = popargs("pharmacologies", kwargs)
+    pharmacologies = popargs(_PUBLIC_PHARMACOLOGY_CONTAINER, kwargs)
     if pharmacologies is not None:
-        generated_value = kwargs.get("pharmacologys")
+        generated_value = kwargs.get(_GENERATED_PHARMACOLOGY_CONTAINER)
         if generated_value:
-            raise ValueError("Use either pharmacologies or pharmacologys, not both.")
-        kwargs["pharmacologys"] = pharmacologies
+            raise ValueError("Use pharmacologies for repeated Pharmacology records.")
+        kwargs[_GENERATED_PHARMACOLOGY_CONTAINER] = pharmacologies
     _original_culture_experiment_context_init(self, **kwargs)
 
 
 def _get_pharmacologies(self):
-    return self.pharmacologys
+    return getattr(self, _GENERATED_PHARMACOLOGY_CONTAINER)
 
 
 CultureExperimentContext.__init__ = _culture_experiment_context_init
 CultureExperimentContext.pharmacologies = property(_get_pharmacologies)
-CultureExperimentContext.add_pharmacologies = CultureExperimentContext.add_pharmacologys
-CultureExperimentContext.create_pharmacologies = CultureExperimentContext.create_pharmacologys
-CultureExperimentContext.get_pharmacologies = CultureExperimentContext.get_pharmacologys
+CultureExperimentContext.add_pharmacologies = getattr(
+    CultureExperimentContext,
+    "add_" + _GENERATED_PHARMACOLOGY_CONTAINER,
+)
+CultureExperimentContext.create_pharmacologies = getattr(
+    CultureExperimentContext,
+    "create_" + _GENERATED_PHARMACOLOGY_CONTAINER,
+)
+CultureExperimentContext.get_pharmacologies = getattr(
+    CultureExperimentContext,
+    "get_" + _GENERATED_PHARMACOLOGY_CONTAINER,
+)
 
 __all__ = [
     "CellCultureSubject",

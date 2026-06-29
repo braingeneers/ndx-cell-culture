@@ -42,5 +42,5 @@ Primary Documentation Paths
 ---------------------------
 
 Start with :doc:`usage` to install the package and create a small file. Use
-:doc:`modeling_guide` for decisions about where metadata belongs, then use
+:doc:`modeling_guide` for guidance about where metadata belongs, then use
 :doc:`field_reference` and :doc:`format` when you need field-level details.
