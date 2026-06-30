@@ -36,6 +36,47 @@ NWBFile
     +-- Pharmacology [0..N]
 ```
 
+The core mental model is to keep biological preparation metadata, core NWB data
+and hardware, and recording context distinct but linked:
+
+```mermaid
+flowchart LR
+  subgraph Biology["Biological preparation"]
+    Subject["CellCultureSubject"]
+    Culture["CellCulture"]
+    Line["CellLine"]
+    BioExt["GeneticVariant<br/>ConstructApplication<br/>CultureProtocol"]
+
+    Subject --> Culture
+    Culture -. "source_lines" .-> Line
+    Culture --> BioExt
+  end
+
+  subgraph Core["Core NWB"]
+    Device["NWB.Device<br/>NWB.DeviceModel"]
+    Data["recorded data<br/>standard NWB metadata"]
+  end
+
+  subgraph Session["Recording context"]
+    Context["CultureExperimentContext"]
+    Experiment["ExperimentContext"]
+    Pharm["Pharmacology"]
+
+    Context --> Experiment
+    Context --> Pharm
+  end
+
+  Biology -. "recorded culture" .-> Session
+  Device -. "device used" .-> Session
+```
+
+Use this mental model:
+
+- Put biological identity and provenance in `CellCultureSubject`.
+- Put recorded data and hardware in core NWB.
+- Put recording conditions and pharmacology in `CultureExperimentContext`.
+- Link context back to the recorded `CellCulture` and `NWB.Device`.
+
 Use this extension when the biological preparation is a cultured neural system rather than an animal subject, and when the metadata needed to interpret the recording cannot be represented clearly with core `NWB.Subject` alone.
 
 ## Installation

@@ -37,6 +37,7 @@ extensions = [
     'sphinx.ext.ifconfig',
     'sphinx.ext.autodoc',
     'sphinx.ext.intersphinx',
+    'sphinxcontrib.mermaid',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -127,6 +128,9 @@ add_function_parentheses = False
 
 # -- HTML sphinx options
 html_theme = "sphinx_rtd_theme"
+mermaid_output_format = "raw"
+mermaid_light_theme = "neutral"
+mermaid_dark_theme = "neutral"
 
 # LaTeX Sphinx options
 latex_elements = {
