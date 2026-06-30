@@ -12,19 +12,26 @@
    }
 }
 
+pre.mermaid,
+.mermaid-container > pre.mermaid,
 .mermaid {
    font-family: Arial, sans-serif !important;
    margin: 1.25rem auto 1.5rem;
-   text-align: center;
+   overflow-x: auto !important;
+   padding-bottom: 0.35rem;
    white-space: normal;
+   width: auto !important;
 }
 
+pre.mermaid > svg,
+.mermaid-container > pre.mermaid > svg,
 .mermaid svg {
    display: block;
-   height: auto;
-   margin: 0 auto;
-   max-width: 980px;
-   width: 100%;
+   height: auto !important;
+   margin: 0;
+   max-width: none !important;
+   min-width: 760px;
+   width: auto !important;
 }
 
 .mermaid svg text,

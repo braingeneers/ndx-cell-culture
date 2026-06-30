@@ -63,24 +63,24 @@ and hardware, and recording context distinct but linked:
      }
    }}%%
    flowchart LR
-     subgraph Biology["Biology"]
-       Subject["Subject"]
-       Culture["Culture"]
-       Line["Source line"]
-       BioExt["Genetic variants<br/>Constructs<br/>Protocol"]
+     subgraph Biology["Biological preparation"]
+       Subject["CellCultureSubject<br/>extends NWB.Subject"]
+       Culture["CellCulture<br/>recorded, related,<br/>or parent cultures"]
+       Line["CellLine<br/>source line lineage"]
+       BioExt["GeneticVariant<br/>ConstructApplication<br/>CultureProtocol"]
 
-       Subject --> Culture
-       Culture -.-> Line
+       Subject -->|"culture"| Culture
+       Culture -.->|"source_lines"| Line
        Culture --> BioExt
      end
 
      subgraph Core["Core NWB"]
-       Device["Device<br/>DeviceModel"]
-       Data["Recorded data<br/>Standard metadata"]
+       Device["NWB.Device<br/>NWB.DeviceModel"]
+       Data["Recorded data<br/>standard NWB metadata"]
      end
 
-     subgraph Session["Session"]
-       Context["Context"]
+     subgraph Session["Recording context"]
+       Context["CultureExperimentContext<br/>extends LabMetaData"]
        Experiment["Experiment"]
        Pharm["Pharmacology"]
 
@@ -88,8 +88,8 @@ and hardware, and recording context distinct but linked:
        Context --> Pharm
      end
 
-     Biology -.-> Session
-     Device -.-> Session
+     Biology -.->|"recorded culture"| Session
+     Device -.->|"device used"| Session
 
 Use this mental model:
 
