@@ -40,6 +40,19 @@ The core mental model is to keep biological preparation metadata, core NWB data
 and hardware, and recording context distinct but linked:
 
 ```mermaid
+%%{init: {
+  "theme": "base",
+  "themeVariables": {
+    "fontFamily": "Inter, Arial, sans-serif",
+    "fontSize": "15px",
+    "primaryColor": "#f8fafc",
+    "primaryTextColor": "#111827",
+    "primaryBorderColor": "#64748b",
+    "lineColor": "#64748b",
+    "clusterBkg": "#f1f5f9",
+    "clusterBorder": "#94a3b8"
+  }
+}}%%
 flowchart LR
   subgraph Biology["Biological preparation"]
     Subject["CellCultureSubject"]
@@ -48,7 +61,7 @@ flowchart LR
     BioExt["GeneticVariant<br/>ConstructApplication<br/>CultureProtocol"]
 
     Subject --> Culture
-    Culture -. "source_lines" .-> Line
+    Culture -.-> Line
     Culture --> BioExt
   end
 
@@ -66,8 +79,8 @@ flowchart LR
     Context --> Pharm
   end
 
-  Biology -. "recorded culture" .-> Session
-  Device -. "device used" .-> Session
+  Biology -.-> Session
+  Device -.-> Session
 ```
 
 Use this mental model:
@@ -75,7 +88,7 @@ Use this mental model:
 - Put biological identity and provenance in `CellCultureSubject`.
 - Put recorded data and hardware in core NWB.
 - Put recording conditions and pharmacology in `CultureExperimentContext`.
-- Link context back to the recorded `CellCulture` and `NWB.Device`.
+- Dotted arrows show references: `CellCulture.source_lines`, plus recording-context links back to the recorded `CellCulture` and `NWB.Device`.
 
 Use this extension when the biological preparation is a cultured neural system rather than an animal subject, and when the metadata needed to interpret the recording cannot be represented clearly with core `NWB.Subject` alone.
 
