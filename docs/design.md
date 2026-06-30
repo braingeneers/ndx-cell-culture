@@ -11,7 +11,8 @@ NWBFile
 +-- subject : CellCultureSubject <extends NWB.Subject>
 |   +-- inherited NWB.Subject fields
 |   +-- culture -> CellCulture catalog entry [1]
-+-- general/devices : NWB.Device / NWB.DeviceModel [core NWB]
++-- general/devices : NWB.Device [0..N] [core NWB]
+|   +-- models : NWB.DeviceModel [0..N]
 +-- lab_meta_data : CultureExperimentContext <extends LabMetaData>
     +-- CellLine [0..N]
     |   +-- GeneticVariant [0..N]
@@ -24,6 +25,9 @@ NWBFile
     +-- CellCultureSourceLineRelation [0..N]
     +-- CellCultureParentRelation [0..N]
     +-- ExperimentContext [0..1]
+    |   +-- subject -> CellCultureSubject
+    |   +-- culture -> CellCulture
+    |   +-- device -> NWB.Device [0..1]
     +-- Pharmacology [0..N]
 ```
 
