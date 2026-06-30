@@ -43,8 +43,8 @@ and hardware, and recording context distinct but linked:
 %%{init: {
   "theme": "base",
   "themeVariables": {
-    "fontFamily": "Inter, Arial, sans-serif",
-    "fontSize": "15px",
+    "fontFamily": "Arial, sans-serif",
+    "fontSize": "14px",
     "primaryColor": "#f8fafc",
     "primaryTextColor": "#111827",
     "primaryBorderColor": "#64748b",
@@ -54,11 +54,11 @@ and hardware, and recording context distinct but linked:
   }
 }}%%
 flowchart LR
-  subgraph Biology["Biological preparation"]
-    Subject["CellCultureSubject"]
-    Culture["CellCulture"]
-    Line["CellLine"]
-    BioExt["GeneticVariant<br/>ConstructApplication<br/>CultureProtocol"]
+  subgraph Biology["Biology"]
+    Subject["Subject"]
+    Culture["Culture"]
+    Line["Source line"]
+    BioExt["Genetic variants<br/>Constructs<br/>Protocol"]
 
     Subject --> Culture
     Culture -.-> Line
@@ -66,13 +66,13 @@ flowchart LR
   end
 
   subgraph Core["Core NWB"]
-    Device["NWB.Device<br/>NWB.DeviceModel"]
-    Data["recorded data<br/>standard NWB metadata"]
+    Device["Device<br/>DeviceModel"]
+    Data["Recorded data<br/>Standard metadata"]
   end
 
-  subgraph Session["Recording context"]
-    Context["CultureExperimentContext"]
-    Experiment["ExperimentContext"]
+  subgraph Session["Session"]
+    Context["Context"]
+    Experiment["Experiment"]
     Pharm["Pharmacology"]
 
     Context --> Experiment
@@ -89,6 +89,7 @@ Use this mental model:
 - Put recorded data and hardware in core NWB.
 - Put recording conditions and pharmacology in `CultureExperimentContext`.
 - Dotted arrows show references: `CellCulture.source_lines`, plus recording-context links back to the recorded `CellCulture` and `NWB.Device`.
+- The diagram uses short labels for readability; the ASCII hierarchy above gives the exact NWB and extension object names.
 
 Use this extension when the biological preparation is a cultured neural system rather than an animal subject, and when the metadata needed to interpret the recording cannot be represented clearly with core `NWB.Subject` alone.
 
