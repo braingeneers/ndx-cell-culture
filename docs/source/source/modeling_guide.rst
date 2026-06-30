@@ -168,23 +168,12 @@ Recommended vocabulary terms are stored as text attributes in the schema. Use
 ``ndx_cell_culture.validate_recommended_terms`` for opt-in checking before
 sharing or depositing files.
 
-Intentionally Absent
---------------------
+What To Model Elsewhere
+-----------------------
 
-The following concepts are intentionally not part of the extension:
-
-* extension-specific external asset registry;
-* extension-specific publication registry;
-* extension-specific hardware object;
-* ``culture_type=batch``;
-* standalone batch objects;
-* ``CellLine.age_or_passage``;
-* ``CellLine.age_reference``;
-* ``CellLine.sex``;
-* ``CellCulture.sex``;
-* ``ExperimentContext.recording_preparation``;
-* ``ExperimentContext.hardware_platform_details``;
-* ``ExperimentContext.chip_id``;
-* ``GeneticVariant.clone_id``;
-* ``GeneticVariant.clonal_status``;
-* ``CultureProtocol.culture_subtype``.
+Keep general assets, publications, hardware, acquisition, stimulation,
+electrodes, imaging, and processing data in core NWB structures whenever
+possible. Use ``batch_label`` as a lightweight grouping label rather than
+creating batch objects. Put passage and clone information on ``CellLine``, put
+culture timing on ``CellCulture`` or ``ExperimentContext``, and use
+``CultureProtocol`` only for concise structured culture-protocol metadata.

@@ -289,7 +289,7 @@ def main():
         contact=["dfparks@ucsc.edu"],
     )
     ns_builder.include_namespace("core")
-    output_dir = str((Path(__file__).parent.parent.parent / "spec").absolute())
+    output_dir = str((Path(__file__).resolve().parents[1] / "spec").absolute())
     export_spec(ns_builder, build_specs(), output_dir)
     strip_trailing_whitespace(output_dir)
 

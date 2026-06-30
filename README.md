@@ -86,13 +86,13 @@ Generated `.nwb` files are written under `examples/` and ignored by git. The sce
 Regenerate the YAML schema:
 
 ```bash
-python src/spec/create_extension_spec.py
+python scripts/create_extension_spec.py
 ```
 
-Run tests:
+Run the local release checks:
 
 ```bash
-pytest
+bash scripts/check_release.sh
 ```
 
 Build the HTML documentation:
@@ -102,7 +102,7 @@ python -m pip install -e ".[docs]"
 make -C docs/source html
 ```
 
-The generated site is written to `docs/_build/html`. Continuous integration regenerates the schema, runs PyNWB round-trip tests, executes the example writers, runs NWB Inspector, builds the docs, verifies clean wheel installation, and checks wheel/source distributions before release.
+The generated site is written to `docs/_build/html`. Continuous integration runs the same release-check script across supported Python versions, including schema regeneration, PyNWB round-trip tests, example writers, NWB Inspector, docs build, clean wheel installation, and wheel/source distribution checks.
 
 ## Status
 

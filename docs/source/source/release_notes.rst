@@ -4,12 +4,12 @@ Release Notes
 1.0rc2
 ------
 
-* Simplifies provenance entry by replacing explicit relation object types with
-  direct ``parent_cell_line``, ``source_lines``, and ``parent_cultures``
-  reference fields.
-* Keeps biological identity and provenance under ``CellCultureSubject`` instead
-  of ``CultureExperimentContext``. ``CultureExperimentContext`` is limited to
-  recording/session context and pharmacology metadata.
+* Represents biological identity and provenance through ``CellCultureSubject``
+  with subject-contained ``CellLine`` and ``CellCulture`` objects.
+* Uses direct ``parent_cell_line``, ``source_lines``, and ``parent_cultures``
+  reference fields for lineage and culture derivation.
+* Keeps ``CultureExperimentContext`` focused on recording/session context and
+  pharmacology metadata.
 
 1.0rc1
 ------

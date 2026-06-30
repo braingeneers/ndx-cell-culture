@@ -2,27 +2,22 @@
 
 Use this checklist when preparing a versioned `ndx-cell-culture` release.
 
-## Before Release
+## Local Validation
 
-- Regenerate schema with `python src/spec/create_extension_spec.py`.
-- Run `pytest -q`.
-- Run `python examples/create_basic_organoid_nwb.py`.
-- Run `python examples/create_synthetic_scenarios.py`.
-- Validate generated NWB files with `pynwb.validate`.
-- Run NWB Inspector on generated examples with threshold `BEST_PRACTICE_VIOLATION`.
-- Run `ndx_cell_culture.validate_recommended_terms` on generated examples and expected release fixtures.
-- Confirm subject-to-culture, `CellLine.parent_cell_line`, `CellCulture.source_lines`, and `CellCulture.parent_cultures` references all round-trip.
-- Install docs dependencies with `python -m pip install -e ".[docs]"`.
-- Build HTML docs with `make -C docs/source html` and review `docs/_build/html`.
-- Build wheel and source distribution with `python -m build --sdist --wheel`.
-- Check distribution metadata with `python -m twine check dist/*`.
-- Install the built wheel in a clean environment and verify `import ndx_cell_culture`.
-- Review README and docs for user-facing clarity before publishing.
+- Install development dependencies with `python -m pip install -e ".[dev]"`.
+- Run `bash scripts/check_release.sh`.
+- Review the generated NWB example files enough to confirm:
+  - `CellCultureSubject` stores biological identity and provenance;
+  - `CultureExperimentContext` stores recording/session context and pharmacology;
+  - `parent_cell_line`, `source_lines`, and `parent_cultures` references round-trip;
+  - recording hardware is represented with core NWB `Device` / `DeviceModel`;
+  - NWB Inspector has no best-practice violations except the intentionally ignored core subject-age warning.
+- Review public README and ReadTheDocs source for stale internal or planning terms before publishing.
 
 ## Versioning
 
 - Update `pyproject.toml` version.
-- Update `src/spec/create_extension_spec.py` namespace version to match.
+- Update `scripts/create_extension_spec.py` namespace version to match.
 - Regenerate and commit `spec/ndx-cell-culture.namespace.yaml` and `spec/ndx-cell-culture.extensions.yaml`.
 - Tag the release as `vX.Y.Z`.
 
@@ -36,10 +31,10 @@ Use this checklist when preparing a versioned `ndx-cell-culture` release.
 
 ## Documentation
 
-- Generated source files live under `docs/source`.
+- Public documentation lives under `docs/source/source`.
 - The Sphinx HTML build output is intentionally untracked at `docs/_build/html`.
-- Host the contents of `docs/_build/html` when publishing public documentation.
-- Read the Docs can import this repository using the root `.readthedocs.yaml` file. The RTD project should build from `docs/source/source/conf.py` and install the package with the `docs` extra.
+- Read the Docs imports this repository using the root `.readthedocs.yaml` file.
+- Keep internal release notes here concise; user-facing model, examples, and field reference content belong in the Sphinx docs.
 
 ## External Review
 

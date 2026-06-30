@@ -11,6 +11,8 @@ import pytest
 import ndx_cell_culture as ndx
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "examples"))
+from create_basic_organoid_nwb import main as write_basic_example  # noqa: E402
+from create_synthetic_scenarios import main as write_synthetic_scenarios  # noqa: E402
 from scenario_builders import SCENARIOS  # noqa: E402
 
 
@@ -268,9 +270,6 @@ def test_removed_terms_are_absent_from_schema():
 def test_user_docs_cover_extension_types_without_planning_artifacts():
     docs_paths = [
         "README.md",
-        "docs/design.md",
-        "docs/field_reference.md",
-        "docs/examples.md",
         "docs/release.md",
     ]
     docs_paths.extend(str(path) for path in Path("docs/source/source").glob("*.rst"))
@@ -303,6 +302,17 @@ def test_user_docs_cover_extension_types_without_planning_artifacts():
         "pharmacology" + "s",
         "open question",
         "release-blocking",
+        "ExternalAsset",
+        "age_or_passage",
+        "CellLine.age_reference",
+        "CellLine.sex",
+        "CellCulture.sex",
+        "recording_preparation",
+        "hardware_platform_details",
+        "chip_id",
+        "GeneticVariant.clone_id",
+        "GeneticVariant.clonal_status",
+        "CultureProtocol.culture_subtype",
         "CellLineParentRelation",
         "CellCultureSourceLineRelation",
         "CellCultureParentRelation",
@@ -513,6 +523,23 @@ def test_synthetic_scenarios_write_read_and_validate(tmp_path):
                 assert len(context.pharmacologies) == pharmacology_count
             else:
                 assert not read.lab_meta_data or "culture_experiment_context" not in read.lab_meta_data
+
+
+def test_example_scripts_write_expected_files(tmp_path):
+    basic_path = write_basic_example(tmp_path / "basic_organoid_example.nwb")
+    scenario_paths = write_synthetic_scenarios(tmp_path / "generated_scenarios")
+
+    assert basic_path == tmp_path / "basic_organoid_example.nwb"
+    assert basic_path.exists()
+    assert len(scenario_paths) == len(SCENARIOS)
+    assert {path.stem for path in scenario_paths} == set(SCENARIOS)
+
+    for path in [basic_path, *scenario_paths]:
+        assert path.exists()
+        _assert_no_validation_errors(path)
+        _assert_no_inspector_violations(path)
+        with NWBHDF5IO(str(path), "r", load_namespaces=True) as io:
+            assert ndx.validate_recommended_terms(io.read()) == []
 
 
 def test_biological_metadata_only_scenario_has_subject_biology_but_no_experiment_context(tmp_path):
