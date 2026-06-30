@@ -5,15 +5,17 @@ from pathlib import Path
 
 from pynwb.spec import (
     NWBAttributeSpec,
+    NWBDatasetSpec,
     NWBGroupSpec,
     NWBLinkSpec,
     NWBNamespaceBuilder,
+    NWBRefSpec,
     export_spec,
 )
 
 
 NAMESPACE = "ndx-cell-culture"
-VERSION = "1.0rc1"
+VERSION = "1.0rc2"
 
 
 def attr(name, doc, required=True, dtype="text"):
@@ -26,6 +28,18 @@ def text_attrs(fields):
 
 def object_link(name, target_type, doc, quantity="?"):
     return NWBLinkSpec(name=name, doc=doc, target_type=target_type, quantity=quantity)
+
+
+def object_ref_dataset(name, target_type, doc, quantity="?", shape=None, dims=None):
+    return NWBDatasetSpec(
+        name=name,
+        doc=doc,
+        neurodata_type_inc="VectorData",
+        dtype=NWBRefSpec(target_type=target_type, reftype="object"),
+        quantity=quantity,
+        shape=shape,
+        dims=dims,
+    )
 
 
 def build_specs():
@@ -105,6 +119,9 @@ def build_specs():
             NWBGroupSpec(neurodata_type_inc="GeneticVariant", doc="Genetic variants attached to this cell line.", quantity="*"),
             NWBGroupSpec(neurodata_type_inc="ConstructApplication", doc="Construct applications attached to this cell line.", quantity="*"),
         ],
+        datasets=[
+            object_ref_dataset("parent_cell_line", "CellLine", "Parent or source CellLine for a derived line."),
+        ],
     )
 
     culture_protocol = NWBGroupSpec(
@@ -149,6 +166,22 @@ def build_specs():
             NWBGroupSpec(neurodata_type_inc="ConstructApplication", doc="Construct applications attached to this culture.", quantity="*"),
             NWBGroupSpec(neurodata_type_inc="CultureProtocol", doc="Structured culture derivation/preparation protocol.", quantity="?"),
         ],
+        datasets=[
+            object_ref_dataset(
+                "source_lines",
+                "CellLine",
+                "Source CellLine or lines used to create this culture.",
+                shape=(None,),
+                dims=("num_source_lines",),
+            ),
+            object_ref_dataset(
+                "parent_cultures",
+                "CellCulture",
+                "Parent or input CellCulture objects used to derive this culture.",
+                shape=(None,),
+                dims=("num_parent_cultures",),
+            ),
+        ],
     )
 
     cell_culture_subject = NWBGroupSpec(
@@ -157,57 +190,6 @@ def build_specs():
         doc="NWB Subject wrapper for a recorded or described cultured neural preparation.",
         links=[
             object_link("culture", "CellCulture", "Link to the recorded or described cataloged CellCulture.", quantity=1),
-        ],
-    )
-
-    cell_line_parent_relation = NWBGroupSpec(
-        neurodata_type_def="CellLineParentRelation",
-        neurodata_type_inc="NWBContainer",
-        doc="Relationship edge linking a child CellLine to a parent CellLine.",
-        attributes=text_attrs(
-            [
-                ("relation_id", True, "Stable relation identifier."),
-                ("relationship_type", False, "Recommended terms include derived_from, cloned_from, reprogrammed_from, edited_from, other."),
-                ("notes", False, "Free-text remarks."),
-            ]
-        ),
-        links=[
-            object_link("child_cell_line", "CellLine", "Child or derived CellLine in the relationship.", quantity=1),
-            object_link("parent_cell_line", "CellLine", "Parent or source CellLine in the relationship.", quantity=1),
-        ],
-    )
-
-    cell_culture_source_line_relation = NWBGroupSpec(
-        neurodata_type_def="CellCultureSourceLineRelation",
-        neurodata_type_inc="NWBContainer",
-        doc="Relationship edge linking a CellCulture to one source CellLine.",
-        attributes=text_attrs(
-            [
-                ("relation_id", True, "Stable relation identifier."),
-                ("role", False, "Recommended terms include primary_source, component, control, other."),
-                ("notes", False, "Free-text remarks."),
-            ]
-        ),
-        links=[
-            object_link("culture", "CellCulture", "CellCulture that used this source line.", quantity=1),
-            object_link("source_line", "CellLine", "Source CellLine for the culture.", quantity=1),
-        ],
-    )
-
-    cell_culture_parent_relation = NWBGroupSpec(
-        neurodata_type_def="CellCultureParentRelation",
-        neurodata_type_inc="NWBContainer",
-        doc="Relationship edge linking a CellCulture to one parent CellCulture.",
-        attributes=text_attrs(
-            [
-                ("relation_id", True, "Stable relation identifier."),
-                ("relationship_type", False, "Culture-to-culture relationship type."),
-                ("notes", False, "Free-text remarks."),
-            ]
-        ),
-        links=[
-            object_link("child_culture", "CellCulture", "Child or derived CellCulture.", quantity=1),
-            object_link("parent_culture", "CellCulture", "Parent or input CellCulture.", quantity=1),
         ],
     )
 
@@ -272,9 +254,6 @@ def build_specs():
         groups=[
             NWBGroupSpec(neurodata_type_inc="CellLine", doc="Reusable CellLine catalog entries for this NWB file.", quantity="*"),
             NWBGroupSpec(neurodata_type_inc="CellCulture", doc="Reusable CellCulture catalog entries for this NWB file.", quantity="*"),
-            NWBGroupSpec(neurodata_type_inc="CellLineParentRelation", doc="CellLine-to-CellLine provenance relationships.", quantity="*"),
-            NWBGroupSpec(neurodata_type_inc="CellCultureSourceLineRelation", doc="CellCulture-to-CellLine source relationships.", quantity="*"),
-            NWBGroupSpec(neurodata_type_inc="CellCultureParentRelation", doc="CellCulture-to-CellCulture provenance relationships.", quantity="*"),
             NWBGroupSpec(neurodata_type_inc="ExperimentContext", doc="Recording/session context for this NWBFile.", quantity="?"),
             NWBGroupSpec(neurodata_type_inc="Pharmacology", doc="Pharmacological interventions linked to experiment contexts.", quantity="*"),
         ],
@@ -287,9 +266,6 @@ def build_specs():
         culture_protocol,
         cell_culture,
         cell_culture_subject,
-        cell_line_parent_relation,
-        cell_culture_source_line_relation,
-        cell_culture_parent_relation,
         experiment_context,
         pharmacology,
         culture_experiment_context,

@@ -11,7 +11,7 @@ Use this checklist when preparing a versioned `ndx-cell-culture` release.
 - Validate generated NWB files with `pynwb.validate`.
 - Run NWB Inspector on generated examples with threshold `BEST_PRACTICE_VIOLATION`.
 - Run `ndx_cell_culture.validate_recommended_terms` on generated examples and expected release fixtures.
-- Confirm subject-to-culture, cell-line parent, culture source-line, and culture parent relationships all round-trip.
+- Confirm subject-to-culture, `CellLine.parent_cell_line`, `CellCulture.source_lines`, and `CellCulture.parent_cultures` references all round-trip.
 - Install docs dependencies with `python -m pip install -e ".[docs]"`.
 - Build HTML docs with `make -C docs/source html` and review `docs/_build/html`.
 - Build wheel and source distribution with `python -m build --sdist --wheel`.

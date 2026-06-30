@@ -20,15 +20,15 @@ NWBFile
 |   +-- models : NWB.DeviceModel [0..N]
 +-- lab_meta_data : CultureExperimentContext <extends LabMetaData>
     +-- CellLine [0..N]
+    |   +-- parent_cell_line -> CellLine [0..1]
     |   +-- GeneticVariant [0..N]
     |   +-- ConstructApplication [0..N]
     +-- CellCulture [0..N]
+    |   +-- source_lines -> CellLine [0..N]
+    |   +-- parent_cultures -> CellCulture [0..N]
     |   +-- GeneticVariant [0..N]
     |   +-- ConstructApplication [0..N]
     |   +-- CultureProtocol [0..1]
-    +-- CellLineParentRelation [0..N]
-    +-- CellCultureSourceLineRelation [0..N]
-    +-- CellCultureParentRelation [0..N]
     +-- ExperimentContext [0..1]
     |   +-- subject -> CellCultureSubject
     |   +-- culture -> CellCulture

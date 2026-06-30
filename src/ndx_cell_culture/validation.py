@@ -185,15 +185,6 @@ RECOMMENDED_TERMS: RecommendedTerms = {
     "Pharmacology": {
         "concentration_unit": {"M", "mM", "uM", "nM", "pM", "%", "mg/mL", "ug/mL", "ng/mL", "other"},
     },
-    "CellLineParentRelation": {
-        "relationship_type": {"derived_from", "cloned_from", "reprogrammed_from", "edited_from", "other"},
-    },
-    "CellCultureSourceLineRelation": {
-        "role": {"primary_source", "component", "control", "other"},
-    },
-    "CellCultureParentRelation": {
-        "relationship_type": {"derived_from", "sliced_from", "assembled_from", "fused_with", "co_cultured_with", "other"},
-    },
 }
 
 

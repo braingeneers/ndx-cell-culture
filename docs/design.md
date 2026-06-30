@@ -15,15 +15,15 @@ NWBFile
 |   +-- models : NWB.DeviceModel [0..N]
 +-- lab_meta_data : CultureExperimentContext <extends LabMetaData>
     +-- CellLine [0..N]
+    |   +-- parent_cell_line -> CellLine [0..1]
     |   +-- GeneticVariant [0..N]
     |   +-- ConstructApplication [0..N]
     +-- CellCulture [0..N]
+    |   +-- source_lines -> CellLine [0..N]
+    |   +-- parent_cultures -> CellCulture [0..N]
     |   +-- GeneticVariant [0..N]
     |   +-- ConstructApplication [0..N]
     |   +-- CultureProtocol [0..1]
-    +-- CellLineParentRelation [0..N]
-    +-- CellCultureSourceLineRelation [0..N]
-    +-- CellCultureParentRelation [0..N]
     +-- ExperimentContext [0..1]
     |   +-- subject -> CellCultureSubject
     |   +-- culture -> CellCulture
@@ -41,15 +41,15 @@ The extension-owned `culture` link identifies the `CellCulture` catalog entry be
 
 ## Catalogs And Provenance
 
-`CultureExperimentContext` is the file-level metadata catalog for cultured preparations. It stores reusable `CellLine` and `CellCulture` objects and explicit relationship records between them.
+`CultureExperimentContext` is the file-level metadata catalog for cultured preparations. It stores reusable `CellLine` and `CellCulture` objects. Lineage and source provenance are direct reference fields on those catalog entries.
 
 Use `CellLine` for source-line identity and lineage metadata such as passage, clone, clonal status, source type, line-level variants, or construct applications.
 
-Use relationship records for provenance:
+Use direct reference fields for provenance:
 
-- `CellLineParentRelation` links a child or derived line to a parent line.
-- `CellCultureSourceLineRelation` links a culture to one source line. Repeat it when a culture has multiple source lines.
-- `CellCultureParentRelation` links a culture to one parent culture. Repeat it for slices, assembloids, directoids/connectoids, and other multi-parent culture derivations.
+- `CellLine.parent_cell_line` answers: what line did this line come from?
+- `CellCulture.source_lines` answers: which source line or lines made this culture?
+- `CellCulture.parent_cultures` answers: which parent culture or cultures produced this culture?
 
 This catalog model avoids duplicating shared cell lines or parent cultures across several subjects, and it keeps multi-parent provenance explicit.
 

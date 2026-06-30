@@ -34,10 +34,10 @@ Where Metadata Belongs
      - Describe cell-line provenance, source type, passage, clone, clonal
        status, and line-level metadata.
    * - Line and culture provenance
-     - relationship objects
-     - Use ``CellLineParentRelation``, ``CellCultureSourceLineRelation``, and
-       ``CellCultureParentRelation``. Repeat relation objects for multi-source
-       or multi-parent preparations.
+     - direct reference fields
+     - Use ``CellLine.parent_cell_line``, ``CellCulture.source_lines``, and
+       ``CellCulture.parent_cultures`` to capture lineage without separate
+       provenance rows.
    * - Stable engineered genomic changes
      - ``GeneticVariant``
      - Attach variants to the ``CellLine`` or ``CellCulture`` where the
@@ -96,20 +96,19 @@ Catalogs And Provenance
 
 ``CultureExperimentContext`` is the file-level metadata catalog for cultured
 preparations. It stores reusable ``CellLine`` and ``CellCulture`` objects and
-explicit relationship records between them.
+direct provenance references between them.
 
 Use ``CellLine`` for source-line identity and lineage metadata such as passage,
 clone, clonal status, source type, line-level variants, or construct
 applications.
 
-Use relationship records for provenance:
+Use direct reference fields for provenance:
 
-* ``CellLineParentRelation`` links a child or derived line to a parent line.
-* ``CellCultureSourceLineRelation`` links a culture to one source line. Repeat
-  it when a culture has multiple source lines.
-* ``CellCultureParentRelation`` links a culture to one parent culture. Repeat
-  it for slices, assembloids, directoids/connectoids, and other multi-parent
-  culture derivations.
+* ``CellLine.parent_cell_line`` answers: what line did this line come from?
+* ``CellCulture.source_lines`` answers: which source line or lines made this
+  culture?
+* ``CellCulture.parent_cultures`` answers: which parent culture or cultures
+  produced this culture?
 
 This catalog model avoids duplicating shared cell lines or parent cultures
 across several subjects, and it keeps multi-parent provenance explicit.

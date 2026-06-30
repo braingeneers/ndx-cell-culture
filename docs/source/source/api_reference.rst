@@ -14,9 +14,6 @@ Import these classes directly from ``ndx_cell_culture``:
 * ``CellCultureSubject``
 * ``CellCulture``
 * ``CellLine``
-* ``CellLineParentRelation``
-* ``CellCultureSourceLineRelation``
-* ``CellCultureParentRelation``
 * ``GeneticVariant``
 * ``ConstructApplication``
 * ``CultureProtocol``
@@ -27,6 +24,19 @@ Import these classes directly from ``ndx_cell_culture``:
 The constructor signatures are generated from the NWB extension schema. The
 curated field guidance is in :doc:`field_reference`; the formal generated
 schema reference is in :doc:`format`.
+
+Provenance References
+---------------------
+
+The public constructors accept normal objects for provenance fields:
+
+* ``CellLine(parent_cell_line=parent_line)``
+* ``CellCulture(source_lines=[line_a, line_b])``
+* ``CellCulture(parent_cultures=[parent_organoid])``
+
+These fields are stored as NWB object-reference vectors. After reading a file
+back, use indexing or slicing to access the referenced objects, for example
+``culture.source_lines[:]`` or ``line.parent_cell_line[0]``.
 
 Pharmacology Records
 --------------------

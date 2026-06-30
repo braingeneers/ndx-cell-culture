@@ -178,6 +178,14 @@ groups:
     dtype: text
     doc: Free-text remarks.
     required: false
+  datasets:
+  - name: parent_cell_line
+    neurodata_type_inc: VectorData
+    dtype:
+      target_type: CellLine
+      reftype: object
+    doc: Parent or source CellLine for a derived line.
+    quantity: '?'
   groups:
   - neurodata_type_inc: GeneticVariant
     doc: Genetic variants attached to this cell line.
@@ -270,6 +278,29 @@ groups:
     dtype: text
     doc: Free-text remarks.
     required: false
+  datasets:
+  - name: source_lines
+    neurodata_type_inc: VectorData
+    dtype:
+      target_type: CellLine
+      reftype: object
+    dims:
+    - num_source_lines
+    shape:
+    - null
+    doc: Source CellLine or lines used to create this culture.
+    quantity: '?'
+  - name: parent_cultures
+    neurodata_type_inc: VectorData
+    dtype:
+      target_type: CellCulture
+      reftype: object
+    dims:
+    - num_parent_cultures
+    shape:
+    - null
+    doc: Parent or input CellCulture objects used to derive this culture.
+    quantity: '?'
   groups:
   - neurodata_type_inc: GeneticVariant
     doc: Genetic variants attached to this culture.
@@ -288,73 +319,6 @@ groups:
   - name: culture
     target_type: CellCulture
     doc: Link to the recorded or described cataloged CellCulture.
-- neurodata_type_def: CellLineParentRelation
-  neurodata_type_inc: NWBContainer
-  doc: Relationship edge linking a child CellLine to a parent CellLine.
-  attributes:
-  - name: relation_id
-    dtype: text
-    doc: Stable relation identifier.
-  - name: relationship_type
-    dtype: text
-    doc: Recommended terms include derived_from, cloned_from, reprogrammed_from,
-      edited_from, other.
-    required: false
-  - name: notes
-    dtype: text
-    doc: Free-text remarks.
-    required: false
-  links:
-  - name: child_cell_line
-    target_type: CellLine
-    doc: Child or derived CellLine in the relationship.
-  - name: parent_cell_line
-    target_type: CellLine
-    doc: Parent or source CellLine in the relationship.
-- neurodata_type_def: CellCultureSourceLineRelation
-  neurodata_type_inc: NWBContainer
-  doc: Relationship edge linking a CellCulture to one source CellLine.
-  attributes:
-  - name: relation_id
-    dtype: text
-    doc: Stable relation identifier.
-  - name: role
-    dtype: text
-    doc: Recommended terms include primary_source, component, control, other.
-    required: false
-  - name: notes
-    dtype: text
-    doc: Free-text remarks.
-    required: false
-  links:
-  - name: culture
-    target_type: CellCulture
-    doc: CellCulture that used this source line.
-  - name: source_line
-    target_type: CellLine
-    doc: Source CellLine for the culture.
-- neurodata_type_def: CellCultureParentRelation
-  neurodata_type_inc: NWBContainer
-  doc: Relationship edge linking a CellCulture to one parent CellCulture.
-  attributes:
-  - name: relation_id
-    dtype: text
-    doc: Stable relation identifier.
-  - name: relationship_type
-    dtype: text
-    doc: Culture-to-culture relationship type.
-    required: false
-  - name: notes
-    dtype: text
-    doc: Free-text remarks.
-    required: false
-  links:
-  - name: child_culture
-    target_type: CellCulture
-    doc: Child or derived CellCulture.
-  - name: parent_culture
-    target_type: CellCulture
-    doc: Parent or input CellCulture.
 - neurodata_type_def: ExperimentContext
   neurodata_type_inc: NWBContainer
   doc: Recording-time or session-level metadata separate from stable biological 
@@ -474,15 +438,6 @@ groups:
     quantity: '*'
   - neurodata_type_inc: CellCulture
     doc: Reusable CellCulture catalog entries for this NWB file.
-    quantity: '*'
-  - neurodata_type_inc: CellLineParentRelation
-    doc: CellLine-to-CellLine provenance relationships.
-    quantity: '*'
-  - neurodata_type_inc: CellCultureSourceLineRelation
-    doc: CellCulture-to-CellLine source relationships.
-    quantity: '*'
-  - neurodata_type_inc: CellCultureParentRelation
-    doc: CellCulture-to-CellCulture provenance relationships.
     quantity: '*'
   - neurodata_type_inc: ExperimentContext
     doc: Recording/session context for this NWBFile.

@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "ndx-cell-culture"
-version = "1.0rc1"
+version = "1.0rc2"
 authors = [
     { name = "David Parks", email = "dfparks@ucsc.edu" },
 ]

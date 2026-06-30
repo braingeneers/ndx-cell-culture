@@ -48,6 +48,8 @@ Extension-owned link:
 | `disease_or_diagnosis` | Optional | text attribute | Disease background or diagnosis. |
 | `reference_genome` | Optional | text attribute | Assembly/annotation context; not a substitute for `Subject.genotype`. |
 | `notes` | Optional | text attribute | Free-text remarks. |
+| `source_lines` | Optional/repeated | object references to `CellLine` | Source line or lines used to create this culture. Pass a list of `CellLine` objects; read back as an object-reference vector. |
+| `parent_cultures` | Optional/repeated | object references to `CellCulture` | Parent or input cultures used to derive this culture. Use for slices, directoids/connectoids, assembloids, and other culture-derived preparations. |
 | `GeneticVariant` children | Optional/repeated | child groups | Culture-attached genetic variants. |
 | `ConstructApplication` children | Optional/repeated | child groups | Culture-attached construct applications. |
 | `CultureProtocol` child | Optional | child group | Structured derivation/preparation protocol. |
@@ -69,42 +71,19 @@ Extension-owned link:
 | `disease_or_diagnosis` | Optional | text attribute | Disease background or diagnosis. |
 | `reference_genome` | Optional | text attribute | Assembly/annotation context such as `GRCh38`. |
 | `notes` | Optional | text attribute | Free-text remarks. |
+| `parent_cell_line` | Optional | object reference to `CellLine` | Parent or source line for a derived line. Pass a `CellLine` object; read back as a one-element object-reference vector. |
 | `GeneticVariant` children | Optional/repeated | child groups | Variants attached at line level. |
 | `ConstructApplication` children | Optional/repeated | child groups | Construct applications attached at line level. |
 
-## Provenance Relations
+## Provenance
 
-Relationship objects live under `CultureExperimentContext` and make lineage explicit without duplicating objects.
+Provenance is represented directly on catalog entries:
 
-### CellLineParentRelation
+- use `CellLine.parent_cell_line` for cell-line derivation;
+- use `CellCulture.source_lines` for source lines used to create a culture;
+- use `CellCulture.parent_cultures` for parent/input cultures used to derive another culture.
 
-| Field | Requirement | Type | Guidance |
-| --- | --- | --- | --- |
-| `relation_id` | Required | text attribute | Stable relation identifier. |
-| `relationship_type` | Optional | text attribute | Recommended terms: `derived_from`, `cloned_from`, `reprogrammed_from`, `edited_from`, `other`. |
-| `notes` | Optional | text attribute | Free-text remarks. |
-| `child_cell_line` | Required | link to `CellLine` | Child or derived line. |
-| `parent_cell_line` | Required | link to `CellLine` | Parent or source line. |
-
-### CellCultureSourceLineRelation
-
-| Field | Requirement | Type | Guidance |
-| --- | --- | --- | --- |
-| `relation_id` | Required | text attribute | Stable relation identifier. |
-| `role` | Optional | text attribute | Recommended terms: `primary_source`, `component`, `control`, `other`. |
-| `notes` | Optional | text attribute | Free-text remarks. |
-| `culture` | Required | link to `CellCulture` | Culture that used this source line. |
-| `source_line` | Required | link to `CellLine` | Source line for the culture. |
-
-### CellCultureParentRelation
-
-| Field | Requirement | Type | Guidance |
-| --- | --- | --- | --- |
-| `relation_id` | Required | text attribute | Stable relation identifier. |
-| `relationship_type` | Optional | text attribute | Recommended terms: `derived_from`, `sliced_from`, `assembled_from`, `fused_with`, `co_cultured_with`, `other`. |
-| `notes` | Optional | text attribute | Free-text remarks. |
-| `child_culture` | Required | link to `CellCulture` | Child or derived culture. |
-| `parent_culture` | Required | link to `CellCulture` | Parent or input culture. |
+These fields are stored as NWB object-reference datasets so referenced `CellLine` and `CellCulture` catalog entries are not duplicated.
 
 ## GeneticVariant
 
@@ -164,9 +143,6 @@ Extends core `LabMetaData`.
 | `name` | Required by `LabMetaData` | group name | Recommended value: `culture_experiment_context`. |
 | `CellLine` children | Optional/repeated | child groups | Reusable cell-line catalog entries for this NWB file. |
 | `CellCulture` children | Optional/repeated | child groups | Reusable culture catalog entries for this NWB file. |
-| `CellLineParentRelation` children | Optional/repeated | child groups | Cell-line lineage relationships. |
-| `CellCultureSourceLineRelation` children | Optional/repeated | child groups | Culture source-line relationships. |
-| `CellCultureParentRelation` children | Optional/repeated | child groups | Culture parent/input relationships. |
 | `ExperimentContext` child | Optional | child group | Recording/session context for this file. |
 | `Pharmacology` children | Optional/repeated | child groups | Pharmacology rows linked to experiment context. |
 

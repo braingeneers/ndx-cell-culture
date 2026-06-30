@@ -100,6 +100,17 @@ CellCulture
      - Optional
      - text attribute
      - Free-text remarks.
+   * - ``source_lines``
+     - Optional/repeated
+     - object references to ``CellLine``
+     - Source line or lines used to create this culture. Pass a list of
+       ``CellLine`` objects; read back as an object-reference vector.
+   * - ``parent_cultures``
+     - Optional/repeated
+     - object references to ``CellCulture``
+     - Parent or input cultures used to derive this culture. Use for slices,
+       directoids/connectoids, assembloids, and other culture-derived
+       preparations.
    * - ``GeneticVariant`` children
      - Optional/repeated
      - child groups
@@ -179,21 +190,24 @@ CellLine
      - Optional
      - text attribute
      - Free-text remarks.
+   * - ``parent_cell_line``
+     - Optional
+     - object reference to ``CellLine``
+     - Parent or source line for a derived line. Pass a ``CellLine`` object;
+       read back as a one-element object-reference vector.
 
-Provenance Relations
---------------------
+Provenance
+----------
 
-Relationship objects live under ``CultureExperimentContext`` and make lineage
-explicit without duplicating objects.
+Provenance is represented directly on catalog entries:
 
-``CellLineParentRelation`` requires ``relation_id``, ``child_cell_line``, and
-``parent_cell_line``. It may also include ``relationship_type`` and ``notes``.
+* use ``CellLine.parent_cell_line`` for cell-line derivation;
+* use ``CellCulture.source_lines`` for source lines used to create a culture;
+* use ``CellCulture.parent_cultures`` for parent/input cultures used to derive
+  another culture.
 
-``CellCultureSourceLineRelation`` requires ``relation_id``, ``culture``, and
-``source_line``. It may also include ``role`` and ``notes``.
-
-``CellCultureParentRelation`` requires ``relation_id``, ``child_culture``, and
-``parent_culture``. It may also include ``relationship_type`` and ``notes``.
+These fields are stored as NWB object-reference datasets so referenced
+``CellLine`` and ``CellCulture`` catalog entries are not duplicated.
 
 GeneticVariant
 --------------
@@ -233,8 +247,8 @@ CultureExperimentContext
 
 ``CultureExperimentContext`` extends core ``LabMetaData``. Its recommended
 group name is ``culture_experiment_context``. It contains reusable
-``CellLine`` and ``CellCulture`` catalog entries, provenance relation objects,
-one optional ``ExperimentContext``, and repeated ``Pharmacology`` children.
+``CellLine`` and ``CellCulture`` catalog entries, one optional
+``ExperimentContext``, and repeated ``Pharmacology`` children.
 
 ExperimentContext
 -----------------

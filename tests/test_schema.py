@@ -49,9 +49,6 @@ def test_dynamic_classes_are_available():
         "CellCultureSubject",
         "CellCulture",
         "CellLine",
-        "CellLineParentRelation",
-        "CellCultureSourceLineRelation",
-        "CellCultureParentRelation",
         "GeneticVariant",
         "ConstructApplication",
         "CultureProtocol",
@@ -60,6 +57,12 @@ def test_dynamic_classes_are_available():
         "Pharmacology",
     ]:
         assert hasattr(ndx, name)
+    for removed_name in [
+        "CellLineParentRelation",
+        "CellCultureSourceLineRelation",
+        "CellCultureParentRelation",
+    ]:
+        assert not hasattr(ndx, removed_name)
     assert hasattr(ndx, "validate_recommended_terms")
 
 
@@ -155,6 +158,7 @@ def _build_roundtrip_file():
         genetic_variants=[variant],
         construct_applications=[construct],
         culture_protocol=protocol,
+        source_lines=[line],
     )
     subject = ndx.CellCultureSubject(
         subject_id="SUBJ-EX-ORG-001",
@@ -194,19 +198,11 @@ def _build_roundtrip_file():
         start_time_s=300.0,
         end_time_s=900.0,
     )
-    source_relation = ndx.CellCultureSourceLineRelation(
-        name="REL-EX-ORG-SOURCE-001",
-        relation_id="REL-EX-ORG-SOURCE-001",
-        culture=culture,
-        source_line=line,
-        role="primary_source",
-    )
     nwbfile.add_lab_meta_data(
         ndx.CultureExperimentContext(
             name="culture_experiment_context",
             cell_lines=[line],
             cell_cultures=[culture],
-            cell_culture_source_line_relations=[source_relation],
             experiment_context=experiment,
             pharmacologies=[pharmacology],
         )
@@ -230,7 +226,7 @@ def test_write_read_roundtrip(tmp_path):
         assert read.subject.sex == "F"
         context = read.lab_meta_data["culture_experiment_context"]
         assert context.cell_cultures["CULT-EX-ORG-001"] is read.subject.culture
-        assert context.cell_culture_source_line_relations["REL-EX-ORG-SOURCE-001"].source_line.cell_line_id == "CL-EX-CTRL-001"
+        assert read.subject.culture.source_lines[0].cell_line_id == "CL-EX-CTRL-001"
         assert context.experiment_context.experiment_id == "EXP-EX-ORG-001"
         assert context.experiment_context.device.name == "MaxTwo MX2-CHIP-17"
         assert context.pharmacologies["PHARM-EX-CNQX-01"].agent == "CNQX"
@@ -248,10 +244,23 @@ def test_removed_terms_are_absent_from_schema():
         "chip_id",
         "viral_infection",
         "starting_material_line",
-        "source_lines",
-        "parent_cultures",
+        "CellLineParentRelation",
+        "CellCultureSourceLineRelation",
+        "CellCultureParentRelation",
+        "relation_id",
+        "child_cell_line",
+        "child_culture",
+        "cell_line_parent_relations",
+        "cell_culture_source_line_relations",
+        "cell_culture_parent_relations",
     ]:
         assert removed not in schema
+    for required in [
+        "source_lines",
+        "parent_cultures",
+        "parent_cell_line",
+    ]:
+        assert required in schema
 
 
 def test_user_docs_cover_extension_types_without_planning_artifacts():
@@ -274,9 +283,6 @@ def test_user_docs_cover_extension_types_without_planning_artifacts():
         "CultureExperimentContext",
         "ExperimentContext",
         "Pharmacology",
-        "CellLineParentRelation",
-        "CellCultureSourceLineRelation",
-        "CellCultureParentRelation",
     ]:
         assert name in docs_text
     for planning_or_lab_specific_term in [
@@ -295,6 +301,9 @@ def test_user_docs_cover_extension_types_without_planning_artifacts():
         "pharmacology" + "s",
         "open question",
         "release-blocking",
+        "CellLineParentRelation",
+        "CellCultureSourceLineRelation",
+        "CellCultureParentRelation",
     ]:
         assert planning_or_lab_specific_term not in docs_text
 
@@ -307,15 +316,11 @@ def test_schema_declares_critical_relationships():
         "neurodata_type_def: CultureExperimentContext",
         "neurodata_type_inc: LabMetaData",
         "name: culture",
-        "neurodata_type_def: CellLineParentRelation",
-        "neurodata_type_def: CellCultureSourceLineRelation",
-        "neurodata_type_def: CellCultureParentRelation",
-        "name: child_cell_line",
         "name: parent_cell_line",
-        "name: source_line",
-        "name: child_culture",
-        "name: parent_culture",
+        "name: source_lines",
+        "name: parent_cultures",
         "target_type: CellLine",
+        "target_type: CellCulture",
         "name: related_application",
         "target_type: ConstructApplication",
         "name: subject",
@@ -364,6 +369,7 @@ def test_stable_relationship_links_write_read_and_validate(tmp_path):
         sample_label="Derived",
         species="Homo sapiens",
         cell_source_type="iPSC",
+        parent_cell_line=parent_line,
     )
     application = ndx.ConstructApplication(
         name="application",
@@ -383,6 +389,13 @@ def test_stable_relationship_links_write_read_and_validate(tmp_path):
         name="protocol",
         protocol_id="PROTO-REL",
     )
+    parent_culture = ndx.CellCulture(
+        name="parent_culture",
+        culture_id="CULT-PARENT",
+        culture_type="organoid",
+        sample_label="Parent culture",
+        species="Homo sapiens",
+    )
     culture = ndx.CellCulture(
         name="culture",
         culture_id="CULT-REL",
@@ -392,34 +405,8 @@ def test_stable_relationship_links_write_read_and_validate(tmp_path):
         construct_applications=[application],
         genetic_variants=[variant],
         culture_protocol=protocol,
-    )
-    line_parent_relation = ndx.CellLineParentRelation(
-        name="REL-LINE-PARENT",
-        relation_id="REL-LINE-PARENT",
-        child_cell_line=derived_line,
-        parent_cell_line=parent_line,
-        relationship_type="edited_from",
-    )
-    source_relation = ndx.CellCultureSourceLineRelation(
-        name="REL-CULTURE-SOURCE",
-        relation_id="REL-CULTURE-SOURCE",
-        culture=culture,
-        source_line=derived_line,
-        role="primary_source",
-    )
-    parent_culture = ndx.CellCulture(
-        name="parent_culture",
-        culture_id="CULT-PARENT",
-        culture_type="organoid",
-        sample_label="Parent culture",
-        species="Homo sapiens",
-    )
-    culture_parent_relation = ndx.CellCultureParentRelation(
-        name="REL-CULTURE-PARENT",
-        relation_id="REL-CULTURE-PARENT",
-        child_culture=culture,
-        parent_culture=parent_culture,
-        relationship_type="sliced_from",
+        source_lines=[derived_line],
+        parent_cultures=[parent_culture],
     )
     subject = ndx.CellCultureSubject(subject_id="SUBJ-REL", species="Homo sapiens", culture=culture)
     nwbfile = NWBFile(
@@ -433,9 +420,6 @@ def test_stable_relationship_links_write_read_and_validate(tmp_path):
             name="culture_experiment_context",
             cell_lines=[parent_line, derived_line],
             cell_cultures=[parent_culture, culture],
-            cell_line_parent_relations=[line_parent_relation],
-            cell_culture_source_line_relations=[source_relation],
-            cell_culture_parent_relations=[culture_parent_relation],
         )
     )
 
@@ -448,9 +432,9 @@ def test_stable_relationship_links_write_read_and_validate(tmp_path):
     with NWBHDF5IO(str(path), "r", load_namespaces=True) as io:
         read = io.read()
         context = read.lab_meta_data["culture_experiment_context"]
-        assert context.cell_line_parent_relations["REL-LINE-PARENT"].parent_cell_line.name == "parent"
-        assert context.cell_culture_source_line_relations["REL-CULTURE-SOURCE"].source_line.name == "derived"
-        assert context.cell_culture_parent_relations["REL-CULTURE-PARENT"].parent_culture.name == "parent_culture"
+        assert context.cell_lines["derived"].parent_cell_line[0].name == "parent"
+        assert context.cell_cultures["culture"].source_lines[0].name == "derived"
+        assert context.cell_cultures["culture"].parent_cultures[0].name == "parent_culture"
         assert read.subject.culture.genetic_variants["variant"].related_application.name == "application"
 
 

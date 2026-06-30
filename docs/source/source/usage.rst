@@ -23,7 +23,8 @@ Core Usage Pattern
 
 1. Create reusable ``CellLine`` and ``CellCulture`` objects.
 2. Link the recorded preparation through ``CellCultureSubject.culture``.
-3. Store catalogs and provenance relations in ``CultureExperimentContext``.
+3. Store catalogs in ``CultureExperimentContext`` and use direct provenance
+   fields such as ``source_lines`` and ``parent_cultures``.
 4. Use core NWB ``Device`` / ``DeviceModel`` for hardware identity.
 5. Use ``ExperimentContext`` and ``Pharmacology`` for recording-session context.
 
@@ -36,8 +37,8 @@ Minimal Example
 ---------------
 
 This example creates a synthetic cortical organoid recording with one source
-line, one culture, one source-line relation, core NWB device metadata, and one
-recording context.
+line, one culture, direct source-line provenance, core NWB device metadata, and
+one recording context.
 
 .. code-block:: python
 
@@ -48,7 +49,6 @@ recording context.
 
    from ndx_cell_culture import (
        CellCulture,
-       CellCultureSourceLineRelation,
        CellCultureSubject,
        CellLine,
        CultureExperimentContext,
@@ -84,14 +84,7 @@ recording context.
        age="P120D",
        age_reference="days_post_induction",
        culture_protocol=protocol,
-   )
-
-   source_relation = CellCultureSourceLineRelation(
-       name="REL-SYN-ORG-SOURCE-001",
-       relation_id="REL-SYN-ORG-SOURCE-001",
-       culture=culture,
-       source_line=line,
-       role="primary_source",
+       source_lines=[line],
    )
 
    subject = CellCultureSubject(
@@ -130,7 +123,6 @@ recording context.
            name="culture_experiment_context",
            cell_lines=[line],
            cell_cultures=[culture],
-           cell_culture_source_line_relations=[source_relation],
            experiment_context=experiment,
        )
    )
