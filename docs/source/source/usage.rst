@@ -33,8 +33,88 @@ records, including constructor input and
 ``get_pharmacologies`` / ``add_pharmacologies`` / ``create_pharmacologies``
 methods.
 
-Minimal Example
----------------
+Which Objects Do I Need?
+------------------------
+
+Start with the subject and the recorded culture. Add provenance, protocol,
+recording context, and pharmacology only when those details are relevant.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 28 36 36
+
+   * - Need
+     - Object
+     - When to add it
+   * - Recorded/described preparation
+     - ``CellCultureSubject`` + ``CellCulture``
+     - Always for files using this extension
+   * - Source line identity
+     - ``CellLine``
+     - When a donor, source line, or derived line matters
+   * - Culture derivation
+     - ``CellCulture.parent_cultures``
+     - For slices, directoids/connectoids, assembloids, or other derived
+       cultures
+   * - Engineering or reporter metadata
+     - ``GeneticVariant`` / ``ConstructApplication``
+     - When edits, constructs, viral vectors, RNPs, reporters, or perturbations
+       are part of the biological context
+   * - Culture method summary
+     - ``CultureProtocol``
+     - When a concise protocol identifier or summary helps users interpret the
+       preparation
+   * - Recording/session metadata
+     - ``ExperimentContext`` / ``Pharmacology``
+     - When the file represents a recording session or pharmacological
+       intervention
+
+Smallest Useful Example
+-----------------------
+
+This example records only the cultured preparation identity. It is enough when
+you need a valid NWB file with a cultured subject, but do not yet need source
+line provenance or recording-session metadata.
+
+.. code-block:: python
+
+   from datetime import datetime
+
+   from dateutil.tz import tzlocal
+   from pynwb import NWBHDF5IO, NWBFile
+
+   from ndx_cell_culture import CellCulture, CellCultureSubject
+
+   culture = CellCulture(
+       name="CULT-SYN-ORG-001",
+       culture_id="CULT-SYN-ORG-001",
+       culture_type="organoid",
+       sample_label="Synthetic cortical organoid",
+       species="Homo sapiens",
+       culture_subtype="cortical",
+       age="P120D",
+       age_reference="days_post_induction",
+   )
+
+   subject = CellCultureSubject(
+       subject_id="SUBJ-SYN-ORG-001",
+       species="Homo sapiens",
+       description="Synthetic cortical organoid",
+       culture=culture,
+   )
+
+   nwbfile = NWBFile(
+       session_description="synthetic organoid metadata",
+       identifier="NWB-SYN-ORG-001",
+       session_start_time=datetime(2026, 1, 1, tzinfo=tzlocal()),
+   )
+   nwbfile.subject = subject
+
+   with NWBHDF5IO("synthetic_organoid_minimal.nwb", "w") as io:
+       io.write(nwbfile)
+
+Organoid Recording With Context
+-------------------------------
 
 This example creates a synthetic cortical organoid recording with one source
 line, one culture, direct source-line provenance, core NWB device metadata, and

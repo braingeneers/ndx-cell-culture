@@ -45,6 +45,35 @@ biological-preparation metadata that those core objects do not describe.
 The detailed NWB placement is described in :doc:`modeling_guide`; field-level
 details are listed in :doc:`field_reference`.
 
+Which Objects Do I Need?
+------------------------
+
+Start small. Add objects only when they describe metadata that matters for your
+dataset.
+
+.. list-table::
+   :header-rows: 1
+   :widths: 30 70
+
+   * - If your file needs to describe...
+     - Use these objects
+   * - A recorded or described cultured preparation
+     - ``CellCulture`` linked from ``CellCultureSubject.culture``
+   * - The source line or donor/line provenance
+     - ``CellLine`` under ``CellCultureSubject`` and
+       ``CellCulture.source_lines``
+   * - A slice, directoid/connectoid, assembloid, or derived culture
+     - Additional ``CellCulture`` objects linked with
+       ``CellCulture.parent_cultures``
+   * - Engineered edits or applied constructs
+     - ``GeneticVariant`` and ``ConstructApplication`` attached to the
+       ``CellLine`` or ``CellCulture`` where they occurred
+   * - A concise culture method summary
+     - ``CultureProtocol`` attached to the ``CellCulture``
+   * - Recording conditions, device link, or pharmacology
+     - ``ExperimentContext`` and optional ``Pharmacology`` records in
+       ``CultureExperimentContext``
+
 Vocabulary Guidance
 -------------------
 

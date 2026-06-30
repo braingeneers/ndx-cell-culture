@@ -59,6 +59,7 @@ python -m pip install -e ".[dev]"
 Start with the hosted documentation:
 
 - [Installation and quickstart](https://ndx-cell-culture.readthedocs.io/en/latest/usage.html)
+- [Which objects do I need?](https://ndx-cell-culture.readthedocs.io/en/latest/usage.html#which-objects-do-i-need)
 - [Modeling guide](https://ndx-cell-culture.readthedocs.io/en/latest/modeling_guide.html)
 - [Field reference](https://ndx-cell-culture.readthedocs.io/en/latest/field_reference.html)
 - [Examples and recipes](https://ndx-cell-culture.readthedocs.io/en/latest/examples.html)
