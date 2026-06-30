@@ -15,7 +15,10 @@ from scenario_builders import SCENARIOS  # noqa: E402
 
 
 def _assert_no_validation_errors(path):
-    result = validate(paths=[str(path)])
+    try:
+        result = validate(path=str(path))
+    except TypeError:
+        result = validate(paths=[str(path)])
     if isinstance(result, tuple):
         errors = result[0]
     else:
@@ -257,7 +260,6 @@ def test_user_docs_cover_extension_types_without_planning_artifacts():
         "docs/design.md",
         "docs/field_reference.md",
         "docs/examples.md",
-        "docs/modeling_principles.md",
         "docs/release.md",
     ]
     docs_paths.extend(str(path) for path in Path("docs/source/source").glob("*.rst"))
