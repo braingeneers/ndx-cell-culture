@@ -379,6 +379,36 @@ def test_required_culture_on_subject():
     assert "cell_cultures" not in context_docval_names
 
 
+def test_subject_culture_collection_deduplicates_primary_culture_from_generated_container():
+    culture = ndx.CellCulture(
+        name="CULT",
+        culture_id="CULT",
+        culture_type="organoid",
+        sample_label="Recorded culture",
+        species="Homo sapiens",
+    )
+    related_culture = ndx.CellCulture(
+        name="RELATED-CULT",
+        culture_id="RELATED-CULT",
+        culture_type="slice",
+        sample_label="Related culture",
+        species="Homo sapiens",
+    )
+
+    subject = ndx.CellCultureSubject(
+        subject_id="SUBJ",
+        species="Homo sapiens",
+        culture=culture,
+        cell_cultures={culture.name: culture, related_culture.name: related_culture},
+        related_cultures=[culture, related_culture],
+    )
+
+    assert subject.culture is culture
+    assert subject.cell_cultures["CULT"] is culture
+    assert subject.cell_cultures["RELATED-CULT"] is related_culture
+    assert list(subject.cell_cultures) == ["CULT", "RELATED-CULT"]
+
+
 def test_stable_relationship_links_write_read_and_validate(tmp_path):
     parent_line = ndx.CellLine(
         name="parent",

@@ -51,9 +51,32 @@ def _as_reference_vector(name, description, value):
 def _as_list(value):
     if value is None:
         return []
+    if isinstance(value, dict):
+        return list(value.values())
     if isinstance(value, (list, tuple)):
         return list(value)
     return [value]
+
+
+def _same_container(left, right):
+    if left is right:
+        return True
+    if left is None or right is None:
+        return False
+    for attr in ("object_id", "name"):
+        left_value = getattr(left, attr, None)
+        right_value = getattr(right, attr, None)
+        if left_value and right_value and left_value == right_value:
+            return True
+    return False
+
+
+def _dedupe_containers(values):
+    deduped = []
+    for value in _as_list(values):
+        if not any(_same_container(value, existing) for existing in deduped):
+            deduped.append(value)
+    return deduped
 
 
 _original_cell_line_init = CellLine.__init__
@@ -139,18 +162,20 @@ def _cell_culture_subject_init(self, **kwargs):
         _PUBLIC_RELATED_CULTURES_CONTAINER,
         kwargs,
     )
-    subject_cultures = _as_list(cell_cultures)
+    subject_cultures = []
     if getattr(culture, "name", None) == "culture":
         raise ValueError("CellCulture.name cannot be 'culture' when used as CellCultureSubject.culture; use a stable identifier-style name and store the biological identifier in culture_id.")
-    for related_culture in _as_list(related_cultures):
-        if related_culture not in subject_cultures:
-            subject_cultures.append(related_culture)
-    if culture is not None and culture not in subject_cultures:
+    for subject_culture in _dedupe_containers(_as_list(cell_cultures) + _as_list(related_cultures)):
+        if not _same_container(subject_culture, culture):
+            subject_cultures.append(subject_culture)
+    if culture is not None and getattr(culture, "parent", None) is None:
         subject_cultures.insert(0, culture)
     kwargs["culture"] = culture
     if subject_cultures:
         kwargs[_GENERATED_SUBJECT_CULTURES_CONTAINER] = subject_cultures
     _original_cell_culture_subject_init(self, **kwargs)
+    if culture is not None and culture.name not in self.cell_cultures:
+        self.add_cell_cultures(culture)
 
 
 def _get_related_cultures(self):
