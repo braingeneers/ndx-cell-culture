@@ -27,7 +27,7 @@ NWBFile
 |   |   +-- ConstructApplication [0..N]
 |   |   +-- CultureProtocol [0..1]
 +-- general/devices : NWB.Device [0..N]
-|   +-- models : NWB.DeviceModel [0..N]
++-- general/devices/models : NWB.DeviceModel [0..N] [hardware model metadata]
 +-- lab metadata : CultureExperimentContext <extends LabMetaData>
     +-- ExperimentContext [0..1]
     |   +-- subject -> CellCultureSubject
