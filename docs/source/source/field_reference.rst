@@ -23,7 +23,7 @@ Inherited fields from ``NWB.Subject`` are not redefined by this extension:
 ``age__reference``, ``date_of_birth``, ``genotype``, ``strain``, and
 ``weight``. Culture age should not be stored in ``NWB.Subject.age``.
 
-Extension-owned link:
+Extension-owned fields:
 
 .. list-table::
    :header-rows: 1
@@ -36,8 +36,18 @@ Extension-owned link:
    * - ``culture``
      - Required
      - link to ``CellCulture``
-     - Recorded or described cultured neural preparation cataloged in
-       ``CultureExperimentContext``.
+     - Recorded or described cultured neural preparation stored under this
+       subject.
+   * - ``CellLine`` children
+     - Optional/repeated
+     - child groups
+     - Source-line objects needed to interpret the subject culture provenance.
+   * - ``CellCulture`` children
+     - Optional/repeated
+     - child groups
+     - Recorded, related, or parent cultures needed to interpret the subject
+       culture provenance. The public ``related_cultures`` constructor alias
+       can be used for parent/input cultures.
 
 CellCulture
 -----------
@@ -199,7 +209,7 @@ CellLine
 Provenance
 ----------
 
-Provenance is represented directly on catalog entries:
+Provenance is represented directly on subject-contained biological objects:
 
 * use ``CellLine.parent_cell_line`` for cell-line derivation;
 * use ``CellCulture.source_lines`` for source lines used to create a culture;
@@ -207,7 +217,7 @@ Provenance is represented directly on catalog entries:
   another culture.
 
 These fields are stored as NWB object-reference datasets so referenced
-``CellLine`` and ``CellCulture`` catalog entries are not duplicated.
+``CellLine`` and ``CellCulture`` objects are not duplicated.
 
 GeneticVariant
 --------------
@@ -246,9 +256,9 @@ CultureExperimentContext
 ------------------------
 
 ``CultureExperimentContext`` extends core ``LabMetaData``. Its recommended
-group name is ``culture_experiment_context``. It contains reusable
-``CellLine`` and ``CellCulture`` catalog entries, one optional
-``ExperimentContext``, and repeated ``Pharmacology`` children.
+group name is ``culture_experiment_context``. It contains one optional
+``ExperimentContext`` and repeated ``Pharmacology`` children. Biological
+``CellLine`` and ``CellCulture`` objects belong under ``CellCultureSubject``.
 
 ExperimentContext
 -----------------

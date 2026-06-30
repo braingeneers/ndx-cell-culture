@@ -1,7 +1,7 @@
 groups:
 - neurodata_type_def: GeneticVariant
   neurodata_type_inc: NWBContainer
-  doc: Stable or defining engineered genomic change attached to a CellLine or 
+  doc: Stable or defining engineered genomic change attached to a CellLine or
     CellCulture. Use for engineered edits, not every raw sequencing variant.
   attributes:
   - name: variant_id
@@ -16,8 +16,8 @@ groups:
     required: false
   - name: edit_type
     dtype: text
-    doc: Recommended terms include knockout, knockin, point_mutation, deletion, 
-      duplication, inversion, tag_insertion, reporter_insertion, 
+    doc: Recommended terms include knockout, knockin, point_mutation, deletion,
+      duplication, inversion, tag_insertion, reporter_insertion,
       CRISPRi_targeting, CRISPRa_targeting, other.
   - name: edit_description
     dtype: text
@@ -25,16 +25,16 @@ groups:
     required: false
   - name: method
     dtype: text
-    doc: Engineering method, e.g. CRISPR-Cas9, base_editing, prime_editing, 
+    doc: Engineering method, e.g. CRISPR-Cas9, base_editing, prime_editing,
       TALEN, ZFNs, homologous_recombination, other.
   - name: delivery_method
     dtype: text
-    doc: Method used to deliver edit machinery, e.g. RNP, plasmid, lentivirus, 
+    doc: Method used to deliver edit machinery, e.g. RNP, plasmid, lentivirus,
       AAV, electroporation, lipofection, other.
     required: false
   - name: zygosity_or_edit_state
     dtype: text
-    doc: Observed zygosity or edit state, e.g. heterozygous, homozygous, 
+    doc: Observed zygosity or edit state, e.g. heterozygous, homozygous,
       biallelic, hemizygous, mosaic, unknown, other.
     required: false
   - name: validation_status
@@ -43,7 +43,7 @@ groups:
     required: false
   - name: validation_method
     dtype: text
-    doc: Assay or method used for validation, e.g. Sanger, amplicon_seq, WGS, 
+    doc: Assay or method used for validation, e.g. Sanger, amplicon_seq, WGS,
       WES, ONT, ddPCR, PCR, fluorescence imaging, other.
     required: false
   - name: notes
@@ -53,12 +53,12 @@ groups:
   links:
   - name: related_application
     target_type: ConstructApplication
-    doc: Link to the ConstructApplication related to this variant, when 
+    doc: Link to the ConstructApplication related to this variant, when
       applicable.
     quantity: '?'
 - neurodata_type_def: ConstructApplication
   neurodata_type_inc: NWBContainer
-  doc: Construct, vector, reagent, reporter, or perturbation applied to a 
+  doc: Construct, vector, reagent, reporter, or perturbation applied to a
     CellLine or CellCulture.
   attributes:
   - name: application_id
@@ -66,23 +66,23 @@ groups:
     doc: Stable construct application identifier.
   - name: source
     dtype: text
-    doc: Construct source, catalog, plasmid, vendor, manufacturer, person, or 
+    doc: Construct source, catalog, plasmid, vendor, manufacturer, person, or
       lab.
     required: false
   - name: delivery_route
     dtype: text
-    doc: Broad route, e.g. transduction, transfection, microinjection, 
+    doc: Broad route, e.g. transduction, transfection, microinjection,
       cell_fusion, other.
     required: false
   - name: delivery_mechanism
     dtype: text
-    doc: Technical mechanism, e.g. lipofection, polymer_transfection, 
-      calcium_phosphate, electroporation, nucleofection, nanoparticle_mediated, 
+    doc: Technical mechanism, e.g. lipofection, polymer_transfection,
+      calcium_phosphate, electroporation, nucleofection, nanoparticle_mediated,
       other. Do not use microinjection here.
     required: false
   - name: vector_type
     dtype: text
-    doc: Vector or reagent class, e.g. AAV, lentivirus, retrovirus, plasmid, 
+    doc: Vector or reagent class, e.g. AAV, lentivirus, retrovirus, plasmid,
       transposon, RNP, minicircle_dna, linear_dna, rna, mrna, sirna, crispr_rna,
       adenovirus, baculovirus, herpes_simplex_virus, other.
   - name: payload
@@ -94,7 +94,7 @@ groups:
     required: false
   - name: genomic_persistence_state
     dtype: text
-    doc: Persistence state, e.g. genomically_integrated, 
+    doc: Persistence state, e.g. genomically_integrated,
       episomal_or_extragenomic, transient_nonintegrating, unknown, other.
     required: false
   - name: application_time_relative_to_recording
@@ -111,7 +111,7 @@ groups:
     required: false
   - name: expression_status
     dtype: text
-    doc: Expression or delivery observation state, e.g. planned, observed, 
+    doc: Expression or delivery observation state, e.g. planned, observed,
       validated, failed, unknown.
     required: false
   - name: validation_method
@@ -162,7 +162,7 @@ groups:
     required: false
   - name: passage_number
     dtype: text
-    doc: Passage number or passage label. Do not use culture-age fields on 
+    doc: Passage number or passage label. Do not use culture-age fields on
       CellLine.
     required: false
   - name: disease_or_diagnosis
@@ -171,7 +171,7 @@ groups:
     required: false
   - name: reference_genome
     dtype: text
-    doc: Assembly or annotation context, e.g. GRCh38; not a substitute for 
+    doc: Assembly or annotation context, e.g. GRCh38; not a substitute for
       Subject.genotype.
     required: false
   - name: notes
@@ -244,11 +244,11 @@ groups:
     doc: Human-readable culture label.
   - name: species
     dtype: text
-    doc: Culture-level convenience/search species value; may mirror 
+    doc: Culture-level convenience/search species value; may mirror
       CellCultureSubject.species.
   - name: culture_subtype
     dtype: text
-    doc: Regional or subtype identity, e.g. cortical, thalamic, midbrain, 
+    doc: Regional or subtype identity, e.g. cortical, thalamic, midbrain,
       hippocampal, retinal, spinal, assembloid, tumor_organoid, other.
     required: false
   - name: batch_label
@@ -257,12 +257,12 @@ groups:
     required: false
   - name: age
     dtype: text
-    doc: Culture age. Prefer ISO-8601 duration such as P120D; pilot terms like 
+    doc: Culture age. Prefer ISO-8601 duration such as P120D; pilot terms like
       day45 are acceptable.
     required: false
   - name: age_reference
     dtype: text
-    doc: Reference event for culture age, e.g. days_post_induction or 
+    doc: Reference event for culture age, e.g. days_post_induction or
       days_post_aggregation.
     required: false
   - name: disease_or_diagnosis
@@ -271,7 +271,7 @@ groups:
     required: false
   - name: reference_genome
     dtype: text
-    doc: Assembly/annotation context for culture-specific cases or cultures 
+    doc: Assembly/annotation context for culture-specific cases or cultures
       without a modeled source line.
     required: false
   - name: notes
@@ -313,15 +313,23 @@ groups:
     quantity: '?'
 - neurodata_type_def: CellCultureSubject
   neurodata_type_inc: Subject
-  doc: NWB Subject wrapper for a recorded or described cultured neural 
+  doc: NWB Subject wrapper for a recorded or described cultured neural
     preparation.
+  groups:
+  - neurodata_type_inc: CellLine
+    doc: CellLine objects needed to interpret the subject culture provenance.
+    quantity: '*'
+  - neurodata_type_inc: CellCulture
+    doc: Recorded, related, or parent CellCulture objects needed to interpret
+      the subject culture provenance.
+    quantity: '*'
   links:
   - name: culture
     target_type: CellCulture
-    doc: Link to the recorded or described cataloged CellCulture.
+    doc: Link to the recorded or described subject-contained CellCulture.
 - neurodata_type_def: ExperimentContext
   neurodata_type_inc: NWBContainer
-  doc: Recording-time or session-level metadata separate from stable biological 
+  doc: Recording-time or session-level metadata separate from stable biological
     identity.
   attributes:
   - name: experiment_id
@@ -333,7 +341,7 @@ groups:
     required: false
   - name: age_at_recording
     dtype: text
-    doc: Culture age at recording; separate from CellCulture.age and inherited 
+    doc: Culture age at recording; separate from CellCulture.age and inherited
       Subject.age.
   - name: age_reference
     dtype: text
@@ -368,12 +376,12 @@ groups:
     required: false
   - name: electrical_stimulation
     dtype: bool
-    doc: Search flag for electrical stimulation; detailed waveforms belong in 
+    doc: Search flag for electrical stimulation; detailed waveforms belong in
       core NWB stimulus data.
     required: false
   - name: optical_stimulation
     dtype: bool
-    doc: Search flag for optical stimulation; detailed waveforms belong in core 
+    doc: Search flag for optical stimulation; detailed waveforms belong in core
       NWB stimulus data.
     required: false
   - name: pharmacology_present
@@ -431,14 +439,9 @@ groups:
     doc: Experiment context this pharmacological intervention belongs to.
 - neurodata_type_def: CultureExperimentContext
   neurodata_type_inc: LabMetaData
-  doc: LabMetaData container for culture catalogs, provenance, and context.
+  doc: LabMetaData container for cultured-preparation recording context and
+    pharmacology metadata.
   groups:
-  - neurodata_type_inc: CellLine
-    doc: Reusable CellLine catalog entries for this NWB file.
-    quantity: '*'
-  - neurodata_type_inc: CellCulture
-    doc: Reusable CellCulture catalog entries for this NWB file.
-    quantity: '*'
   - neurodata_type_inc: ExperimentContext
     doc: Recording/session context for this NWBFile.
     quantity: '?'

@@ -189,7 +189,11 @@ def build_specs():
         neurodata_type_inc="Subject",
         doc="NWB Subject wrapper for a recorded or described cultured neural preparation.",
         links=[
-            object_link("culture", "CellCulture", "Link to the recorded or described cataloged CellCulture.", quantity=1),
+            object_link("culture", "CellCulture", "Link to the recorded or described subject-contained CellCulture.", quantity=1),
+        ],
+        groups=[
+            NWBGroupSpec(neurodata_type_inc="CellLine", doc="CellLine objects needed to interpret the subject culture provenance.", quantity="*"),
+            NWBGroupSpec(neurodata_type_inc="CellCulture", doc="Recorded, related, or parent CellCulture objects needed to interpret the subject culture provenance.", quantity="*"),
         ],
     )
 
@@ -250,10 +254,8 @@ def build_specs():
     culture_experiment_context = NWBGroupSpec(
         neurodata_type_def="CultureExperimentContext",
         neurodata_type_inc="LabMetaData",
-        doc="LabMetaData container for culture catalogs, provenance, and context.",
+        doc="LabMetaData container for cultured-preparation recording context and pharmacology metadata.",
         groups=[
-            NWBGroupSpec(neurodata_type_inc="CellLine", doc="Reusable CellLine catalog entries for this NWB file.", quantity="*"),
-            NWBGroupSpec(neurodata_type_inc="CellCulture", doc="Reusable CellCulture catalog entries for this NWB file.", quantity="*"),
             NWBGroupSpec(neurodata_type_inc="ExperimentContext", doc="Recording/session context for this NWBFile.", quantity="?"),
             NWBGroupSpec(neurodata_type_inc="Pharmacology", doc="Pharmacological interventions linked to experiment contexts.", quantity="*"),
         ],
@@ -272,6 +274,12 @@ def build_specs():
     ]
 
 
+def strip_trailing_whitespace(output_dir):
+    for path in Path(output_dir).glob("*.yaml"):
+        lines = path.read_text().splitlines()
+        path.write_text("\n".join(line.rstrip() for line in lines) + "\n")
+
+
 def main():
     ns_builder = NWBNamespaceBuilder(
         name=NAMESPACE,
@@ -283,6 +291,7 @@ def main():
     ns_builder.include_namespace("core")
     output_dir = str((Path(__file__).parent.parent.parent / "spec").absolute())
     export_spec(ns_builder, build_specs(), output_dir)
+    strip_trailing_whitespace(output_dir)
 
 
 if __name__ == "__main__":

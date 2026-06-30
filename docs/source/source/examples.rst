@@ -45,7 +45,7 @@ Scenario Coverage
        context, and no pharmacology.
    * - Biological metadata only
      - ``build_biological_metadata_only_organoid``
-     - Synthetic organoid with culture and line catalogs but no
+     - Synthetic organoid with subject-contained culture and line metadata but no
        recording/session context.
    * - Pharmacology titration
      - ``build_pharmacology_titration_organoid``
@@ -67,14 +67,14 @@ Organoid recording
 ~~~~~~~~~~~~~~~~~~
 
 Create one ``CellCultureSubject`` linked to the recorded ``CellCulture``. Store
-the source line in the ``CellLine`` catalog, set
+the source line under the subject with ``cell_lines=[line]``, set
 ``CellCulture.source_lines=[line]``, and put searchable recording context in
 ``ExperimentContext``.
 
 Organoid-derived slice
 ~~~~~~~~~~~~~~~~~~~~~~
 
-Catalog both the parent organoid and the slice as ``CellCulture`` objects. Link
+Store both the parent organoid and the slice under ``CellCultureSubject``. Link
 the slice to the parent organoid with ``CellCulture.parent_cultures``.
 
 Directoid or connectoid

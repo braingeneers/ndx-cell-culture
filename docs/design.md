@@ -10,20 +10,20 @@ The extension is designed for files where the recorded subject is a culture-deri
 NWBFile
 +-- subject : CellCultureSubject <extends NWB.Subject>
 |   +-- inherited NWB.Subject fields
-|   +-- culture -> CellCulture catalog entry [1]
+|   +-- culture -> CellCulture [recorded/described preparation]
+|   +-- CellLine [0..N]
+|   |   +-- parent_cell_line -> CellLine [0..1]
+|   |   +-- GeneticVariant [0..N]
+|   |   +-- ConstructApplication [0..N]
+|   +-- CellCulture [0..N] [recorded, related, or parent cultures]
+|   |   +-- source_lines -> CellLine [0..N]
+|   |   +-- parent_cultures -> CellCulture [0..N]
+|   |   +-- GeneticVariant [0..N]
+|   |   +-- ConstructApplication [0..N]
+|   |   +-- CultureProtocol [0..1]
 +-- general/devices : NWB.Device [0..N] [core NWB]
 |   +-- models : NWB.DeviceModel [0..N]
-+-- lab_meta_data : CultureExperimentContext <extends LabMetaData>
-    +-- CellLine [0..N]
-    |   +-- parent_cell_line -> CellLine [0..1]
-    |   +-- GeneticVariant [0..N]
-    |   +-- ConstructApplication [0..N]
-    +-- CellCulture [0..N]
-    |   +-- source_lines -> CellLine [0..N]
-    |   +-- parent_cultures -> CellCulture [0..N]
-    |   +-- GeneticVariant [0..N]
-    |   +-- ConstructApplication [0..N]
-    |   +-- CultureProtocol [0..1]
++-- lab metadata : CultureExperimentContext <extends LabMetaData>
     +-- ExperimentContext [0..1]
     |   +-- subject -> CellCultureSubject
     |   +-- culture -> CellCulture
@@ -35,13 +35,13 @@ NWBFile
 
 `CellCultureSubject` extends core `NWB.Subject`. It does not redefine inherited subject fields such as `subject_id`, `species`, `sex`, `age`, `genotype`, or `description`.
 
-The extension-owned `culture` link identifies the `CellCulture` catalog entry being recorded or described. Culture-specific timing belongs in `CellCulture.age` or `ExperimentContext.age_at_recording`, not in `NWB.Subject.age`.
+The extension-owned `culture` link identifies the subject-contained `CellCulture` being recorded or described. Culture-specific timing belongs in `CellCulture.age` or `ExperimentContext.age_at_recording`, not in `NWB.Subject.age`.
 
 `CellCulture` describes the preparation itself: type, subtype, culture age, batch label, disease/diagnosis, reference genome, attached variants, construct applications, and culture protocol metadata.
 
-## Catalogs And Provenance
+## Biological Context And Provenance
 
-`CultureExperimentContext` is the file-level metadata catalog for cultured preparations. It stores reusable `CellLine` and `CellCulture` objects. Lineage and source provenance are direct reference fields on those catalog entries.
+`CellCultureSubject` stores the biological context needed to interpret the recorded preparation: source `CellLine` objects, the recorded `CellCulture`, and any related or parent `CellCulture` inputs. `CultureExperimentContext` is reserved for recording/session context and pharmacology metadata.
 
 Use `CellLine` for source-line identity and lineage metadata such as passage, clone, clonal status, source type, line-level variants, or construct applications.
 
@@ -51,7 +51,7 @@ Use direct reference fields for provenance:
 - `CellCulture.source_lines` answers: which source line or lines made this culture?
 - `CellCulture.parent_cultures` answers: which parent culture or cultures produced this culture?
 
-This catalog model avoids duplicating shared cell lines or parent cultures across several subjects, and it keeps multi-parent provenance explicit.
+This subject-centered model keeps biological identity with the subject while still allowing multi-parent provenance for slices, assembloids, directoids/connectoids, and other derived cultures.
 
 ## Variants And Construct Applications
 

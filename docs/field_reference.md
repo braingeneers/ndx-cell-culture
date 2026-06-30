@@ -27,11 +27,13 @@ Inherited from `NWB.Subject` and not redefined by this extension:
 | `strain` | Usually animal-centric. |
 | `weight` | Usually not meaningful for cell cultures/organoids. |
 
-Extension-owned link:
+Extension-owned fields:
 
 | Field | Requirement | Type | Guidance |
 | --- | --- | --- | --- |
-| `culture` | Required | link to `CellCulture` | Recorded or described cultured neural preparation cataloged in `CultureExperimentContext`. |
+| `culture` | Required | link to `CellCulture` | Recorded or described cultured neural preparation stored under this subject. |
+| `CellLine` children | Optional/repeated | child groups | Source-line objects needed to interpret the subject culture provenance. |
+| `CellCulture` children | Optional/repeated | child groups | Recorded, related, or parent cultures needed to interpret the subject culture provenance. The public `related_cultures` constructor alias can be used for parent/input cultures. |
 
 ## CellCulture
 
@@ -77,13 +79,13 @@ Extension-owned link:
 
 ## Provenance
 
-Provenance is represented directly on catalog entries:
+Provenance is represented directly on subject-contained biological objects:
 
 - use `CellLine.parent_cell_line` for cell-line derivation;
 - use `CellCulture.source_lines` for source lines used to create a culture;
 - use `CellCulture.parent_cultures` for parent/input cultures used to derive another culture.
 
-These fields are stored as NWB object-reference datasets so referenced `CellLine` and `CellCulture` catalog entries are not duplicated.
+These fields are stored as NWB object-reference datasets so referenced `CellLine` and `CellCulture` objects are not duplicated.
 
 ## GeneticVariant
 
@@ -141,8 +143,6 @@ Extends core `LabMetaData`.
 | Field | Requirement | Type | Guidance |
 | --- | --- | --- | --- |
 | `name` | Required by `LabMetaData` | group name | Recommended value: `culture_experiment_context`. |
-| `CellLine` children | Optional/repeated | child groups | Reusable cell-line catalog entries for this NWB file. |
-| `CellCulture` children | Optional/repeated | child groups | Reusable culture catalog entries for this NWB file. |
 | `ExperimentContext` child | Optional | child group | Recording/session context for this file. |
 | `Pharmacology` children | Optional/repeated | child groups | Pharmacology rows linked to experiment context. |
 

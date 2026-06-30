@@ -166,6 +166,7 @@ def _build_roundtrip_file():
         sex="F",
         description="Recorded cortical organoid on MEA",
         culture=culture,
+        cell_lines=[line],
     )
     nwbfile = NWBFile(
         session_description="round-trip test",
@@ -201,8 +202,6 @@ def _build_roundtrip_file():
     nwbfile.add_lab_meta_data(
         ndx.CultureExperimentContext(
             name="culture_experiment_context",
-            cell_lines=[line],
-            cell_cultures=[culture],
             experiment_context=experiment,
             pharmacologies=[pharmacology],
         )
@@ -224,8 +223,9 @@ def test_write_read_roundtrip(tmp_path):
         assert read.subject.culture.culture_id == "CULT-EX-ORG-001"
         assert read.subject.culture.culture_type == "organoid"
         assert read.subject.sex == "F"
+        assert read.subject.cell_cultures["CULT-EX-ORG-001"] is read.subject.culture
+        assert read.subject.cell_lines["CL-EX-CTRL-001"] is read.subject.culture.source_lines[0]
         context = read.lab_meta_data["culture_experiment_context"]
-        assert context.cell_cultures["CULT-EX-ORG-001"] is read.subject.culture
         assert read.subject.culture.source_lines[0].cell_line_id == "CL-EX-CTRL-001"
         assert context.experiment_context.experiment_id == "EXP-EX-ORG-001"
         assert context.experiment_context.device.name == "MaxTwo MX2-CHIP-17"
@@ -253,6 +253,8 @@ def test_removed_terms_are_absent_from_schema():
         "cell_line_parent_relations",
         "cell_culture_source_line_relations",
         "cell_culture_parent_relations",
+        "Reusable CellLine catalog entries",
+        "Reusable CellCulture catalog entries",
     ]:
         assert removed not in schema
     for required in [
@@ -304,6 +306,10 @@ def test_user_docs_cover_extension_types_without_planning_artifacts():
         "CellLineParentRelation",
         "CellCultureSourceLineRelation",
         "CellCultureParentRelation",
+        "CellCulture catalog entry",
+        "file-level metadata catalog",
+        "CellLine and CellCulture catalog entries",
+        "CultureExperimentContext`` is the file-level metadata catalog",
     ]:
         assert planning_or_lab_specific_term not in docs_text
 
@@ -331,6 +337,9 @@ def test_schema_declares_critical_relationships():
         "target_type: ExperimentContext",
     ]:
         assert relationship in schema
+    context_spec = schema.split("neurodata_type_def: CultureExperimentContext", 1)[1]
+    assert "neurodata_type_inc: CellLine" not in context_spec
+    assert "neurodata_type_inc: CellCulture" not in context_spec
 
 
 def test_required_culture_on_subject():
@@ -349,8 +358,15 @@ def test_required_culture_on_subject():
         sample_label="Culture",
         species="Homo sapiens",
     )
-    subject = ndx.CellCultureSubject(subject_id="SUBJ", species="Homo sapiens", culture=culture)
+    subject = ndx.CellCultureSubject(subject_id="SUBJ", species="Homo sapiens", culture=culture, cell_lines=[line])
     assert subject.culture.culture_id == "CULT"
+    assert subject.cell_cultures["CULT"] is culture
+    assert subject.cell_lines["CL"] is line
+    subject_docval_names = [arg["name"] for arg in get_docval(ndx.CellCultureSubject.__init__)]
+    assert "related_cultures" in subject_docval_names
+    context_docval_names = [arg["name"] for arg in get_docval(ndx.CultureExperimentContext.__init__)]
+    assert "cell_lines" not in context_docval_names
+    assert "cell_cultures" not in context_docval_names
 
 
 def test_stable_relationship_links_write_read_and_validate(tmp_path):
@@ -397,7 +413,7 @@ def test_stable_relationship_links_write_read_and_validate(tmp_path):
         species="Homo sapiens",
     )
     culture = ndx.CellCulture(
-        name="culture",
+        name="CULT-REL",
         culture_id="CULT-REL",
         culture_type="organoid",
         sample_label="Relationship culture",
@@ -408,20 +424,19 @@ def test_stable_relationship_links_write_read_and_validate(tmp_path):
         source_lines=[derived_line],
         parent_cultures=[parent_culture],
     )
-    subject = ndx.CellCultureSubject(subject_id="SUBJ-REL", species="Homo sapiens", culture=culture)
+    subject = ndx.CellCultureSubject(
+        subject_id="SUBJ-REL",
+        species="Homo sapiens",
+        culture=culture,
+        cell_lines=[parent_line, derived_line],
+        related_cultures=[parent_culture],
+    )
     nwbfile = NWBFile(
         session_description="relationship test",
         identifier="RELATIONSHIP-TEST",
         session_start_time=datetime(2026, 5, 12, tzinfo=tzlocal()),
     )
     nwbfile.subject = subject
-    nwbfile.add_lab_meta_data(
-        ndx.CultureExperimentContext(
-            name="culture_experiment_context",
-            cell_lines=[parent_line, derived_line],
-            cell_cultures=[parent_culture, culture],
-        )
-    )
 
     path = tmp_path / "relationships.nwb"
     with NWBHDF5IO(str(path), "w") as io:
@@ -431,10 +446,10 @@ def test_stable_relationship_links_write_read_and_validate(tmp_path):
 
     with NWBHDF5IO(str(path), "r", load_namespaces=True) as io:
         read = io.read()
-        context = read.lab_meta_data["culture_experiment_context"]
-        assert context.cell_lines["derived"].parent_cell_line[0].name == "parent"
-        assert context.cell_cultures["culture"].source_lines[0].name == "derived"
-        assert context.cell_cultures["culture"].parent_cultures[0].name == "parent_culture"
+        assert read.subject.cell_lines["derived"].parent_cell_line[0].name == "parent"
+        assert read.subject.cell_cultures["CULT-REL"].source_lines[0].name == "derived"
+        assert read.subject.cell_cultures["CULT-REL"].parent_cultures[0].name == "parent_culture"
+        assert read.subject.get_related_cultures("parent_culture").culture_id == "CULT-PARENT"
         assert read.subject.culture.genetic_variants["variant"].related_application.name == "application"
 
 
@@ -448,26 +463,19 @@ def test_recommended_term_validator_reports_invalid_values():
         cell_source_type="iPSC",
     )
     culture = ndx.CellCulture(
-        name="culture",
+        name="CULT",
         culture_id="CULT",
         culture_type="batch",
         sample_label="Culture",
         species="Homo sapiens",
     )
-    subject = ndx.CellCultureSubject(subject_id="SUBJ", species="Homo sapiens", culture=culture)
+    subject = ndx.CellCultureSubject(subject_id="SUBJ", species="Homo sapiens", culture=culture, cell_lines=[line])
     nwbfile = NWBFile(
         session_description="recommended-term validator test",
         identifier="TERM-VALIDATOR-TEST",
         session_start_time=datetime(2026, 5, 12, tzinfo=tzlocal()),
     )
     nwbfile.subject = subject
-    nwbfile.add_lab_meta_data(
-        ndx.CultureExperimentContext(
-            name="culture_experiment_context",
-            cell_lines=[line],
-            cell_cultures=[culture],
-        )
-    )
 
     issues = ndx.validate_recommended_terms(nwbfile)
     assert {(issue.object_type, issue.field, issue.value) for issue in issues} == {
@@ -498,15 +506,16 @@ def test_synthetic_scenarios_write_read_and_validate(tmp_path):
             read = io.read()
             assert ndx.validate_recommended_terms(read) == []
             assert read.subject.culture.culture_type == culture_type
-            context = read.lab_meta_data["culture_experiment_context"]
-            assert read.subject.culture.name in context.cell_cultures
+            assert read.subject.culture.name in read.subject.cell_cultures
             if platform is not None:
                 context = read.lab_meta_data["culture_experiment_context"]
                 assert context.experiment_context.recording_platform == platform
                 assert len(context.pharmacologies) == pharmacology_count
+            else:
+                assert not read.lab_meta_data or "culture_experiment_context" not in read.lab_meta_data
 
 
-def test_biological_metadata_only_scenario_has_catalog_but_no_experiment_context(tmp_path):
+def test_biological_metadata_only_scenario_has_subject_biology_but_no_experiment_context(tmp_path):
     path = tmp_path / "biological_metadata_only_organoid.nwb"
     with NWBHDF5IO(str(path), "w") as io:
         io.write(SCENARIOS["biological_metadata_only_organoid"]())
@@ -515,6 +524,6 @@ def test_biological_metadata_only_scenario_has_catalog_but_no_experiment_context
         read = io.read()
         assert read.subject.subject_id == "SUBJ-SYN-EDITED-ORG-002"
         assert read.subject.culture.culture_id == "CULT-SYN-EDITED-ORG-002"
-        context = read.lab_meta_data["culture_experiment_context"]
-        assert context.experiment_context is None
-        assert len(context.cell_cultures) == 1
+        assert not read.lab_meta_data or "culture_experiment_context" not in read.lab_meta_data
+        assert len(read.subject.cell_cultures) == 1
+        assert len(read.subject.cell_lines) == 2

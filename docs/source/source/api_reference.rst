@@ -28,8 +28,11 @@ schema reference is in :doc:`format`.
 Provenance References
 ---------------------
 
-The public constructors accept normal objects for provenance fields:
+The public constructors accept normal objects for subject biological context
+and provenance fields:
 
+* ``CellCultureSubject(culture=culture, cell_lines=[line])``
+* ``CellCultureSubject(culture=slice_culture, related_cultures=[parent_organoid])``
 * ``CellLine(parent_cell_line=parent_line)``
 * ``CellCulture(source_lines=[line_a, line_b])``
 * ``CellCulture(parent_cultures=[parent_organoid])``
@@ -37,6 +40,12 @@ The public constructors accept normal objects for provenance fields:
 These fields are stored as NWB object-reference vectors. After reading a file
 back, use indexing or slicing to access the referenced objects, for example
 ``culture.source_lines[:]`` or ``line.parent_cell_line[0]``.
+
+``CellCultureSubject`` automatically stores the linked recorded ``culture`` in
+its subject-contained ``cell_cultures`` collection. Use a stable
+identifier-style ``CellCulture.name`` such as ``CULT-SYN-001``; the literal
+name ``culture`` is reserved for the link name and is rejected by the public
+constructor to avoid an HDF5 path conflict.
 
 Pharmacology Records
 --------------------

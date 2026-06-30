@@ -29,7 +29,8 @@ High-Level Model
 At a high level, an NWB file using this extension contains:
 
 * one recorded or described cultured preparation;
-* reusable catalogs of source lines and cultures in the file;
+* subject-contained source lines and related cultures needed to interpret that
+  preparation;
 * explicit provenance links between source lines, parent cultures, and derived
   cultures;
 * engineered variants and construct applications attached where they occurred;

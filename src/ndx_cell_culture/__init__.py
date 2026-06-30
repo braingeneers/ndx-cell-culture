@@ -48,6 +48,14 @@ def _as_reference_vector(name, description, value):
     return VectorData(name=name, description=description, data=data)
 
 
+def _as_list(value):
+    if value is None:
+        return []
+    if isinstance(value, (list, tuple)):
+        return list(value)
+    return [value]
+
+
 _original_cell_line_init = CellLine.__init__
 _cell_line_docval = []
 for _arg in get_docval(_original_cell_line_init):
@@ -106,6 +114,63 @@ def _cell_culture_init(self, **kwargs):
 
 CellLine.__init__ = _cell_line_init
 CellCulture.__init__ = _cell_culture_init
+
+
+_PUBLIC_RELATED_CULTURES_CONTAINER = "related_cultures"
+_GENERATED_SUBJECT_CULTURES_CONTAINER = "cell_cultures"
+_original_cell_culture_subject_init = CellCultureSubject.__init__
+_cell_culture_subject_docval = []
+for _arg in get_docval(_original_cell_culture_subject_init):
+    _cell_culture_subject_docval.append(_arg)
+    if _arg["name"] == _GENERATED_SUBJECT_CULTURES_CONTAINER:
+        _alias_arg = dict(_arg)
+        _alias_arg["name"] = _PUBLIC_RELATED_CULTURES_CONTAINER
+        _alias_arg["doc"] = "Related or parent CellCulture objects needed to interpret the subject culture provenance."
+        _cell_culture_subject_docval.append(_alias_arg)
+
+
+@docval(*_cell_culture_subject_docval)
+def _cell_culture_subject_init(self, **kwargs):
+    """Accept related/parent cultures using a subject-oriented public name."""
+
+    culture, cell_cultures, related_cultures = popargs(
+        "culture",
+        _GENERATED_SUBJECT_CULTURES_CONTAINER,
+        _PUBLIC_RELATED_CULTURES_CONTAINER,
+        kwargs,
+    )
+    subject_cultures = _as_list(cell_cultures)
+    if getattr(culture, "name", None) == "culture":
+        raise ValueError("CellCulture.name cannot be 'culture' when used as CellCultureSubject.culture; use a stable identifier-style name and store the biological identifier in culture_id.")
+    for related_culture in _as_list(related_cultures):
+        if related_culture not in subject_cultures:
+            subject_cultures.append(related_culture)
+    if culture is not None and culture not in subject_cultures:
+        subject_cultures.insert(0, culture)
+    kwargs["culture"] = culture
+    if subject_cultures:
+        kwargs[_GENERATED_SUBJECT_CULTURES_CONTAINER] = subject_cultures
+    _original_cell_culture_subject_init(self, **kwargs)
+
+
+def _get_related_cultures(self):
+    return getattr(self, _GENERATED_SUBJECT_CULTURES_CONTAINER)
+
+
+CellCultureSubject.__init__ = _cell_culture_subject_init
+CellCultureSubject.related_cultures = property(_get_related_cultures)
+CellCultureSubject.add_related_cultures = getattr(
+    CellCultureSubject,
+    "add_" + _GENERATED_SUBJECT_CULTURES_CONTAINER,
+)
+CellCultureSubject.create_related_cultures = getattr(
+    CellCultureSubject,
+    "create_" + _GENERATED_SUBJECT_CULTURES_CONTAINER,
+)
+CellCultureSubject.get_related_cultures = getattr(
+    CellCultureSubject,
+    "get_" + _GENERATED_SUBJECT_CULTURES_CONTAINER,
+)
 
 
 _PUBLIC_PHARMACOLOGY_CONTAINER = "pharmacologies"

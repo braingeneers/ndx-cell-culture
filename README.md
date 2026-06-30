@@ -9,26 +9,26 @@ Full user documentation is available at <https://ndx-cell-culture.readthedocs.io
 
 ## What It Models
 
-The extension keeps core NWB responsible for devices, acquisition, stimulus, imaging, processing, and other modality-specific data. Cultured-preparation metadata is attached through the subject and file-level lab metadata:
+The extension keeps core NWB responsible for devices, acquisition, stimulus, imaging, processing, and other modality-specific data. Cultured-preparation identity and provenance are attached through the subject; recording context and pharmacology live in lab metadata:
 
 ```text
 NWBFile
 +-- subject : CellCultureSubject <extends NWB.Subject>
 |   +-- inherited NWB.Subject fields
-|   +-- culture -> CellCulture catalog entry
+|   +-- culture -> CellCulture [recorded/described preparation]
+|   +-- CellLine [0..N]
+|   |   +-- parent_cell_line -> CellLine [0..1]
+|   |   +-- GeneticVariant [0..N]
+|   |   +-- ConstructApplication [0..N]
+|   +-- CellCulture [0..N] [recorded, related, or parent cultures]
+|   |   +-- source_lines -> CellLine [0..N]
+|   |   +-- parent_cultures -> CellCulture [0..N]
+|   |   +-- GeneticVariant [0..N]
+|   |   +-- ConstructApplication [0..N]
+|   |   +-- CultureProtocol [0..1]
 +-- general/devices : NWB.Device [0..N]
 |   +-- models : NWB.DeviceModel [0..N]
-+-- lab_meta_data : CultureExperimentContext <extends LabMetaData>
-    +-- CellLine [0..N]
-    |   +-- parent_cell_line -> CellLine [0..1]
-    |   +-- GeneticVariant [0..N]
-    |   +-- ConstructApplication [0..N]
-    +-- CellCulture [0..N]
-    |   +-- source_lines -> CellLine [0..N]
-    |   +-- parent_cultures -> CellCulture [0..N]
-    |   +-- GeneticVariant [0..N]
-    |   +-- ConstructApplication [0..N]
-    |   +-- CultureProtocol [0..1]
++-- lab metadata : CultureExperimentContext <extends LabMetaData>
     +-- ExperimentContext [0..1]
     |   +-- subject -> CellCultureSubject
     |   +-- culture -> CellCulture

@@ -82,8 +82,10 @@ Subject And Culture
 inherited subject fields such as ``subject_id``, ``species``, ``sex``, ``age``,
 ``genotype``, or ``description``.
 
-The extension-owned ``culture`` link identifies the ``CellCulture`` catalog
-entry being recorded or described. Culture-specific timing belongs in
+The extension-owned ``culture`` link identifies the subject-contained
+``CellCulture`` object being recorded or described. That culture and any source
+lines or related parent cultures are stored under ``CellCultureSubject``.
+Culture-specific timing belongs in
 ``CellCulture.age`` or ``ExperimentContext.age_at_recording``, not in
 ``NWB.Subject.age``.
 
@@ -91,12 +93,14 @@ entry being recorded or described. Culture-specific timing belongs in
 batch label, disease or diagnosis, reference genome, attached variants,
 construct applications, and culture protocol metadata.
 
-Catalogs And Provenance
------------------------
+Biological Context And Provenance
+---------------------------------
 
-``CultureExperimentContext`` is the file-level metadata catalog for cultured
-preparations. It stores reusable ``CellLine`` and ``CellCulture`` objects and
-direct provenance references between them.
+``CellCultureSubject`` stores the biological context needed to interpret the
+recorded preparation: source ``CellLine`` objects, the recorded
+``CellCulture``, and any related or parent ``CellCulture`` inputs.
+``CultureExperimentContext`` is reserved for recording/session context and
+pharmacology metadata.
 
 Use ``CellLine`` for source-line identity and lineage metadata such as passage,
 clone, clonal status, source type, line-level variants, or construct
@@ -110,8 +114,9 @@ Use direct reference fields for provenance:
 * ``CellCulture.parent_cultures`` answers: which parent culture or cultures
   produced this culture?
 
-This catalog model avoids duplicating shared cell lines or parent cultures
-across several subjects, and it keeps multi-parent provenance explicit.
+This subject-centered model keeps biological identity with the subject while
+still allowing multi-parent provenance for slices, assembloids,
+directoids/connectoids, and other derived cultures.
 
 Variants And Construct Applications
 -----------------------------------

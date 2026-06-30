@@ -36,16 +36,14 @@ def _device(nwbfile, name, description):
 def _add_context(
     nwbfile,
     *,
-    cell_lines=None,
-    cell_cultures=None,
     experiment_context=None,
     pharmacologies=None,
 ):
+    if experiment_context is None and not pharmacologies:
+        return
     nwbfile.add_lab_meta_data(
         CultureExperimentContext(
             name="culture_experiment_context",
-            cell_lines=cell_lines or [],
-            cell_cultures=cell_cultures or [],
             experiment_context=experiment_context,
             pharmacologies=pharmacologies or [],
         )
@@ -122,6 +120,7 @@ def build_basic_organoid():
         sex="F",
         description="Recorded cortical organoid on MEA",
         culture=culture,
+        cell_lines=[line],
     )
     nwbfile = _nwbfile("NWB-EX-ORG-001", "Example organoid recording")
     nwbfile.subject = subject
@@ -147,8 +146,6 @@ def build_basic_organoid():
     )
     _add_context(
         nwbfile,
-        cell_lines=[line],
-        cell_cultures=[culture],
         experiment_context=experiment,
     )
     return nwbfile
@@ -205,6 +202,8 @@ def build_slice_patch_clamp():
         sex="U",
         description="Example organoid-derived slice",
         culture=slice_culture,
+        cell_lines=[line],
+        related_cultures=[parent_organoid],
     )
     nwbfile = _nwbfile("NWB-EX-SLICE-001", "Example organoid slice patch-clamp recording")
     nwbfile.subject = subject
@@ -250,8 +249,6 @@ def build_slice_patch_clamp():
     ]
     _add_context(
         nwbfile,
-        cell_lines=[line],
-        cell_cultures=[parent_organoid, slice_culture],
         experiment_context=experiment,
         pharmacologies=pharmacology,
     )
@@ -324,6 +321,7 @@ def build_edited_ipsc_organoid_mea():
         sex="M",
         description="Synthetic edited organoid subject",
         culture=culture,
+        cell_lines=[parental, derived],
     )
     nwbfile = _nwbfile("NWB-SYN-EDITED-ORG-001", "Synthetic edited organoid MEA example")
     nwbfile.subject = subject
@@ -348,8 +346,6 @@ def build_edited_ipsc_organoid_mea():
     )
     _add_context(
         nwbfile,
-        cell_lines=[parental, derived],
-        cell_cultures=[culture],
         experiment_context=experiment,
     )
     return nwbfile
@@ -421,17 +417,14 @@ def build_biological_metadata_only_organoid():
         sex="M",
         description="Synthetic edited organoid subject without recording context",
         culture=culture,
+        cell_lines=[parental, derived],
     )
     nwbfile = _nwbfile(
         "NWB-SYN-EDITED-ORG-002",
         "Synthetic edited organoid biological metadata example",
     )
     nwbfile.subject = subject
-    _add_context(
-        nwbfile,
-        cell_lines=[parental, derived],
-        cell_cultures=[culture],
-    )
+    _add_context(nwbfile)
     return nwbfile
 
 
@@ -473,6 +466,7 @@ def build_pharmacology_titration_organoid():
         sex="F",
         description="Synthetic organoid subject for pharmacology titration",
         culture=culture,
+        cell_lines=[line],
     )
     nwbfile = _nwbfile("NWB-SYN-PHARM-ORG-001", "Synthetic pharmacology titration example")
     nwbfile.subject = subject
@@ -507,8 +501,6 @@ def build_pharmacology_titration_organoid():
     )
     _add_context(
         nwbfile,
-        cell_lines=[line],
-        cell_cultures=[culture],
         experiment_context=experiment,
         pharmacologies=[pharmacology],
     )
@@ -580,14 +572,12 @@ def build_directoid():
         sex="U",
         description="Example cortico-thalamic directoid",
         culture=directoid,
+        cell_lines=[cortical_line, thalamic_line],
+        related_cultures=[cortical_organoid, thalamic_organoid],
     )
     nwbfile = _nwbfile("NWB-EX-DIRECTOID-001", "Directoid synthetic example")
     nwbfile.subject = subject
-    _add_context(
-        nwbfile,
-        cell_lines=[cortical_line, thalamic_line],
-        cell_cultures=[cortical_organoid, thalamic_organoid, directoid],
-    )
+    _add_context(nwbfile)
     return nwbfile
 
 
@@ -624,14 +614,11 @@ def build_two_line_assembloid():
         sex="U",
         description="Example assembloid from two distinct source lines",
         culture=culture,
+        cell_lines=[line_a, line_b],
     )
     nwbfile = _nwbfile("NWB-EX-ASSEMBLOID-2LINE-001", "Two-line assembloid synthetic example")
     nwbfile.subject = subject
-    _add_context(
-        nwbfile,
-        cell_lines=[line_a, line_b],
-        cell_cultures=[culture],
-    )
+    _add_context(nwbfile)
     return nwbfile
 
 

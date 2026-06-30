@@ -7,9 +7,9 @@ Release Notes
 * Simplifies provenance entry by replacing explicit relation object types with
   direct ``parent_cell_line``, ``source_lines``, and ``parent_cultures``
   reference fields.
-* Keeps source lines and cultures as reusable catalog entries in
-  ``CultureExperimentContext`` while storing provenance as NWB object-reference
-  datasets.
+* Keeps biological identity and provenance under ``CellCultureSubject`` instead
+  of ``CultureExperimentContext``. ``CultureExperimentContext`` is limited to
+  recording/session context and pharmacology metadata.
 
 1.0rc1
 ------
