@@ -1,8 +1,9 @@
 groups:
 - neurodata_type_def: GeneticVariant
   neurodata_type_inc: NWBContainer
-  doc: Stable or defining engineered genomic change attached to a CellLine or
-    CellCulture. Use for engineered edits, not every raw sequencing variant.
+  doc: Stable or defining genomic variant attached to a CellLine or CellCulture.
+    Use for variants relevant to the preparation, not every raw sequencing
+    variant.
   attributes:
   - name: variant_id
     dtype: text
@@ -21,12 +22,19 @@ groups:
       CRISPRi_targeting, CRISPRa_targeting, other.
   - name: edit_description
     dtype: text
-    doc: Human-readable edit description.
+    doc: Human-readable variant or edit description.
+    required: false
+  - name: origin
+    dtype: text
+    doc: 'Preparation-oriented variant origin. Required for new records; optional
+      in the schema so files from earlier release candidates remain readable. Recommended
+      terms: donor_derived, engineered, culture_acquired, unknown, other.'
     required: false
   - name: method
     dtype: text
-    doc: Engineering method, e.g. CRISPR-Cas9, base_editing, prime_editing,
-      TALEN, ZFNs, homologous_recombination, other.
+    doc: Engineering method when origin is engineered, e.g. CRISPR-Cas9,
+      base_editing, prime_editing, TALEN, ZFNs, homologous_recombination, other.
+    required: false
   - name: delivery_method
     dtype: text
     doc: Method used to deliver edit machinery, e.g. RNP, plasmid, lentivirus,

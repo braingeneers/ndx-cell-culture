@@ -2,7 +2,7 @@ Examples And Recipes
 ====================
 
 These examples show common modeling patterns for cultured neural preparations:
-whole-organoid recordings, organoid-derived slices, edited source lines,
+whole-organoid recordings, organoid-derived slices, edited and donor-derived source lines,
 directoids/connectoids, assembloids, biological-metadata-only files, and
 pharmacology titrations. All identifiers and biological details are synthetic.
 
@@ -59,6 +59,10 @@ Scenario Coverage
      - ``build_two_line_assembloid``
      - ``assembloid`` example from two distinct synthetic source lines
        represented by ``source_lines``.
+   * - Donor-derived variant organoid
+     - ``build_donor_derived_variant_organoid``
+     - Synthetic iPSC-derived organoid carrying a defining DDX3X variant that
+       was present in the donor rather than introduced by engineering.
 
 Common Modeling Recipes
 -----------------------

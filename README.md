@@ -3,7 +3,7 @@
 [![tests](https://github.com/braingeneers/ndx-cell-culture/actions/workflows/test.yml/badge.svg)](https://github.com/braingeneers/ndx-cell-culture/actions/workflows/test.yml)
 [![docs](https://readthedocs.org/projects/ndx-cell-culture/badge/?version=latest)](https://ndx-cell-culture.readthedocs.io/)
 
-`ndx-cell-culture` is a Neurodata Without Borders (NWB) extension for describing cultured neural preparations in NWB files. It is intended for labs working with organoids, assembloids, directoids/connectoids, slices, explants, spheroids, dissociated cultures, engineered cell lines, construct applications, recording context, and pharmacology.
+`ndx-cell-culture` is a Neurodata Without Borders (NWB) extension for describing cultured neural preparations in NWB files. It is intended for labs working with organoids, assembloids, directoids/connectoids, slices, explants, spheroids, dissociated cultures, cell lines, defining genetic variants, construct applications, recording context, and pharmacology.
 
 Full user documentation is available at <https://ndx-cell-culture.readthedocs.io/>.
 

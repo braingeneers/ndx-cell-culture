@@ -1,10 +1,10 @@
 [build-system]
-requires = ["hatchling"]
+requires = ["hatchling<1.30"]
 build-backend = "hatchling.build"
 
 [project]
 name = "ndx-cell-culture"
-version = "1.0rc2"
+version = "1.0rc3"
 authors = [
     { name = "David Parks", email = "dfparks@ucsc.edu" },
 ]

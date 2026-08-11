@@ -130,6 +130,7 @@ def _build_roundtrip_file():
         variant_id="VAR-EX-SYNGAP1-KO-01",
         target_symbol="SYNGAP1",
         edit_type="knockout",
+        origin="engineered",
         method="CRISPR-Cas9",
         zygosity_or_edit_state="biallelic",
         validation_status="validated",
@@ -438,6 +439,7 @@ def test_stable_relationship_links_write_read_and_validate(tmp_path):
         variant_id="VAR-REL",
         target_symbol="GENE1",
         edit_type="knockout",
+        origin="engineered",
         method="CRISPR-Cas9",
         related_application=application,
     )
@@ -493,6 +495,95 @@ def test_stable_relationship_links_write_read_and_validate(tmp_path):
         assert read.subject.culture.genetic_variants["variant"].related_application.name == "application"
 
 
+def test_genetic_variant_origin_and_conditional_engineering_method_validation(tmp_path):
+    donor_variant = ndx.GeneticVariant(
+        name="donor-derived-variant",
+        variant_id="VAR-DDX3X-DONOR",
+        target_symbol="DDX3X",
+        edit_type="point_mutation",
+        origin="donor_derived",
+        zygosity_or_edit_state="heterozygous",
+    )
+    engineered_variant = ndx.GeneticVariant(
+        name="engineered-variant",
+        variant_id="VAR-DDX3X-ENGINEERED",
+        target_symbol="DDX3X",
+        edit_type="knockout",
+        origin="engineered",
+    )
+    invalid_origin_variant = ndx.GeneticVariant(
+        name="invalid-origin-variant",
+        variant_id="VAR-DDX3X-INVALID",
+        target_symbol="DDX3X",
+        edit_type="point_mutation",
+        origin="patient_derived",
+    )
+    legacy_variant = ndx.GeneticVariant(
+        name="legacy-variant",
+        variant_id="VAR-DDX3X-LEGACY",
+        target_symbol="DDX3X",
+        edit_type="point_mutation",
+        method="other",
+    )
+
+    assert ndx.validate_recommended_terms(donor_variant) == []
+    engineered_issues = ndx.validate_recommended_terms(engineered_variant)
+    assert len(engineered_issues) == 1
+    assert engineered_issues[0].field == "method"
+    assert "requires a non-empty engineering method" in engineered_issues[0].message
+    invalid_origin_issues = ndx.validate_recommended_terms(invalid_origin_variant)
+    assert len(invalid_origin_issues) == 1
+    assert invalid_origin_issues[0].field == "origin"
+    assert invalid_origin_issues[0].value == "patient_derived"
+    legacy_issues = ndx.validate_recommended_terms(legacy_variant)
+    assert len(legacy_issues) == 1
+    assert legacy_issues[0].field == "origin"
+    assert "requires a non-empty preparation-oriented origin" in legacy_issues[0].message
+
+    line = ndx.CellLine(
+        name="donor-derived-line",
+        cell_line_id="CL-DDX3X-DONOR",
+        cell_line_type="derived_cell_line",
+        sample_label="Donor-derived DDX3X line",
+        species="Homo sapiens",
+        cell_source_type="iPSC",
+        genetic_variants=[donor_variant],
+    )
+    culture = ndx.CellCulture(
+        name="donor-derived-culture",
+        culture_id="CULT-DDX3X-DONOR",
+        culture_type="organoid",
+        sample_label="Donor-derived DDX3X organoid",
+        species="Homo sapiens",
+        source_lines=[line],
+    )
+    subject = ndx.CellCultureSubject(
+        subject_id="SUBJ-DDX3X-DONOR",
+        species="Homo sapiens",
+        culture=culture,
+        cell_lines=[line],
+    )
+    nwbfile = NWBFile(
+        session_description="donor-derived variant round-trip test",
+        identifier="DONOR-DERIVED-VARIANT-TEST",
+        session_start_time=datetime(2026, 5, 12, tzinfo=tzlocal()),
+    )
+    nwbfile.subject = subject
+    path = tmp_path / "donor-derived-variant.nwb"
+    with NWBHDF5IO(str(path), "w") as io:
+        io.write(nwbfile)
+
+    _assert_no_validation_errors(path)
+    with NWBHDF5IO(str(path), "r", load_namespaces=True) as io:
+        read = io.read()
+        variant = read.subject.cell_lines["donor-derived-line"].genetic_variants[
+            "donor-derived-variant"
+        ]
+        assert variant.origin == "donor_derived"
+        assert variant.method is None
+        assert ndx.validate_recommended_terms(read) == []
+
+
 def test_recommended_term_validator_reports_invalid_values():
     line = ndx.CellLine(
         name="line",
@@ -533,6 +624,7 @@ def test_synthetic_scenarios_write_read_and_validate(tmp_path):
         "pharmacology_titration_organoid": ("organoid", "MEA", 1),
         "directoid": ("assembloid", None, 0),
         "two_line_assembloid": ("assembloid", None, 0),
+        "donor_derived_variant_organoid": ("organoid", None, 0),
     }
     for name, (culture_type, platform, pharmacology_count) in expected.items():
         path = tmp_path / f"{name}.nwb"

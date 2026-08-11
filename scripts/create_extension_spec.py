@@ -15,7 +15,7 @@ from pynwb.spec import (
 
 
 NAMESPACE = "ndx-cell-culture"
-VERSION = "1.0rc2"
+VERSION = "1.0rc3"
 
 
 def attr(name, doc, required=True, dtype="text"):
@@ -47,8 +47,8 @@ def build_specs():
         neurodata_type_def="GeneticVariant",
         neurodata_type_inc="NWBContainer",
         doc=(
-            "Stable or defining engineered genomic change attached to a CellLine or CellCulture. "
-            "Use for engineered edits, not every raw sequencing variant."
+            "Stable or defining genomic variant attached to a CellLine or CellCulture. "
+            "Use for variants relevant to the preparation, not every raw sequencing variant."
         ),
         attributes=text_attrs(
             [
@@ -56,8 +56,9 @@ def build_specs():
                 ("target_symbol", True, "Gene symbol or target name."),
                 ("target_coordinates", False, "Genomic coordinates, transcript notation, or locus notation."),
                 ("edit_type", True, "Recommended terms include knockout, knockin, point_mutation, deletion, duplication, inversion, tag_insertion, reporter_insertion, CRISPRi_targeting, CRISPRa_targeting, other."),
-                ("edit_description", False, "Human-readable edit description."),
-                ("method", True, "Engineering method, e.g. CRISPR-Cas9, base_editing, prime_editing, TALEN, ZFNs, homologous_recombination, other."),
+                ("edit_description", False, "Human-readable variant or edit description."),
+                ("origin", False, "Preparation-oriented variant origin. Required for new records; optional in the schema so files from earlier release candidates remain readable. Recommended terms: donor_derived, engineered, culture_acquired, unknown, other."),
+                ("method", False, "Engineering method when origin is engineered, e.g. CRISPR-Cas9, base_editing, prime_editing, TALEN, ZFNs, homologous_recombination, other."),
                 ("delivery_method", False, "Method used to deliver edit machinery, e.g. RNP, plasmid, lentivirus, AAV, electroporation, lipofection, other."),
                 ("zygosity_or_edit_state", False, "Observed zygosity or edit state, e.g. heterozygous, homozygous, biallelic, hemizygous, mosaic, unknown, other."),
                 ("validation_status", False, "Validation state, e.g. planned, screened, validated, failed, unknown."),

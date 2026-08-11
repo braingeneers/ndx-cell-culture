@@ -38,10 +38,10 @@ Where Metadata Belongs
      - Use ``CellLine.parent_cell_line``, ``CellCulture.source_lines``, and
        ``CellCulture.parent_cultures`` to capture lineage without separate
        provenance rows.
-   * - Stable engineered genomic changes
+   * - Stable or defining genomic variants
      - ``GeneticVariant``
      - Attach variants to the ``CellLine`` or ``CellCulture`` where the
-       defining edit belongs.
+       defining variant belongs.
    * - Applied constructs and reagents
      - ``ConstructApplication``
      - Attach vectors, RNPs, reporters, optogenetic tools, or similar
@@ -121,14 +121,30 @@ directoids/connectoids, and other derived cultures.
 Variants And Construct Applications
 -----------------------------------
 
-Use ``GeneticVariant`` for stable or defining engineered genomic changes. Do
-not use it as a complete raw sequencing variant table.
+Use ``GeneticVariant`` for stable or defining genomic variants that help
+identify or interpret the preparation. This includes variants present in a
+donor, introduced through engineering, or acquired during culture. Do not use
+it as a complete raw sequencing variant table.
+
+Use ``origin`` to record the preparation-oriented source of the variant:
+
+* ``donor_derived`` means the source biological material already carried the
+  variant before the modeled line or culture was established;
+* ``engineered`` means the variant was intentionally introduced, in which case
+  ``method`` records the engineering method;
+* ``culture_acquired`` means the variant arose during propagation or culture;
+* ``unknown`` means the origin is not known;
+* ``other`` covers a known origin outside these recommended categories.
+
+``donor_derived`` does not assert whether a human variant is germline, somatic,
+inherited, or de novo. Record those details in the variant description or notes
+when they are known and relevant.
 
 Use ``ConstructApplication`` for applied constructs, viral vectors, RNPs,
 reporters, optogenetic tools, or similar interventions. Attach the application
 where it occurred:
 
-* line-level engineering belongs on ``CellLine``;
+* line-level variants and engineering belong on ``CellLine``;
 * culture-level transduction, transfection, injection, or acute perturbation
   belongs on ``CellCulture``;
 * detailed recorded stimulus waveforms belong in core NWB stimulus/acquisition

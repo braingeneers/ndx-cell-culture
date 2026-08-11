@@ -59,6 +59,13 @@ RECOMMENDED_TERMS: RecommendedTerms = {
         "clonal_status": {"clonal", "polyclonal", "mixed", "unknown"},
     },
     "GeneticVariant": {
+        "origin": {
+            "donor_derived",
+            "engineered",
+            "culture_acquired",
+            "unknown",
+            "other",
+        },
         "edit_type": {
             "knockout",
             "knockin",
@@ -197,9 +204,12 @@ class RecommendedTermIssue:
     field: str
     value: str
     allowed_values: Tuple[str, ...]
+    detail: Optional[str] = None
 
     @property
     def message(self) -> str:
+        if self.detail:
+            return self.detail
         allowed = ", ".join(self.allowed_values)
         return (
             f"{self.object_type} '{self.object_name}' has non-recommended value "
@@ -234,6 +244,51 @@ def validate_recommended_terms(container: Any, terms: RecommendedTerms = RECOMME
                         field=field,
                         value=str(value),
                         allowed_values=tuple(sorted(allowed_values)),
+                    )
+                )
+        if object_type == "GeneticVariant":
+            origin = _field_value(obj, "origin")
+            method = _field_value(obj, "method")
+            if not str(origin or "").strip():
+                issues.append(
+                    RecommendedTermIssue(
+                        object_type=object_type,
+                        object_name=object_name,
+                        field="origin",
+                        value="",
+                        allowed_values=tuple(
+                            sorted(
+                                field_terms.get(
+                                    "origin",
+                                    RECOMMENDED_TERMS["GeneticVariant"]["origin"],
+                                )
+                            )
+                        ),
+                        detail=(
+                            f"{object_type} '{object_name}' requires a non-empty "
+                            "preparation-oriented origin"
+                        ),
+                    )
+                )
+            elif str(origin) == "engineered" and not str(method or "").strip():
+                issues.append(
+                    RecommendedTermIssue(
+                        object_type=object_type,
+                        object_name=object_name,
+                        field="method",
+                        value="",
+                        allowed_values=tuple(
+                            sorted(
+                                field_terms.get(
+                                    "method",
+                                    RECOMMENDED_TERMS["GeneticVariant"]["method"],
+                                )
+                            )
+                        ),
+                        detail=(
+                            f"{object_type} '{object_name}' with origin='engineered' "
+                            "requires a non-empty engineering method"
+                        ),
                     )
                 )
     return issues

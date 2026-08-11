@@ -56,10 +56,10 @@ recording context, and pharmacology only when those details are relevant.
      - ``CellCulture.parent_cultures``
      - For slices, directoids/connectoids, assembloids, or other derived
        cultures
-   * - Engineering or reporter metadata
+   * - Defining variant, engineering, or reporter metadata
      - ``GeneticVariant`` / ``ConstructApplication``
-     - When edits, constructs, viral vectors, RNPs, reporters, or perturbations
-       are part of the biological context
+     - When donor-derived, engineered, or culture-acquired variants, constructs,
+       viral vectors, RNPs, reporters, or perturbations are part of the biological context
    * - Culture method summary
      - ``CultureProtocol``
      - When a concise protocol identifier or summary helps users interpret the

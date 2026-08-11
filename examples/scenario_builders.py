@@ -58,6 +58,7 @@ def build_basic_organoid():
         target_coordinates="chr6:33424312-33424345",
         edit_type="knockout",
         edit_description="exon 8 frameshift indel",
+        origin="engineered",
         method="CRISPR-Cas9",
         delivery_method="RNP",
         zygosity_or_edit_state="biallelic",
@@ -274,6 +275,7 @@ def build_edited_ipsc_organoid_mea():
         target_symbol="GENE1",
         edit_type="knockin",
         edit_description="synthetic heterozygous frameshift edit",
+        origin="engineered",
         method="CRISPR-Cas9",
         zygosity_or_edit_state="heterozygous",
         validation_status="screened",
@@ -370,6 +372,7 @@ def build_biological_metadata_only_organoid():
         target_symbol="GENE1",
         edit_type="knockin",
         edit_description="synthetic heterozygous frameshift edit",
+        origin="engineered",
         method="CRISPR-Cas9",
         zygosity_or_edit_state="heterozygous",
         validation_status="screened",
@@ -622,6 +625,56 @@ def build_two_line_assembloid():
     return nwbfile
 
 
+def build_donor_derived_variant_organoid():
+    variant = GeneticVariant(
+        name="VAR-SYN-DDX3X-DONOR",
+        variant_id="VAR-SYN-DDX3X-DONOR",
+        target_symbol="DDX3X",
+        edit_type="point_mutation",
+        edit_description="Synthetic donor-derived DDX3X variant",
+        origin="donor_derived",
+        zygosity_or_edit_state="heterozygous",
+        validation_status="validated",
+        validation_method="WES",
+    )
+    line = CellLine(
+        name="CL-SYN-DDX3X-DONOR",
+        cell_line_id="CL-SYN-DDX3X-DONOR",
+        cell_line_type="derived_cell_line",
+        sample_label="Synthetic donor-derived DDX3X iPSC line",
+        species="Homo sapiens",
+        cell_source_type="iPSC",
+        disease_or_diagnosis="synthetic neurodevelopmental condition",
+        reference_genome="GRCh38",
+        genetic_variants=[variant],
+    )
+    culture = CellCulture(
+        name="CULT-SYN-DDX3X-ORG-001",
+        culture_id="CULT-SYN-DDX3X-ORG-001",
+        culture_type="organoid",
+        sample_label="Synthetic donor-derived DDX3X organoid",
+        species="Homo sapiens",
+        culture_subtype="cortical",
+        age="P90D",
+        age_reference="days_post_induction",
+        source_lines=[line],
+    )
+    subject = CellCultureSubject(
+        subject_id="SUBJ-SYN-DDX3X-ORG-001",
+        species="Homo sapiens",
+        sex="U",
+        description="Synthetic organoid carrying a donor-derived DDX3X variant",
+        culture=culture,
+        cell_lines=[line],
+    )
+    nwbfile = _nwbfile(
+        "NWB-SYN-DDX3X-ORG-001",
+        "Donor-derived genetic variant synthetic example",
+    )
+    nwbfile.subject = subject
+    return nwbfile
+
+
 SCENARIOS = {
     "basic_organoid": build_basic_organoid,
     "slice_patch_clamp": build_slice_patch_clamp,
@@ -630,4 +683,5 @@ SCENARIOS = {
     "pharmacology_titration_organoid": build_pharmacology_titration_organoid,
     "directoid": build_directoid,
     "two_line_assembloid": build_two_line_assembloid,
+    "donor_derived_variant_organoid": build_donor_derived_variant_organoid,
 }

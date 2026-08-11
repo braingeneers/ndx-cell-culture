@@ -223,13 +223,20 @@ GeneticVariant
 --------------
 
 Required fields are ``variant_id``, ``target_symbol``, ``edit_type``, and
-``method``. Optional fields include ``target_coordinates``,
-``edit_description``, ``delivery_method``, ``zygosity_or_edit_state``,
+``origin``. Recommended ``origin`` terms are ``donor_derived``, ``engineered``,
+``culture_acquired``, ``unknown``, and ``other``. Optional fields include
+``target_coordinates``, ``edit_description``, ``method``, ``delivery_method``, ``zygosity_or_edit_state``,
 ``validation_status``, ``validation_method``, ``notes``, and
 ``related_application``.
 
-Use ``GeneticVariant`` for stable or defining engineered genomic changes, not
-as a complete raw sequencing variant table.
+Use ``GeneticVariant`` for stable or defining genomic variants, not as a
+complete raw sequencing variant table. ``method`` is the engineering method
+and is expected when ``origin`` is ``engineered``; it is not required for
+donor-derived or culture-acquired variants.
+
+The schema keeps ``origin`` physically optional so NWB files written by earlier
+release candidates remain readable. New records are expected to provide it,
+and ``validate_recommended_terms`` reports a missing value.
 
 ConstructApplication
 --------------------

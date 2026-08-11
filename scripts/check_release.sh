@@ -55,7 +55,7 @@ def assert_no_inspector_violations(path):
 
 paths = [Path("examples/basic_organoid_example.nwb")]
 paths.extend(sorted(Path("examples/generated_scenarios").glob("*.nwb")))
-assert len(paths) == 8, paths
+assert len(paths) == 9, paths
 
 for path in paths:
     assert path.exists(), path
