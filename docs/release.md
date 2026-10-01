@@ -26,6 +26,7 @@ Use this checklist when preparing a versioned `ndx-cell-culture` release.
 - Publish to TestPyPI first for installation testing.
 - Publish to PyPI after the TestPyPI package installs and imports cleanly.
 - Update `docs/catalog/ndx-meta.yaml.template` with the final PyPI URL and release version.
+- Set catalog `maintainers` to a list of GitHub usernames.
 - Submit the completed catalog metadata to the NWB staged extensions repository.
 - For DANDI-facing datasets, document the exact `ndx-cell-culture` version used to create the NWB files.
 
