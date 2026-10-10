@@ -83,6 +83,7 @@ required_wheel = {
     "ndx_cell_culture/spec/ndx-cell-culture.namespace.yaml",
     "ndx_cell_culture/spec/ndx-cell-culture.extensions.yaml",
     "ndx_cell_culture/validation.py",
+    "ndx_cell_culture/_provenance.py",
 }
 with ZipFile(wheel) as zf:
     wheel_names = set(zf.namelist())
@@ -106,14 +107,14 @@ assert ndx.CellCultureSubject.__name__ == "CellCultureSubject"
 assert ndx.CellCulture.__name__ == "CellCulture"
 assert ndx.CellLine.__name__ == "CellLine"
 assert ndx.CultureProtocol.__name__ == "CultureProtocol"
-assert ndx.CultureExperimentContext.__name__ == "CultureExperimentContext"
+assert not hasattr(ndx, "CultureExperimentContext")
 assert ndx.ExperimentContext.__name__ == "ExperimentContext"
 assert ndx.Pharmacology.__name__ == "Pharmacology"
 assert not hasattr(ndx, "CellLineParentRelation")
 assert not hasattr(ndx, "CellCultureSourceLineRelation")
 assert not hasattr(ndx, "CellCultureParentRelation")
-assert hasattr(ndx.CultureExperimentContext, "pharmacologies")
-assert hasattr(ndx.CultureExperimentContext, "add_pharmacologies")
-assert hasattr(ndx.CultureExperimentContext, "get_pharmacologies")
+assert hasattr(ndx.ExperimentContext, "pharmacologies")
+assert hasattr(ndx.ExperimentContext, "add_pharmacologies")
+assert hasattr(ndx.ExperimentContext, "get_pharmacologies")
 assert callable(ndx.validate_recommended_terms)
 PY

@@ -99,8 +99,8 @@ Biological Context And Provenance
 ``CellCultureSubject`` stores the biological context needed to interpret the
 recorded preparation: source ``CellLine`` objects, the recorded
 ``CellCulture``, and any related or parent ``CellCulture`` inputs.
-``CultureExperimentContext`` is reserved for recording/session context and
-pharmacology metadata.
+``ExperimentContext`` is stored directly in ``NWBFile.lab_meta_data`` and
+contains recording/session context and optional pharmacology metadata.
 
 Use ``CellLine`` for source-line identity and lineage metadata such as passage,
 clone, clonal status, source type, line-level variants, or construct
@@ -126,7 +126,8 @@ identify or interpret the preparation. This includes variants present in a
 donor, introduced through engineering, or acquired during culture. Do not use
 it as a complete raw sequencing variant table.
 
-Use ``origin`` to record the preparation-oriented source of the variant:
+An explicit, non-empty ``origin`` is required to record the preparation-oriented
+source of the variant:
 
 * ``donor_derived`` means the source biological material already carried the
   variant before the modeled line or culture was established;
@@ -170,12 +171,20 @@ Use ``ExperimentContext`` for session-level searchable context: recording
 platform, culture age at recording, media or bath, temperature, duration,
 broad stimulation flags, pharmacology flag, and a short setup description.
 
+Attach it directly using ``nwbfile.add_lab_meta_data(experiment)``. Its Python
+``subject``, ``culture``, and ``session_id`` properties resolve metadata from
+the enclosing NWB file. Set session IDs on ``NWBFile`` and use context ``notes``
+only for remarks specific to these recording conditions.
+
 Use core NWB ``Device`` / ``DeviceModel`` for recording hardware. The
 extension does not define a custom hardware object.
 
 Use ``Pharmacology`` for compounds applied during a recording session. The
 intended scale is modest searchable metadata, not a full protocol or
 time-series pharmacology representation.
+
+Store interventions under ``ExperimentContext.pharmacologies``. The Python
+``Pharmacology.experiment`` property resolves the containing context.
 
 Recommended Terms
 -----------------

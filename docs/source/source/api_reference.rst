@@ -17,7 +17,6 @@ Import these classes directly from ``ndx_cell_culture``:
 * ``GeneticVariant``
 * ``ConstructApplication``
 * ``CultureProtocol``
-* ``CultureExperimentContext``
 * ``ExperimentContext``
 * ``Pharmacology``
 
@@ -42,22 +41,51 @@ back, use indexing or slicing to access the referenced objects, for example
 ``culture.source_lines[:]`` or ``line.parent_cell_line[0]``.
 
 ``CellCultureSubject`` automatically stores the linked recorded ``culture`` in
-its subject-contained ``cell_cultures`` collection. Use a stable
+its subject-contained ``cell_cultures`` collection. It also collects referenced
+source and parent lines, parent cultures, and variant-related applications.
+Explicit ``cell_lines`` and ``related_cultures`` arguments remain available to
+include additional objects. Use a stable
 identifier-style ``CellCulture.name`` such as ``CULT-SYN-001``; the literal
 name ``culture`` is reserved for the link name and is rejected by the public
 constructor to avoid an HDF5 path conflict.
+
+An unowned application referenced by a variant is attached to the line or
+culture containing that variant. Existing application ownership is preserved.
+If an unowned application is referenced from multiple biological objects,
+attach it explicitly to the appropriate ``construct_applications`` collection
+before constructing the subject. Objects already owned by another subject and
+distinct objects with conflicting names raise descriptive errors.
+
+Automatic collection happens during subject construction. When adding new
+references afterward, explicitly add the targets with ``add_cell_lines``,
+``add_related_cultures``, or the appropriate biological object's
+``add_construct_applications`` method. Referencing an unstored target can cause
+``ReferenceTargetNotBuiltError`` when writing.
+
+Recording Context
+-----------------
+
+Store ``ExperimentContext`` directly with
+``nwbfile.add_lab_meta_data(experiment)``. Its read-only ``subject``, ``culture``,
+and ``session_id`` properties resolve values from the enclosing ``NWBFile``.
+Set ``session_id`` on the file. Accessing derived relationships before
+attachment, or subject/culture on a file without ``CellCultureSubject``, raises
+a descriptive ``ValueError``.
 
 Pharmacology Records
 --------------------
 
 Use ``pharmacologies`` for repeated ``Pharmacology`` records in
-``CultureExperimentContext``:
+``ExperimentContext``:
 
-* ``CultureExperimentContext(pharmacologies=[...])``
-* ``CultureExperimentContext.pharmacologies``
-* ``CultureExperimentContext.add_pharmacologies(...)``
-* ``CultureExperimentContext.create_pharmacologies(...)``
-* ``CultureExperimentContext.get_pharmacologies(...)``
+* ``ExperimentContext(pharmacologies=[...], ...)``
+* ``ExperimentContext.pharmacologies``
+* ``ExperimentContext.add_pharmacologies(...)``
+* ``ExperimentContext.create_pharmacologies(...)``
+* ``ExperimentContext.get_pharmacologies(...)``
+
+``Pharmacology.experiment`` resolves the containing ``ExperimentContext``;
+attach the intervention to that context before accessing the property.
 
 Recommended-Term Validation
 ---------------------------

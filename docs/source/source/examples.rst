@@ -70,8 +70,8 @@ Common Modeling Recipes
 Organoid recording
 ~~~~~~~~~~~~~~~~~~
 
-Create one ``CellCultureSubject`` linked to the recorded ``CellCulture``. Store
-the source line under the subject with ``cell_lines=[line]``, set
+Create one ``CellCultureSubject`` linked to the recorded ``CellCulture``.
+Subject construction stores the referenced source line automatically; set
 ``CellCulture.source_lines=[line]``, and put searchable recording context in
 ``ExperimentContext``.
 
@@ -99,6 +99,6 @@ Pharmacology titration
 ~~~~~~~~~~~~~~~~~~~~~~
 
 Use ``ExperimentContext`` for the recording session and add one or more
-``Pharmacology`` records linked to that context. ``concentration`` is a
+``Pharmacology`` records as children of that context. ``concentration`` is a
 searchable text value and may contain a range when that is the most useful
 summary for discovery.

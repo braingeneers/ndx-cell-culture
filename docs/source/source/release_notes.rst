@@ -1,20 +1,13 @@
 Release Notes
 =============
 
-1.0rc2
+1.0rc4
 ------
 
-* Represents biological identity and provenance through ``CellCultureSubject``
-  with subject-contained ``CellLine`` and ``CellCulture`` objects.
-* Uses direct ``parent_cell_line``, ``source_lines``, and ``parent_cultures``
-  reference fields for lineage and culture derivation.
-* Keeps ``CultureExperimentContext`` focused on recording/session context and
-  pharmacology metadata.
-
-1.0rc1
-------
-
-Initial release candidate for NWB maintainer, stakeholder, and external lab
-review. This release candidate includes the core schema, PyNWB package,
-synthetic examples, public documentation, and validation helpers intended for
-review before the first stable ``1.0.0`` release.
+* Recording context is a ``LabMetaData`` object stored directly under the NWB
+  file and owns optional pharmacology records.
+* The Python API resolves the subject, recorded culture, and session ID from
+  the enclosing file, and resolves each intervention's containing experiment.
+* Genetic variants require an explicit, non-empty preparation-oriented origin.
+* Subject construction collects referenced biological provenance and reports
+  ambiguous ownership or conflicting object names.

@@ -28,11 +28,8 @@ NWBFile
 |   |   +-- CultureProtocol [0..1]
 +-- general/devices : NWB.Device [0..N]
 +-- general/devices/models : NWB.DeviceModel [0..N] [hardware model metadata]
-+-- lab metadata : CultureExperimentContext <extends LabMetaData>
-    +-- ExperimentContext [0..1]
-    |   +-- subject -> CellCultureSubject
-    |   +-- culture -> CellCulture
-    |   +-- device -> NWB.Device [0..1]
++-- lab metadata : ExperimentContext <extends LabMetaData>
+    +-- device -> NWB.Device [0..1]
     +-- Pharmacology [0..N]
 ```
 
@@ -67,31 +64,35 @@ flowchart LR
 
   subgraph Core["Core NWB"]
     Device["NWB.Device<br/>NWB.DeviceModel"]
-    Data["Recorded data<br/>standard NWB metadata"]
+    Data["NWBFile<br/>recorded data and<br/>standard metadata"]
   end
 
   subgraph Session["Recording context"]
-    Context["CultureExperimentContext<br/>extends LabMetaData"]
-    Experiment["Experiment"]
+    Context["ExperimentContext<br/>extends LabMetaData"]
     Pharm["Pharmacology"]
 
-    Context --> Experiment
     Context --> Pharm
   end
 
-  Biology -.->|"recorded culture"| Session
-  Device -.->|"device used"| Session
+  Data -->|"subject"| Subject
+  Data -->|"lab_meta_data"| Context
+  Context -.->|"device"| Device
 ```
 
 Use this mental model:
 
 - Put biological identity and provenance in `CellCultureSubject`.
 - Put recorded data and hardware in core NWB.
-- Put recording conditions and pharmacology in `CultureExperimentContext`.
-- Dotted arrows show references: `CellCulture.source_lines`, plus recording-context links back to the recorded `CellCulture` and `NWB.Device`.
+- Put recording conditions and pharmacology in `ExperimentContext`.
+- Dotted arrows show stored references: `CellCulture.source_lines` and `ExperimentContext.device`. Subject, recorded culture, and session ID are resolved from the enclosing NWB file by the Python API.
 - The diagram uses short labels for readability; the ASCII hierarchy above gives the exact NWB and extension object names.
 
 Use this extension when the biological preparation is a cultured neural system rather than an animal subject, and when the metadata needed to interpret the recording cannot be represented clearly with core `NWB.Subject` alone.
+
+`CellCultureSubject` automatically includes the source lines, parent cultures,
+and related applications referenced by its biological objects during construction.
+Every `GeneticVariant` requires an explicit, non-empty `origin`; use `unknown`
+when its origin is not known.
 
 ## Installation
 
