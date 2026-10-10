@@ -202,16 +202,18 @@ CellLine
      - Free-text remarks.
    * - ``parent_cell_line``
      - Optional
-     - object reference to ``CellLine``
-     - Parent or source line for a derived line. Pass a ``CellLine`` object;
-       read back as a one-element object-reference vector.
+     - one-element object-reference vector to ``CellLine``
+     - Single immediate parent line, if known. Omit when unknown, or pass one
+       ``CellLine`` object; read back as a one-element vector. Multiple parents
+       are rejected.
 
 Provenance
 ----------
 
 Provenance is represented directly on subject-contained biological objects:
 
-* use ``CellLine.parent_cell_line`` for cell-line derivation;
+* use ``CellLine.parent_cell_line`` for a single immediate parent in cell-line
+  derivation;
 * use ``CellCulture.source_lines`` for source lines used to create a culture;
 * use ``CellCulture.parent_cultures`` for parent/input cultures used to derive
   another culture.

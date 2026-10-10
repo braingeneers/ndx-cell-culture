@@ -192,7 +192,11 @@ groups:
     dtype:
       target_type: CellLine
       reftype: object
-    doc: Parent or source CellLine for a derived line.
+    dims:
+    - num_parent_lines
+    shape:
+    - 1
+    doc: Single immediate parent CellLine for a derived line, if known.
     quantity: '?'
   groups:
   - neurodata_type_inc: GeneticVariant

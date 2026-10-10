@@ -15,7 +15,7 @@ from pynwb.spec import (
 
 
 NAMESPACE = "ndx-cell-culture"
-VERSION = "1.0rc3"
+VERSION = "1.0rc4"
 
 
 def attr(name, doc, required=True, dtype="text"):
@@ -121,7 +121,13 @@ def build_specs():
             NWBGroupSpec(neurodata_type_inc="ConstructApplication", doc="Construct applications attached to this cell line.", quantity="*"),
         ],
         datasets=[
-            object_ref_dataset("parent_cell_line", "CellLine", "Parent or source CellLine for a derived line."),
+            object_ref_dataset(
+                "parent_cell_line",
+                "CellLine",
+                "Single immediate parent CellLine for a derived line, if known.",
+                shape=(1,),
+                dims=("num_parent_lines",),
+            ),
         ],
     )
 

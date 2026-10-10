@@ -108,7 +108,9 @@ applications.
 
 Use direct reference fields for provenance:
 
-* ``CellLine.parent_cell_line`` answers: what line did this line come from?
+* ``CellLine.parent_cell_line`` answers: what single immediate line did this
+  line come from? Omit the field when the parent is unknown. Model successive
+  derivations as a chain of lines; multiple derived lines may share one parent.
 * ``CellCulture.source_lines`` answers: which source line or lines made this
   culture?
 * ``CellCulture.parent_cultures`` answers: which parent culture or cultures

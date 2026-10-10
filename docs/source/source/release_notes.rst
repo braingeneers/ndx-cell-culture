@@ -1,6 +1,17 @@
 Release Notes
 =============
 
+1.0rc4
+------
+
+* Limits ``CellLine.parent_cell_line`` to one immediate parent when present,
+  with schema, constructor, and write-time validation.
+* Reads singleton parent vectors from earlier release candidates and
+  normalizes empty parent vectors to an absent parent. Multiple-parent line
+  records require correction before they can be read with this package.
+* Keeps multiple source lines and parent cultures available on ``CellCulture``.
+* Accepts single objects for culture provenance references as well as lists.
+
 1.0rc2
 ------
 

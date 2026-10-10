@@ -2,10 +2,12 @@
 
 from pathlib import Path
 
+from hdmf.build import ObjectMapper
 from hdmf.common import VectorData
 from hdmf.utils import docval, get_docval, popargs
 from importlib_resources import files
-from pynwb import get_class, load_namespaces
+from pynwb import get_class, load_namespaces, register_map
+from pynwb.io.core import NWBContainerMapper
 
 from .validation import RECOMMENDED_TERMS, RecommendedTermIssue, validate_recommended_terms
 
@@ -79,13 +81,36 @@ def _dedupe_containers(values):
     return deduped
 
 
+def _check_parent_cell_line(parent_cell_line, cell_line_id, normalize_empty=False):
+    if parent_cell_line is None:
+        return None
+    prefix = "CellLine {!r}: parent_cell_line".format(cell_line_id)
+    if not isinstance(parent_cell_line, VectorData):
+        raise TypeError("{} must be a CellLine reference vector.".format(prefix))
+    count = len(parent_cell_line)
+    if count == 0 and normalize_empty:
+        return None
+    if count != 1:
+        raise ValueError(
+            "{} must contain exactly one CellLine when present; got {} references.".format(prefix, count)
+        )
+    parent = parent_cell_line[0]
+    if not isinstance(parent, CellLine):
+        raise TypeError(
+            "{} must reference a CellLine; got {}.".format(prefix, type(parent).__name__)
+        )
+    return parent_cell_line
+
+
 _original_cell_line_init = CellLine.__init__
 _cell_line_docval = []
 for _arg in get_docval(_original_cell_line_init):
     _arg = dict(_arg)
     if _arg["name"] == "parent_cell_line":
         _arg["type"] = (CellLine, VectorData)
-        _arg["doc"] = "Parent or source CellLine for a derived line."
+        _arg["doc"] = "Single immediate parent CellLine for a derived line, if known."
+        # Validate the vector after converting scalar input and normalizing legacy empties.
+        _arg.pop("shape", None)
     _cell_line_docval.append(_arg)
 
 
@@ -94,8 +119,11 @@ def _cell_line_init(self, **kwargs):
     parent_cell_line = popargs("parent_cell_line", kwargs)
     parent_cell_line = _as_reference_vector(
         "parent_cell_line",
-        "Parent or source CellLine for a derived line.",
+        "Single immediate parent CellLine for a derived line, if known.",
         parent_cell_line,
+    )
+    parent_cell_line = _check_parent_cell_line(
+        parent_cell_line, kwargs["cell_line_id"], normalize_empty=True
     )
     if parent_cell_line is not None:
         kwargs["parent_cell_line"] = parent_cell_line
@@ -109,9 +137,11 @@ for _arg in get_docval(_original_cell_culture_init):
     if _arg["name"] == "source_lines":
         _arg["type"] = (CellLine, VectorData, list, tuple)
         _arg["doc"] = "Source CellLine or lines used to create this culture."
+        _arg.pop("shape", None)
     elif _arg["name"] == "parent_cultures":
         _arg["type"] = (CellCulture, VectorData, list, tuple)
         _arg["doc"] = "Parent or input CellCulture objects used to derive this culture."
+        _arg.pop("shape", None)
     _cell_culture_docval.append(_arg)
 
 
@@ -137,6 +167,14 @@ def _cell_culture_init(self, **kwargs):
 
 CellLine.__init__ = _cell_line_init
 CellCulture.__init__ = _cell_culture_init
+
+
+@register_map(CellLine)
+class _CellLineMapper(NWBContainerMapper):
+    @ObjectMapper.object_attr("parent_cell_line")
+    def parent_cell_line(self, container, manager):
+        # VectorData can be mutated after construction, so enforce the constraint at build time too.
+        return _check_parent_cell_line(container.parent_cell_line, container.cell_line_id)
 
 
 _PUBLIC_RELATED_CULTURES_CONTAINER = "related_cultures"

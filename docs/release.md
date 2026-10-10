@@ -6,6 +6,8 @@ Use this checklist when preparing a versioned `ndx-cell-culture` release.
 
 - Install development dependencies with `python -m pip install -e ".[dev]"`.
 - Run `bash scripts/check_release.sh`.
+- Confirm the parent-line regression tests cover legacy-file export and reading
+  from the cached schema without importing the extension package.
 - Review the generated NWB example files enough to confirm:
   - `CellCultureSubject` stores biological identity and provenance;
   - `CultureExperimentContext` stores recording/session context and pharmacology;

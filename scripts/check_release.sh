@@ -100,6 +100,7 @@ python -m venv "$TMP_DIR/venv"
 "$TMP_DIR/venv/bin/python" -m pip install --upgrade pip
 "$TMP_DIR/venv/bin/python" -m pip install "$TMP_DIR"/dist/ndx_cell_culture-*.whl
 "$TMP_DIR/venv/bin/python" - <<'PY'
+from hdmf.common import VectorData
 import ndx_cell_culture as ndx
 
 assert ndx.CellCultureSubject.__name__ == "CellCultureSubject"
@@ -116,4 +117,25 @@ assert hasattr(ndx.CultureExperimentContext, "pharmacologies")
 assert hasattr(ndx.CultureExperimentContext, "add_pharmacologies")
 assert hasattr(ndx.CultureExperimentContext, "get_pharmacologies")
 assert callable(ndx.validate_recommended_terms)
+
+def line(name, **kwargs):
+    return ndx.CellLine(
+        name=name, cell_line_id=name, cell_line_type="parental_cell_line",
+        sample_label=name, species="Homo sapiens", cell_source_type="iPSC", **kwargs
+    )
+
+parent = line("CL-WHEEL-PARENT")
+child = line("CL-WHEEL-CHILD", parent_cell_line=parent)
+assert child.parent_cell_line[0] is parent
+assert line("CL-WHEEL-EMPTY", parent_cell_line=VectorData(
+    name="parent_cell_line", description="Empty parent", data=[]
+)).parent_cell_line is None
+try:
+    line("CL-WHEEL-MULTIPLE", parent_cell_line=VectorData(
+        name="parent_cell_line", description="Invalid parents", data=[parent, parent]
+    ))
+except ValueError as exc:
+    assert "exactly one CellLine" in str(exc)
+else:
+    raise AssertionError("Installed wheel accepted multiple parents")
 PY

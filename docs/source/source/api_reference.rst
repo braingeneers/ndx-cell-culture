@@ -37,9 +37,24 @@ and provenance fields:
 * ``CellCulture(source_lines=[line_a, line_b])``
 * ``CellCulture(parent_cultures=[parent_organoid])``
 
-These fields are stored as NWB object-reference vectors. After reading a file
-back, use indexing or slicing to access the referenced objects, for example
-``culture.source_lines[:]`` or ``line.parent_cell_line[0]``.
+The line and culture provenance fields are stored as NWB object-reference
+vectors. ``CellLine.parent_cell_line`` has zero or one immediate parent: omit
+the argument when the parent is unknown, or pass a single ``CellLine``. A
+one-element ``VectorData`` containing a ``CellLine`` is also accepted. Multiple
+parents and references to other object types are rejected, including vectors
+modified before writing.
+
+After reading a file back, use indexing or slicing to access the referenced
+objects, for example ``culture.source_lines[:]`` or
+``line.parent_cell_line[0]`` when ``line.parent_cell_line is not None``.
+``CellCulture.source_lines`` and ``CellCulture.parent_cultures`` can contain
+multiple inputs.
+
+Files from earlier release candidates with no parent dataset or a singleton
+parent vector remain readable. Empty parent vectors are normalized to ``None``
+and omitted when exporting with ``NWBHDF5IO.export``. Files containing multiple
+parents for a ``CellLine`` raise an error identifying the affected line;
+resolve the lineage before exporting with the current schema.
 
 ``CellCultureSubject`` automatically stores the linked recorded ``culture`` in
 its subject-contained ``cell_cultures`` collection. Use a stable
