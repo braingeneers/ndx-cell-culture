@@ -9,6 +9,7 @@ from importlib_resources import files
 from pynwb import get_class, load_namespaces, register_map
 from pynwb.io.core import NWBContainerMapper
 
+from ._provenance import collect_subject_provenance
 from .validation import RECOMMENDED_TERMS, RecommendedTermIssue, validate_recommended_terms
 
 
@@ -33,9 +34,21 @@ CellLine = get_class("CellLine", "ndx-cell-culture")
 GeneticVariant = get_class("GeneticVariant", "ndx-cell-culture")
 ConstructApplication = get_class("ConstructApplication", "ndx-cell-culture")
 CultureProtocol = get_class("CultureProtocol", "ndx-cell-culture")
-CultureExperimentContext = get_class("CultureExperimentContext", "ndx-cell-culture")
 ExperimentContext = get_class("ExperimentContext", "ndx-cell-culture")
 Pharmacology = get_class("Pharmacology", "ndx-cell-culture")
+
+
+_original_genetic_variant_init = GeneticVariant.__init__
+
+
+@docval(*get_docval(_original_genetic_variant_init))
+def _genetic_variant_init(self, **kwargs):
+    if not kwargs["origin"].strip():
+        raise ValueError("GeneticVariant.origin must be non-empty; use 'unknown' when the origin is not known.")
+    _original_genetic_variant_init(self, **kwargs)
+
+
+GeneticVariant.__init__ = _genetic_variant_init
 
 
 def _as_reference_vector(name, description, value):
@@ -192,7 +205,7 @@ for _arg in get_docval(_original_cell_culture_subject_init):
 
 @docval(*_cell_culture_subject_docval)
 def _cell_culture_subject_init(self, **kwargs):
-    """Accept related/parent cultures using a subject-oriented public name."""
+    """Store the linked culture and complete its referenced biological provenance."""
 
     culture, cell_cultures, related_cultures = popargs(
         "culture",
@@ -200,20 +213,31 @@ def _cell_culture_subject_init(self, **kwargs):
         _PUBLIC_RELATED_CULTURES_CONTAINER,
         kwargs,
     )
+    application_attachments = []
     subject_cultures = []
     if getattr(culture, "name", None) == "culture":
         raise ValueError("CellCulture.name cannot be 'culture' when used as CellCultureSubject.culture; use a stable identifier-style name and store the biological identifier in culture_id.")
-    for subject_culture in _dedupe_containers(_as_list(cell_cultures) + _as_list(related_cultures)):
-        if not _same_container(subject_culture, culture):
-            subject_cultures.append(subject_culture)
-    if culture is not None and getattr(culture, "parent", None) is None:
-        subject_cultures.insert(0, culture)
+    if self._in_construct_mode:
+        # HDMF readback can supply the primary culture both as a link and as a child.
+        for subject_culture in _dedupe_containers(_as_list(cell_cultures) + _as_list(related_cultures)):
+            if not _same_container(subject_culture, culture):
+                subject_cultures.append(subject_culture)
+        if culture is not None and getattr(culture, "parent", None) is None:
+            subject_cultures.insert(0, culture)
+    else:
+        cell_lines, subject_cultures, application_attachments = collect_subject_provenance(
+            self, culture, kwargs.get("cell_lines"), _as_list(cell_cultures) + _as_list(related_cultures)
+        )
+        if cell_lines:
+            kwargs["cell_lines"] = cell_lines
     kwargs["culture"] = culture
     if subject_cultures:
         kwargs[_GENERATED_SUBJECT_CULTURES_CONTAINER] = subject_cultures
     _original_cell_culture_subject_init(self, **kwargs)
     if culture is not None and culture.name not in self.cell_cultures:
         self.add_cell_cultures(culture)
+    for owner, application in application_attachments:
+        owner.add_construct_applications(application)
 
 
 def _get_related_cultures(self):
@@ -238,19 +262,19 @@ CellCultureSubject.get_related_cultures = getattr(
 
 _PUBLIC_PHARMACOLOGY_CONTAINER = "pharmacologies"
 _GENERATED_PHARMACOLOGY_CONTAINER = "pharmacology" + "s"
-_original_culture_experiment_context_init = CultureExperimentContext.__init__
-_culture_experiment_context_docval = []
-for _arg in get_docval(_original_culture_experiment_context_init):
-    _culture_experiment_context_docval.append(_arg)
+_original_experiment_context_init = ExperimentContext.__init__
+_experiment_context_docval = []
+for _arg in get_docval(_original_experiment_context_init):
+    _experiment_context_docval.append(_arg)
     if _arg["name"] == _GENERATED_PHARMACOLOGY_CONTAINER:
         _alias_arg = dict(_arg)
         _alias_arg["name"] = _PUBLIC_PHARMACOLOGY_CONTAINER
         _alias_arg["doc"] = "Repeated Pharmacology records."
-        _culture_experiment_context_docval.append(_alias_arg)
+        _experiment_context_docval.append(_alias_arg)
 
 
-@docval(*_culture_experiment_context_docval)
-def _culture_experiment_context_init(self, **kwargs):
+@docval(*_experiment_context_docval)
+def _experiment_context_init(self, **kwargs):
     """Accept repeated Pharmacology records using the public plural spelling."""
 
     pharmacologies = popargs(_PUBLIC_PHARMACOLOGY_CONTAINER, kwargs)
@@ -259,27 +283,61 @@ def _culture_experiment_context_init(self, **kwargs):
         if generated_value:
             raise ValueError("Use pharmacologies for repeated Pharmacology records.")
         kwargs[_GENERATED_PHARMACOLOGY_CONTAINER] = pharmacologies
-    _original_culture_experiment_context_init(self, **kwargs)
+    _original_experiment_context_init(self, **kwargs)
 
 
 def _get_pharmacologies(self):
     return getattr(self, _GENERATED_PHARMACOLOGY_CONTAINER)
 
 
-CultureExperimentContext.__init__ = _culture_experiment_context_init
-CultureExperimentContext.pharmacologies = property(_get_pharmacologies)
-CultureExperimentContext.add_pharmacologies = getattr(
-    CultureExperimentContext,
+ExperimentContext.__init__ = _experiment_context_init
+ExperimentContext.pharmacologies = property(_get_pharmacologies)
+ExperimentContext.add_pharmacologies = getattr(
+    ExperimentContext,
     "add_" + _GENERATED_PHARMACOLOGY_CONTAINER,
 )
-CultureExperimentContext.create_pharmacologies = getattr(
-    CultureExperimentContext,
+ExperimentContext.create_pharmacologies = getattr(
+    ExperimentContext,
     "create_" + _GENERATED_PHARMACOLOGY_CONTAINER,
 )
-CultureExperimentContext.get_pharmacologies = getattr(
-    CultureExperimentContext,
+ExperimentContext.get_pharmacologies = getattr(
+    ExperimentContext,
     "get_" + _GENERATED_PHARMACOLOGY_CONTAINER,
 )
+
+
+def _get_experiment_file(self):
+    nwbfile = self.get_ancestor("NWBFile")
+    if nwbfile is None:
+        raise ValueError("ExperimentContext must be attached to an NWBFile to resolve file metadata.")
+    return nwbfile
+
+
+def _get_experiment_subject(self):
+    subject = _get_experiment_file(self).subject
+    if not isinstance(subject, CellCultureSubject):
+        raise ValueError("ExperimentContext requires an NWBFile with a CellCultureSubject to resolve subject or culture.")
+    return subject
+
+
+def _get_experiment_culture(self):
+    return self.subject.culture
+
+
+def _get_experiment_session_id(self):
+    return _get_experiment_file(self).session_id
+
+
+def _get_pharmacology_experiment(self):
+    if not isinstance(self.parent, ExperimentContext):
+        raise ValueError("Pharmacology must be attached to an ExperimentContext to resolve its experiment.")
+    return self.parent
+
+
+ExperimentContext.subject = property(_get_experiment_subject, doc="Cultured subject resolved from the enclosing NWBFile.")
+ExperimentContext.culture = property(_get_experiment_culture, doc="Recorded culture resolved from the enclosing NWBFile subject.")
+ExperimentContext.session_id = property(_get_experiment_session_id, doc="Session ID resolved from the enclosing NWBFile.")
+Pharmacology.experiment = property(_get_pharmacology_experiment, doc="ExperimentContext containing this intervention.")
 
 __all__ = [
     "CellCultureSubject",
@@ -288,7 +346,6 @@ __all__ = [
     "GeneticVariant",
     "ConstructApplication",
     "CultureProtocol",
-    "CultureExperimentContext",
     "ExperimentContext",
     "Pharmacology",
     "RECOMMENDED_TERMS",

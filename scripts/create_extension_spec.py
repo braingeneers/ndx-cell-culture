@@ -57,7 +57,7 @@ def build_specs():
                 ("target_coordinates", False, "Genomic coordinates, transcript notation, or locus notation."),
                 ("edit_type", True, "Recommended terms include knockout, knockin, point_mutation, deletion, duplication, inversion, tag_insertion, reporter_insertion, CRISPRi_targeting, CRISPRa_targeting, other."),
                 ("edit_description", False, "Human-readable variant or edit description."),
-                ("origin", False, "Preparation-oriented variant origin. Required for new records; optional in the schema so files from earlier release candidates remain readable. Recommended terms: donor_derived, engineered, culture_acquired, unknown, other."),
+                ("origin", True, "Preparation-oriented variant origin. Recommended terms: donor_derived, engineered, culture_acquired, unknown, other. Use unknown when the origin is not known."),
                 ("method", False, "Engineering method when origin is engineered, e.g. CRISPR-Cas9, base_editing, prime_editing, TALEN, ZFNs, homologous_recombination, other."),
                 ("delivery_method", False, "Method used to deliver edit machinery, e.g. RNP, plasmid, lentivirus, AAV, electroporation, lipofection, other."),
                 ("zygosity_or_edit_state", False, "Observed zygosity or edit state, e.g. heterozygous, homozygous, biallelic, hemizygous, mosaic, unknown, other."),
@@ -206,19 +206,18 @@ def build_specs():
 
     experiment_context = NWBGroupSpec(
         neurodata_type_def="ExperimentContext",
-        neurodata_type_inc="NWBContainer",
-        doc="Recording-time or session-level metadata separate from stable biological identity.",
+        neurodata_type_inc="LabMetaData",
+        doc="Recording-time or session-level metadata stored directly in NWBFile.lab_meta_data, with optional pharmacology children.",
         attributes=[
             *text_attrs(
                 [
                     ("experiment_id", True, "Stable experiment context identifier."),
-                    ("session_id", False, "Acquisition/session label."),
                     ("age_at_recording", True, "Culture age at recording; separate from CellCulture.age and inherited Subject.age."),
                     ("age_reference", False, "Reference event for age_at_recording."),
                     ("recording_platform", True, "Recommended terms: MEA, patch_clamp, calcium_imaging, multimodal, other."),
                     ("media_or_bath", False, "Media, bath solution, or ACSF during recording."),
                     ("experimental_setup", False, "Short recording setup summary."),
-                    ("notes", False, "Free-text remarks."),
+                    ("notes", False, "Remarks specific to these recording conditions; file-wide notes belong in NWBFile.notes."),
                 ]
             ),
             attr("temperature_c", "Recording temperature in Celsius.", required=False, dtype="float32"),
@@ -229,16 +228,17 @@ def build_specs():
             attr("pharmacology_present", "Search flag for pharmacology presence.", required=False, dtype="bool"),
         ],
         links=[
-            NWBLinkSpec(doc="CellCultureSubject recorded in this experiment.", target_type="CellCultureSubject", name="subject", quantity=1),
-            NWBLinkSpec(doc="CellCulture recorded in this experiment.", target_type="CellCulture", name="culture", quantity=1),
             NWBLinkSpec(doc="Core NWB Device object relevant to this recording context.", target_type="Device", name="device", quantity="?"),
+        ],
+        groups=[
+            NWBGroupSpec(neurodata_type_inc="Pharmacology", doc="Pharmacological interventions applied during this recording context.", quantity="*"),
         ],
     )
 
     pharmacology = NWBGroupSpec(
         neurodata_type_def="Pharmacology",
         neurodata_type_inc="NWBContainer",
-        doc="Repeatable pharmacological intervention linked to an ExperimentContext.",
+        doc="Repeatable pharmacological intervention contained in an ExperimentContext.",
         attributes=text_attrs(
             [
                 ("pharmacology_id", True, "Stable pharmacology row identifier."),
@@ -253,19 +253,6 @@ def build_specs():
             attr("start_time_s", "Start time relative to recording start.", required=False, dtype="float32"),
             attr("end_time_s", "End time relative to recording start.", required=False, dtype="float32"),
         ],
-        links=[
-            NWBLinkSpec(doc="Experiment context this pharmacological intervention belongs to.", target_type="ExperimentContext", name="experiment", quantity=1),
-        ],
-    )
-
-    culture_experiment_context = NWBGroupSpec(
-        neurodata_type_def="CultureExperimentContext",
-        neurodata_type_inc="LabMetaData",
-        doc="LabMetaData container for cultured-preparation recording context and pharmacology metadata.",
-        groups=[
-            NWBGroupSpec(neurodata_type_inc="ExperimentContext", doc="Recording/session context for this NWBFile.", quantity="?"),
-            NWBGroupSpec(neurodata_type_inc="Pharmacology", doc="Pharmacological interventions linked to experiment contexts.", quantity="*"),
-        ],
     )
 
     return [
@@ -275,9 +262,8 @@ def build_specs():
         culture_protocol,
         cell_culture,
         cell_culture_subject,
-        experiment_context,
         pharmacology,
-        culture_experiment_context,
+        experiment_context,
     ]
 
 

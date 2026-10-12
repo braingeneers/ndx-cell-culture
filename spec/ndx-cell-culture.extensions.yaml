@@ -26,10 +26,8 @@ groups:
     required: false
   - name: origin
     dtype: text
-    doc: 'Preparation-oriented variant origin. Required for new records; optional
-      in the schema so files from earlier release candidates remain readable. Recommended
-      terms: donor_derived, engineered, culture_acquired, unknown, other.'
-    required: false
+    doc: 'Preparation-oriented variant origin. Recommended terms: donor_derived, engineered,
+      culture_acquired, unknown, other. Use unknown when the origin is not known.'
   - name: method
     dtype: text
     doc: Engineering method when origin is engineered, e.g. CRISPR-Cas9,
@@ -339,81 +337,10 @@ groups:
   - name: culture
     target_type: CellCulture
     doc: Link to the recorded or described subject-contained CellCulture.
-- neurodata_type_def: ExperimentContext
-  neurodata_type_inc: NWBContainer
-  doc: Recording-time or session-level metadata separate from stable biological
-    identity.
-  attributes:
-  - name: experiment_id
-    dtype: text
-    doc: Stable experiment context identifier.
-  - name: session_id
-    dtype: text
-    doc: Acquisition/session label.
-    required: false
-  - name: age_at_recording
-    dtype: text
-    doc: Culture age at recording; separate from CellCulture.age and inherited
-      Subject.age.
-  - name: age_reference
-    dtype: text
-    doc: Reference event for age_at_recording.
-    required: false
-  - name: recording_platform
-    dtype: text
-    doc: 'Recommended terms: MEA, patch_clamp, calcium_imaging, multimodal, other.'
-  - name: media_or_bath
-    dtype: text
-    doc: Media, bath solution, or ACSF during recording.
-    required: false
-  - name: experimental_setup
-    dtype: text
-    doc: Short recording setup summary.
-    required: false
-  - name: notes
-    dtype: text
-    doc: Free-text remarks.
-    required: false
-  - name: temperature_c
-    dtype: float32
-    doc: Recording temperature in Celsius.
-    required: false
-  - name: recording_duration_s
-    dtype: float32
-    doc: Recording duration in seconds.
-    required: false
-  - name: spontaneous_activity
-    dtype: bool
-    doc: Search flag for spontaneous activity.
-    required: false
-  - name: electrical_stimulation
-    dtype: bool
-    doc: Search flag for electrical stimulation; detailed waveforms belong in
-      core NWB stimulus data.
-    required: false
-  - name: optical_stimulation
-    dtype: bool
-    doc: Search flag for optical stimulation; detailed waveforms belong in core
-      NWB stimulus data.
-    required: false
-  - name: pharmacology_present
-    dtype: bool
-    doc: Search flag for pharmacology presence.
-    required: false
-  links:
-  - name: subject
-    target_type: CellCultureSubject
-    doc: CellCultureSubject recorded in this experiment.
-  - name: culture
-    target_type: CellCulture
-    doc: CellCulture recorded in this experiment.
-  - name: device
-    target_type: Device
-    doc: Core NWB Device object relevant to this recording context.
-    quantity: '?'
 - neurodata_type_def: Pharmacology
   neurodata_type_inc: NWBContainer
-  doc: Repeatable pharmacological intervention linked to an ExperimentContext.
+  doc: Repeatable pharmacological intervention contained in an
+    ExperimentContext.
   attributes:
   - name: pharmacology_id
     dtype: text
@@ -445,18 +372,70 @@ groups:
     dtype: float32
     doc: End time relative to recording start.
     required: false
-  links:
-  - name: experiment
-    target_type: ExperimentContext
-    doc: Experiment context this pharmacological intervention belongs to.
-- neurodata_type_def: CultureExperimentContext
+- neurodata_type_def: ExperimentContext
   neurodata_type_inc: LabMetaData
-  doc: LabMetaData container for cultured-preparation recording context and
-    pharmacology metadata.
+  doc: Recording-time or session-level metadata stored directly in
+    NWBFile.lab_meta_data, with optional pharmacology children.
+  attributes:
+  - name: experiment_id
+    dtype: text
+    doc: Stable experiment context identifier.
+  - name: age_at_recording
+    dtype: text
+    doc: Culture age at recording; separate from CellCulture.age and inherited
+      Subject.age.
+  - name: age_reference
+    dtype: text
+    doc: Reference event for age_at_recording.
+    required: false
+  - name: recording_platform
+    dtype: text
+    doc: 'Recommended terms: MEA, patch_clamp, calcium_imaging, multimodal, other.'
+  - name: media_or_bath
+    dtype: text
+    doc: Media, bath solution, or ACSF during recording.
+    required: false
+  - name: experimental_setup
+    dtype: text
+    doc: Short recording setup summary.
+    required: false
+  - name: notes
+    dtype: text
+    doc: Remarks specific to these recording conditions; file-wide notes belong
+      in NWBFile.notes.
+    required: false
+  - name: temperature_c
+    dtype: float32
+    doc: Recording temperature in Celsius.
+    required: false
+  - name: recording_duration_s
+    dtype: float32
+    doc: Recording duration in seconds.
+    required: false
+  - name: spontaneous_activity
+    dtype: bool
+    doc: Search flag for spontaneous activity.
+    required: false
+  - name: electrical_stimulation
+    dtype: bool
+    doc: Search flag for electrical stimulation; detailed waveforms belong in
+      core NWB stimulus data.
+    required: false
+  - name: optical_stimulation
+    dtype: bool
+    doc: Search flag for optical stimulation; detailed waveforms belong in core
+      NWB stimulus data.
+    required: false
+  - name: pharmacology_present
+    dtype: bool
+    doc: Search flag for pharmacology presence.
+    required: false
   groups:
-  - neurodata_type_inc: ExperimentContext
-    doc: Recording/session context for this NWBFile.
-    quantity: '?'
   - neurodata_type_inc: Pharmacology
-    doc: Pharmacological interventions linked to experiment contexts.
+    doc: Pharmacological interventions applied during this recording context.
     quantity: '*'
+  links:
+  - name: device
+    target_type: Device
+    doc: Core NWB Device object relevant to this recording context.
+    quantity: '?'

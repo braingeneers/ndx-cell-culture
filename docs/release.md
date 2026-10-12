@@ -10,7 +10,7 @@ Use this checklist when preparing a versioned `ndx-cell-culture` release.
   from the cached schema without importing the extension package.
 - Review the generated NWB example files enough to confirm:
   - `CellCultureSubject` stores biological identity and provenance;
-  - `CultureExperimentContext` stores recording/session context and pharmacology;
+  - `ExperimentContext` is stored directly in `lab_meta_data` and owns pharmacology;
   - `parent_cell_line`, `source_lines`, and `parent_cultures` references round-trip;
   - recording hardware is represented with core NWB `Device` / `DeviceModel`;
   - NWB Inspector has no best-practice violations except the intentionally ignored core subject-age warning.
@@ -42,3 +42,34 @@ Use this checklist when preparing a versioned `ndx-cell-culture` release.
 ## External Review
 
 Before recommending broad production use, review the extension with NWB maintainers and at least one external cell-culture lab. The schema is designed to be usable before NWB-core inclusion, but maintainer feedback should inform the first stable release.
+
+## Unpublished RC API Changes (1.0rc4)
+
+Issues #2, #3, #4, and #6 are addressed in this iteration. Issues #1 (DANDI age
+semantics) and #5 (parent-line representation) are handled separately.
+
+Earlier RC files using the previous recording-context model are not supported
+by the revised schema. Regenerate them from their source metadata with the
+current API; do not merely change the embedded namespace version. Parent-line
+provenance files without the changed context or variant fields retain the
+normalization and export support covered by the parent-line regression tests.
+Update callers as follows:
+
+- Replace `CultureExperimentContext(experiment_context=experiment, ...)` with
+  `nwbfile.add_lab_meta_data(experiment)`.
+- Move `pharmacologies` and its add/create/get methods onto `ExperimentContext`.
+- Remove `subject` and `culture` constructor arguments from `ExperimentContext`;
+  attach it to the file and use the derived properties when needed.
+- Move `ExperimentContext(session_id=...)` to `NWBFile(session_id=...)` or set
+  `nwbfile.session_id` before writing. Context notes describe recording conditions;
+  file-wide notes belong in `NWBFile.notes`.
+- Remove `Pharmacology(experiment=...)`; add the record to the experiment's
+  `pharmacologies` collection. Its `experiment` property resolves ownership.
+- Supply an explicit non-empty `GeneticVariant.origin`, using `unknown` when
+  appropriate. The schema no longer treats the attribute as optional.
+- Referenced provenance is collected at subject construction. Explicit
+  collections remain useful for additional objects and for choosing application
+  ownership. New references added afterward still require explicit storage.
+
+The subject-age Inspector exclusion remains in place pending #1. Passing these
+release checks does not establish DANDI acceptance.

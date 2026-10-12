@@ -54,7 +54,6 @@ def test_dynamic_classes_are_available():
         "GeneticVariant",
         "ConstructApplication",
         "CultureProtocol",
-        "CultureExperimentContext",
         "ExperimentContext",
         "Pharmacology",
     ]:
@@ -84,27 +83,30 @@ def test_pharmacologies_alias_is_public_spelling():
     experiment = ndx.ExperimentContext(
         name="EXP-ALIAS",
         experiment_id="EXP-ALIAS",
-        subject=subject,
-        culture=culture,
         age_at_recording="P1D",
         recording_platform="MEA",
     )
     pharmacology = ndx.Pharmacology(
         name="PHARM-ALIAS",
         pharmacology_id="PHARM-ALIAS",
-        experiment=experiment,
         agent="CNQX",
     )
-    context = ndx.CultureExperimentContext(
-        name="culture_experiment_context",
+    context = ndx.ExperimentContext(
+        name="EXP-COLLECTION",
+        experiment_id="EXP-COLLECTION",
+        age_at_recording="P1D",
+        recording_platform="MEA",
         pharmacologies=[pharmacology],
     )
     generated_plural = "pharmacology" + "s"
-    docval_names = [arg["name"] for arg in get_docval(ndx.CultureExperimentContext.__init__)]
+    docval_names = [arg["name"] for arg in get_docval(ndx.ExperimentContext.__init__)]
     assert "pharmacologies" in docval_names
     with pytest.raises(ValueError, match="Use pharmacologies"):
-        ndx.CultureExperimentContext(
-            name="culture_experiment_context",
+        ndx.ExperimentContext(
+            name="EXP-CONFLICT",
+            experiment_id="EXP-CONFLICT",
+            age_at_recording="P1D",
+            recording_platform="MEA",
             pharmacologies=[pharmacology],
             **{generated_plural: [pharmacology]},
         )
@@ -181,8 +183,6 @@ def _build_roundtrip_file():
     experiment = ndx.ExperimentContext(
         name="EXP-EX-ORG-001",
         experiment_id="EXP-EX-ORG-001",
-        subject=subject,
-        culture=culture,
         age_at_recording="P120D",
         age_reference="days_post_induction",
         recording_platform="MEA",
@@ -195,20 +195,14 @@ def _build_roundtrip_file():
     pharmacology = ndx.Pharmacology(
         name="PHARM-EX-CNQX-01",
         pharmacology_id="PHARM-EX-CNQX-01",
-        experiment=experiment,
         agent="CNQX",
         concentration="10",
         concentration_unit="uM",
         start_time_s=300.0,
         end_time_s=900.0,
     )
-    nwbfile.add_lab_meta_data(
-        ndx.CultureExperimentContext(
-            name="culture_experiment_context",
-            experiment_context=experiment,
-            pharmacologies=[pharmacology],
-        )
-    )
+    experiment.add_pharmacologies(pharmacology)
+    nwbfile.add_lab_meta_data(experiment)
     return nwbfile
 
 
@@ -228,10 +222,10 @@ def test_write_read_roundtrip(tmp_path):
         assert read.subject.sex == "F"
         assert read.subject.cell_cultures["CULT-EX-ORG-001"] is read.subject.culture
         assert read.subject.cell_lines["CL-EX-CTRL-001"] is read.subject.culture.source_lines[0]
-        context = read.lab_meta_data["culture_experiment_context"]
+        context = next(iter(read.lab_meta_data.values()))
         assert read.subject.culture.source_lines[0].cell_line_id == "CL-EX-CTRL-001"
-        assert context.experiment_context.experiment_id == "EXP-EX-ORG-001"
-        assert context.experiment_context.device.name == "MaxTwo MX2-CHIP-17"
+        assert context.experiment_id == "EXP-EX-ORG-001"
+        assert context.device.name == "MaxTwo MX2-CHIP-17"
         assert context.pharmacologies["PHARM-EX-CNQX-01"].agent == "CNQX"
 
 
@@ -282,7 +276,6 @@ def test_user_docs_cover_extension_types_without_planning_artifacts():
         "GeneticVariant",
         "ConstructApplication",
         "CultureProtocol",
-        "CultureExperimentContext",
         "ExperimentContext",
         "Pharmacology",
     ]:
@@ -330,7 +323,7 @@ def test_schema_declares_critical_relationships():
     for relationship in [
         "neurodata_type_def: CellCultureSubject",
         "neurodata_type_inc: Subject",
-        "neurodata_type_def: CultureExperimentContext",
+        "neurodata_type_def: ExperimentContext",
         "neurodata_type_inc: LabMetaData",
         "name: culture",
         "name: parent_cell_line",
@@ -340,17 +333,17 @@ def test_schema_declares_critical_relationships():
         "target_type: CellCulture",
         "name: related_application",
         "target_type: ConstructApplication",
-        "name: subject",
-        "target_type: CellCultureSubject",
         "name: device",
         "target_type: Device",
-        "name: experiment",
-        "target_type: ExperimentContext",
     ]:
         assert relationship in schema
-    context_spec = schema.split("neurodata_type_def: CultureExperimentContext", 1)[1]
+    context_spec = schema.split("neurodata_type_def: ExperimentContext", 1)[1]
     assert "neurodata_type_inc: CellLine" not in context_spec
     assert "neurodata_type_inc: CellCulture" not in context_spec
+    assert "CultureExperimentContext" not in schema
+    assert "name: subject" not in context_spec
+    assert "name: culture" not in context_spec
+    assert "name: session_id" not in context_spec
 
 
 def test_required_culture_on_subject():
@@ -375,7 +368,7 @@ def test_required_culture_on_subject():
     assert subject.cell_lines["CL"] is line
     subject_docval_names = [arg["name"] for arg in get_docval(ndx.CellCultureSubject.__init__)]
     assert "related_cultures" in subject_docval_names
-    context_docval_names = [arg["name"] for arg in get_docval(ndx.CultureExperimentContext.__init__)]
+    context_docval_names = [arg["name"] for arg in get_docval(ndx.ExperimentContext.__init__)]
     assert "cell_lines" not in context_docval_names
     assert "cell_cultures" not in context_docval_names
 
@@ -518,13 +511,6 @@ def test_genetic_variant_origin_and_conditional_engineering_method_validation(tm
         edit_type="point_mutation",
         origin="patient_derived",
     )
-    legacy_variant = ndx.GeneticVariant(
-        name="legacy-variant",
-        variant_id="VAR-DDX3X-LEGACY",
-        target_symbol="DDX3X",
-        edit_type="point_mutation",
-        method="other",
-    )
 
     assert ndx.validate_recommended_terms(donor_variant) == []
     engineered_issues = ndx.validate_recommended_terms(engineered_variant)
@@ -535,10 +521,6 @@ def test_genetic_variant_origin_and_conditional_engineering_method_validation(tm
     assert len(invalid_origin_issues) == 1
     assert invalid_origin_issues[0].field == "origin"
     assert invalid_origin_issues[0].value == "patient_derived"
-    legacy_issues = ndx.validate_recommended_terms(legacy_variant)
-    assert len(legacy_issues) == 1
-    assert legacy_issues[0].field == "origin"
-    assert "requires a non-empty preparation-oriented origin" in legacy_issues[0].message
 
     line = ndx.CellLine(
         name="donor-derived-line",
@@ -640,11 +622,11 @@ def test_synthetic_scenarios_write_read_and_validate(tmp_path):
             assert read.subject.culture.culture_type == culture_type
             assert read.subject.culture.name in read.subject.cell_cultures
             if platform is not None:
-                context = read.lab_meta_data["culture_experiment_context"]
-                assert context.experiment_context.recording_platform == platform
+                context = next(iter(read.lab_meta_data.values()))
+                assert context.recording_platform == platform
                 assert len(context.pharmacologies) == pharmacology_count
             else:
-                assert not read.lab_meta_data or "culture_experiment_context" not in read.lab_meta_data
+                assert not read.lab_meta_data
 
 
 def test_example_scripts_write_expected_files(tmp_path):
@@ -673,6 +655,6 @@ def test_biological_metadata_only_scenario_has_subject_biology_but_no_experiment
         read = io.read()
         assert read.subject.subject_id == "SUBJ-SYN-EDITED-ORG-002"
         assert read.subject.culture.culture_id == "CULT-SYN-EDITED-ORG-002"
-        assert not read.lab_meta_data or "culture_experiment_context" not in read.lab_meta_data
+        assert not read.lab_meta_data
         assert len(read.subject.cell_cultures) == 1
         assert len(read.subject.cell_lines) == 2

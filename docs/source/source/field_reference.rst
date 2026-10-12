@@ -236,9 +236,8 @@ complete raw sequencing variant table. ``method`` is the engineering method
 and is expected when ``origin`` is ``engineered``; it is not required for
 donor-derived or culture-acquired variants.
 
-The schema keeps ``origin`` physically optional so NWB files written by earlier
-release candidates remain readable. New records are expected to provide it,
-and ``validate_recommended_terms`` reports a missing value.
+The schema and Python constructor require ``origin``. Empty and whitespace-only
+values are rejected; use ``unknown`` when the origin is not known.
 
 ConstructApplication
 --------------------
@@ -261,23 +260,25 @@ Required field: ``protocol_id``. Optional fields: ``protocol_name``,
 ``protocol_uri``, ``protocol_doi``, ``protocol_version``,
 ``patterning_summary``, ``media_summary``, and ``notes``.
 
-CultureExperimentContext
-------------------------
-
-``CultureExperimentContext`` extends core ``LabMetaData``. Its recommended
-group name is ``culture_experiment_context``. It contains one optional
-``ExperimentContext`` and repeated ``Pharmacology`` children. Biological
-``CellLine`` and ``CellCulture`` objects belong under ``CellCultureSubject``.
-
 ExperimentContext
 -----------------
 
+``ExperimentContext`` extends core ``LabMetaData`` and is stored directly in
+``NWBFile.lab_meta_data``. It contains repeated ``Pharmacology`` children.
+Biological ``CellLine`` and ``CellCulture`` objects belong under
+``CellCultureSubject``.
+
 Required fields are ``experiment_id``, ``age_at_recording``,
-``recording_platform``, ``subject``, and ``culture``. Optional fields include
-``session_id``, ``age_reference``, ``media_or_bath``, ``temperature_c``,
+and ``recording_platform``. Optional fields include
+``age_reference``, ``media_or_bath``, ``temperature_c``,
 ``recording_duration_s``, ``spontaneous_activity``,
 ``electrical_stimulation``, ``optical_stimulation``,
 ``pharmacology_present``, ``experimental_setup``, ``notes``, and ``device``.
+
+The read-only Python properties ``subject``, ``culture``, and ``session_id``
+resolve their values from the enclosing NWB file. They are not constructor
+arguments or separately stored fields. Set session IDs on ``NWBFile``; use
+context ``notes`` for remarks specific to the recording conditions.
 
 Use ``device`` to link to a core NWB ``Device``. Detailed acquisition,
 electrode, stimulus, imaging, and processing data should use core NWB
@@ -286,9 +287,13 @@ structures.
 Pharmacology
 ------------
 
-Required fields are ``pharmacology_id``, ``agent``, and ``experiment``.
+Required fields are ``pharmacology_id`` and ``agent``.
 Optional fields are ``concentration``, ``concentration_unit``, ``start_time_s``,
 ``end_time_s``, ``purpose``, and ``notes``.
+
+Attach records using ``ExperimentContext(pharmacologies=[...])`` or
+``experiment.add_pharmacologies(record)``. The read-only ``experiment``
+property resolves the containing context and is not a constructor argument.
 
 ``concentration`` is a searchable summary and may be a flexible text value or
 range when that is useful for dataset discovery.

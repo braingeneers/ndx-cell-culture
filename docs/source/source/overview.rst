@@ -71,8 +71,8 @@ dataset.
    * - A concise culture method summary
      - ``CultureProtocol`` attached to the ``CellCulture``
    * - Recording conditions, device link, or pharmacology
-     - ``ExperimentContext`` and optional ``Pharmacology`` records in
-       ``CultureExperimentContext``
+     - ``ExperimentContext`` in ``NWBFile.lab_meta_data``, with optional
+       ``Pharmacology`` children
 
 Vocabulary Guidance
 -------------------

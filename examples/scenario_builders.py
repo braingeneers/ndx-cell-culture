@@ -10,7 +10,6 @@ from ndx_cell_culture import (
     CellCultureSubject,
     CellLine,
     ConstructApplication,
-    CultureExperimentContext,
     CultureProtocol,
     ExperimentContext,
     GeneticVariant,
@@ -41,13 +40,11 @@ def _add_context(
 ):
     if experiment_context is None and not pharmacologies:
         return
-    nwbfile.add_lab_meta_data(
-        CultureExperimentContext(
-            name="culture_experiment_context",
-            experiment_context=experiment_context,
-            pharmacologies=pharmacologies or [],
-        )
-    )
+    if experiment_context is None:
+        raise ValueError("Pharmacology records require an ExperimentContext.")
+    for pharmacology in pharmacologies or []:
+        experiment_context.add_pharmacologies(pharmacology)
+    nwbfile.add_lab_meta_data(experiment_context)
 
 
 def build_basic_organoid():
@@ -126,12 +123,10 @@ def build_basic_organoid():
     nwbfile = _nwbfile("NWB-EX-ORG-001", "Example organoid recording")
     nwbfile.subject = subject
     device = _device(nwbfile, "MaxTwo MX2-CHIP-17", "MEA recording system/chip")
+    nwbfile.session_id = "2026-05-12-A"
     experiment = ExperimentContext(
         name="EXP-EX-ORG-001",
         experiment_id="EXP-EX-ORG-001",
-        subject=subject,
-        culture=culture,
-        session_id="2026-05-12-A",
         age_at_recording="P120D",
         age_reference="days_post_induction",
         recording_platform="MEA",
@@ -212,8 +207,6 @@ def build_slice_patch_clamp():
     experiment = ExperimentContext(
         name="EXP-EX-SLICE-001",
         experiment_id="EXP-EX-SLICE-001",
-        subject=subject,
-        culture=slice_culture,
         age_at_recording="P120D",
         age_reference="days_post_induction",
         recording_platform="patch_clamp",
@@ -230,7 +223,6 @@ def build_slice_patch_clamp():
         Pharmacology(
             name="PHARM-EX-CNQX-01",
             pharmacology_id="PHARM-EX-CNQX-01",
-            experiment=experiment,
             agent="CNQX",
             concentration="10",
             concentration_unit="uM",
@@ -240,7 +232,6 @@ def build_slice_patch_clamp():
         Pharmacology(
             name="PHARM-EX-APV-01",
             pharmacology_id="PHARM-EX-APV-01",
-            experiment=experiment,
             agent="APV",
             concentration="50",
             concentration_unit="uM",
@@ -328,12 +319,10 @@ def build_edited_ipsc_organoid_mea():
     nwbfile = _nwbfile("NWB-SYN-EDITED-ORG-001", "Synthetic edited organoid MEA example")
     nwbfile.subject = subject
     device = _device(nwbfile, "Example MEA Device A", "MEA recording system")
+    nwbfile.session_id = "2026-03-09"
     experiment = ExperimentContext(
         name="EXP-SYN-EDITED-MEA-001",
         experiment_id="EXP-SYN-EDITED-MEA-001",
-        subject=subject,
-        culture=culture,
-        session_id="2026-03-09",
         age_at_recording="day7",
         age_reference="days_since_plated",
         recording_platform="MEA",
@@ -477,8 +466,6 @@ def build_pharmacology_titration_organoid():
     experiment = ExperimentContext(
         name="EXP-SYN-PHARM-TITRATION-001",
         experiment_id="EXP-SYN-PHARM-TITRATION-001",
-        subject=subject,
-        culture=culture,
         age_at_recording="day121",
         age_reference="days_post_aggregation",
         recording_platform="MEA",
@@ -494,7 +481,6 @@ def build_pharmacology_titration_organoid():
     pharmacology = Pharmacology(
         name="PHARM-SYN-EXAMPLEDRUG-A-001",
         pharmacology_id="PHARM-SYN-EXAMPLEDRUG-A-001",
-        experiment=experiment,
         agent="ExampleDrug-A",
         concentration="5-100",
         concentration_unit="uM",

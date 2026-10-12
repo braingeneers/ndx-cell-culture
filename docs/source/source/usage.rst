@@ -23,10 +23,11 @@ Core Usage Pattern
 
 1. Create reusable ``CellLine`` and ``CellCulture`` objects.
 2. Link the recorded preparation through ``CellCultureSubject.culture``.
-3. Store source lines and related cultures under ``CellCultureSubject`` and use
-   direct provenance fields such as ``source_lines`` and ``parent_cultures``.
+3. Use direct provenance fields such as ``source_lines`` and ``parent_cultures``;
+   subject construction automatically stores the referenced biological objects.
 4. Use core NWB ``Device`` / ``DeviceModel`` for hardware identity.
-5. Use ``ExperimentContext`` and ``Pharmacology`` for recording-session context.
+5. Add ``ExperimentContext`` directly to ``NWBFile.lab_meta_data`` and store
+   optional ``Pharmacology`` records as its children.
 
 The public Python API uses ``pharmacologies`` for repeated ``Pharmacology``
 records, including constructor input and
@@ -99,6 +100,7 @@ line provenance or recording-session metadata.
    subject = CellCultureSubject(
        subject_id="SUBJ-SYN-ORG-001",
        species="Homo sapiens",
+       sex="U",
        description="Synthetic cortical organoid",
        culture=culture,
    )
@@ -131,7 +133,6 @@ one recording context.
        CellCulture,
        CellCultureSubject,
        CellLine,
-       CultureExperimentContext,
        CultureProtocol,
        ExperimentContext,
    )
@@ -173,7 +174,6 @@ one recording context.
        sex="U",
        description="Synthetic cortical organoid recording",
        culture=culture,
-       cell_lines=[line],
    )
 
    nwbfile = NWBFile(
@@ -188,8 +188,6 @@ one recording context.
    experiment = ExperimentContext(
        name="EXP-SYN-ORG-001",
        experiment_id="EXP-SYN-ORG-001",
-       subject=subject,
-       culture=culture,
        age_at_recording="P120D",
        age_reference="days_post_induction",
        recording_platform="MEA",
@@ -199,12 +197,10 @@ one recording context.
        device=device,
    )
 
-   nwbfile.add_lab_meta_data(
-       CultureExperimentContext(
-           name="culture_experiment_context",
-           experiment_context=experiment,
-       )
-   )
+   nwbfile.add_lab_meta_data(experiment)
+
+   assert experiment.subject is subject
+   assert experiment.culture is culture
 
    with NWBHDF5IO("synthetic_organoid.nwb", "w") as io:
        io.write(nwbfile)
