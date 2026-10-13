@@ -44,7 +44,7 @@ Use this checklist when preparing a versioned `ndx-cell-culture` release.
 
 Before recommending broad production use, review the extension with NWB maintainers and at least one external cell-culture lab. The schema is designed to be usable before NWB-core inclusion, but maintainer feedback should inform the first stable release.
 
-## RC API Changes (1.0rc4)
+## RC API Changes (1.0rc3)
 
 The recording-context and provenance changes address issues #2, #3, #4, and
 #6. The singleton parent-line constraint addresses #5. DANDI schema guidance,

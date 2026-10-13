@@ -22,10 +22,10 @@ copyright = '2026, David Parks, Braingeneers Lab, UC Santa Cruz'
 author = 'David Parks'
 
 # The short X.Y version
-version = '1.0rc4'
+version = '1.0rc3'
 
 # The full version, including alpha/beta/rc tags
-release = '1.0rc4'
+release = '1.0rc3'
 
 
 # -- General configuration ---------------------------------------------------

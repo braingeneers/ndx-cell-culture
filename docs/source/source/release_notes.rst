@@ -1,14 +1,14 @@
 Release Notes
 =============
 
-1.0rc4
+1.0rc3
 ------
 
 .. warning::
 
-   This release changes the recording-context schema. Files from earlier
-   release candidates that use ``CultureExperimentContext`` are not supported
-   by the current schema. Reading them with RC4 can omit their recording
+   This release changes the recording-context schema. Files using the older
+   ``CultureExperimentContext`` layout are not supported by the current schema.
+   Reading them with RC3 can omit their recording
    context from ``NWBFile.lab_meta_data``; exporting the resulting object can
    lose that metadata, including pharmacology records.
 

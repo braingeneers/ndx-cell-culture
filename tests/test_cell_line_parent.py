@@ -1,6 +1,7 @@
 """Parent-line constraints, cached-schema reading, and legacy-file compatibility."""
 
 from datetime import datetime, timezone
+import json
 from pathlib import Path
 import subprocess
 import sys
@@ -304,7 +305,15 @@ def test_legacy_parent_files_read_and_export_with_current_schema(tmp_path, relea
             out.export(src_io=io, nwbfile=read, write_args={"link_data": False})
     _assert_valid(export_path)
     with h5py.File(export_path, "r") as h5file:
-        assert list(h5file["specifications/ndx-cell-culture"]) == ["1.0rc4"]
+        assert list(h5file["specifications/ndx-cell-culture"]) == ["1.0rc3"]
+        # The frozen development rc3 schema has the same version label but a
+        # different parent shape. Export must cache the current schema itself.
+        cached_schema = json.loads(
+            h5file["specifications/ndx-cell-culture/1.0rc3/ndx-cell-culture.extensions"][()]
+        )
+        line_spec = next(group for group in cached_schema["groups"] if group.get("neurodata_type_def") == "CellLine")
+        parent_spec = next(dataset for dataset in line_spec["datasets"] if dataset["name"] == "parent_cell_line")
+        assert parent_spec["shape"] == [1]
         child_group = h5file["general/subject/CL-LEGACY"]
         if count <= 0:
             assert "parent_cell_line" not in child_group
