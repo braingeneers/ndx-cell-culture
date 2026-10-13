@@ -1,6 +1,18 @@
 Release Notes
 =============
 
+1.0.0
+-----
+
+* First stable release, available as ``ndx-cell-culture`` on PyPI.
+* Preserves the schema and Python API introduced in 1.0rc3, with namespace
+  version ``1.0.0``.
+* Supports Python 3.8 through 3.12.
+
+The older-file compatibility limits below also apply to 1.0.0. Files using the
+older ``CultureExperimentContext`` layout need regeneration from source metadata
+or an explicit migration that preserves recording context and pharmacology.
+
 1.0rc3
 ------
 
@@ -8,7 +20,7 @@ Release Notes
 
    This release changes the recording-context schema. Files using the older
    ``CultureExperimentContext`` layout are not supported by the current schema.
-   Reading them with RC3 can omit their recording
+   Reading them with RC3 or later can omit their recording
    context from ``NWBFile.lab_meta_data``; exporting the resulting object can
    lose that metadata, including pharmacology records.
 

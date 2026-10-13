@@ -6,6 +6,9 @@ Use this checklist when preparing a versioned `ndx-cell-culture` release.
 
 - Install development dependencies with `python -m pip install -e ".[dev]"`.
 - Run `bash scripts/check_release.sh`.
+- For release preparation, run the checker serially with Python 3.8, 3.9, and
+  3.12, for example `uv run --python 3.9 --extra test --extra docs bash scripts/check_release.sh`.
+  Do not run these commands concurrently: they share `.venv`.
 - Confirm the parent-line regression tests cover legacy-file export and reading
   from the cached schema without importing the extension package.
 - Review the generated NWB example files enough to confirm:
@@ -22,16 +25,73 @@ Use this checklist when preparing a versioned `ndx-cell-culture` release.
 - Update `pyproject.toml` version.
 - Update `scripts/create_extension_spec.py` namespace version to match.
 - Regenerate and commit `spec/ndx-cell-culture.namespace.yaml` and `spec/ndx-cell-culture.extensions.yaml`.
-- Tag the release as `vX.Y.Z`.
+- Match the Sphinx version/release and catalog template version. Preserve frozen
+  legacy test schemas when changing the current namespace version.
+- Update public installation guidance and release notes, the development-status
+  classifier when appropriate, and the local changelog.
+- Commit and push `main`, and require the final commit's test workflow to pass
+  on Python 3.8 through 3.12.
+- Create an annotated tag `vX.Y.Z`, push it, and create a stable GitHub release
+  before dispatching publication. Release candidates retain their prerelease tags.
+
+## Trusted Publishing Setup
+
+Configure GitHub environments `testpypi` and `pypi`, restricted to workflow runs
+from `main`. Upload jobs alone receive `id-token: write`; no stored PyPI token
+is needed. The workflow is manually dispatched and accepts stable releases only.
+
+Log into the Braingeneers accounts on both indices and register these publishers:
+
+| Field | PyPI | TestPyPI |
+| --- | --- | --- |
+| Project | `ndx-cell-culture` | `ndx-cell-culture` |
+| Repository owner | `braingeneers` | `braingeneers` |
+| Repository | `ndx-cell-culture` | `ndx-cell-culture` |
+| Workflow filename | `release.yml` | `release.yml` |
+| Environment | `pypi` | `testpypi` |
+
+For a new project, use a pending publisher on the account's Publishing page:
+[PyPI](https://pypi.org/manage/account/publishing/) or
+[TestPyPI](https://test.pypi.org/manage/account/publishing/). If the project already
+exists, configure its publisher in the project's Publishing settings instead.
+The accounts and publisher registrations are separate on the two indices.
+Pending publishers create the project on first upload and do not reserve its name.
+See [PyPI's setup instructions](https://docs.pypi.org/trusted-publishers/creating-a-project-through-oidc/).
 
 ## Distribution
 
-- Publish to TestPyPI first for installation testing.
-- Publish to PyPI after the TestPyPI package installs and imports cleanly.
-- Update `docs/catalog/ndx-meta.yaml.template` with the final PyPI URL and release version.
-- Set catalog `maintainers` to a list of GitHub usernames.
-- Submit the completed catalog metadata to the NWB staged extensions repository.
-- For DANDI-facing datasets, document the exact `ndx-cell-culture` version used to create the NWB files.
+Dispatch the workflow from `main` after both publisher registrations are ready:
+
+```bash
+gh workflow run release.yml --ref main -f tag=v1.0.0
+```
+
+The workflow verifies the stable GitHub release, matching metadata, and passing
+test CI for the tagged commit. It builds a wheel and source distribution, checks
+them with Twine, smoke-tests the installed wheel, and attaches both files plus
+`SHA256SUMS` to the GitHub release. Later attempts reuse those assets without
+rebuilding or overwriting them; incomplete assets must be investigated first.
+
+TestPyPI receives the files first. A fresh runner checks the published filenames
+and SHA-256 checksums, installs dependencies from production PyPI, installs the
+package from TestPyPI with `--no-deps`, and checks the version, bundled namespace,
+and a minimal NWB write/read. PyPI publication depends on that verification and
+uses the identical files, followed by the same checksum and installation checks.
+Rerun failed jobs after fixing account configuration or transient failures.
+Already-uploaded files are skipped, but checksum verification still rejects
+different files; published versions cannot be replaced with corrected artifacts.
+
+Record the release URL and validation results in local maintainer notes and the
+changelog. Leave the worktree clean.
+
+## Catalog and Downstream Follow-up
+
+- Keep the catalog template's final PyPI URL, release version, and `maintainers`
+  list of GitHub usernames current. Submit it to the NWB staged extensions
+  repository as a separate maintainer task.
+- For DANDI-facing datasets, document the exact extension version used to create
+  the NWB files. Uploader upgrades, archive-client checks, and old-file migration
+  are independent downstream tasks and do not block this package's release.
 
 ## Documentation
 

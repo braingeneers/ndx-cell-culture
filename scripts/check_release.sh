@@ -133,3 +133,6 @@ except ValueError as exc:
 else:
     raise AssertionError("Installed wheel accepted multiple parents")
 PY
+
+RELEASE_VERSION="$(python -c 'import yaml; print(yaml.safe_load(open("spec/ndx-cell-culture.namespace.yaml"))["namespaces"][0]["version"])')"
+"$TMP_DIR/venv/bin/python" "$ROOT_DIR/scripts/smoke_test_release.py" --version "$RELEASE_VERSION"

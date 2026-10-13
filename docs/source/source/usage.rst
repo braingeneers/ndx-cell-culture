@@ -4,11 +4,11 @@ Installation and Quickstart
 Installation
 ------------
 
-Install the package from the repository during release-candidate review:
+Install the stable release from PyPI:
 
 .. code-block:: bash
 
-   python -m pip install git+https://github.com/braingeneers/ndx-cell-culture.git
+   python -m pip install ndx-cell-culture
 
 For local development:
 

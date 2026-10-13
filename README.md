@@ -103,10 +103,10 @@ readiness. Run NWB Inspector with `--config dandi` before deposition.
 
 ## Installation
 
-Install the current release candidate from GitHub:
+Install the stable release from PyPI:
 
 ```bash
-python -m pip install git+https://github.com/braingeneers/ndx-cell-culture.git
+python -m pip install ndx-cell-culture
 ```
 
 For local development:
@@ -170,4 +170,4 @@ The generated site is written to `docs/_build/html`. Continuous integration runs
 
 ## Status
 
-This package is a release-candidate NDX intended for stakeholder and NWB maintainer review. The core model is encoded in the schema and documentation, and automated tests cover the public examples and relationship model.
+Version 1.0.0 is the first stable release. The core model is encoded in the schema and documentation, and automated tests cover the public examples and relationship model. See the [release notes](https://ndx-cell-culture.readthedocs.io/en/latest/release_notes.html) for compatibility guidance when working with files created using earlier release candidates.

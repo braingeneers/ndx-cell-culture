@@ -9,4 +9,4 @@ namespaces:
   schema:
   - namespace: core
   - source: ndx-cell-culture.extensions.yaml
-  version: 1.0rc3
+  version: 1.0.0

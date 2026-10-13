@@ -1,0 +1,208 @@
+name: publish release
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing stable GitHub release tag (vX.Y.Z)
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: publish-${{ inputs.tag }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    if: github.ref == 'refs/heads/main' && github.repository == 'braingeneers/ndx-cell-culture'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+      actions: read
+    outputs:
+      version: ${{ steps.metadata.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag }}
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Require a stable release and passing CI for its commit
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.tag }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$RELEASE_TAG" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]
+          [[ "$(git rev-parse HEAD)" == "$(git rev-parse "refs/tags/$RELEASE_TAG^{commit}")" ]]
+          gh release view "$RELEASE_TAG" --json isDraft,isPrerelease | python -c 'import json,sys; r=json.load(sys.stdin); assert not r["isDraft"] and not r["isPrerelease"]'
+          gh api --method GET "repos/$GITHUB_REPOSITORY/actions/workflows/test.yml/runs" -f "head_sha=$(git rev-parse HEAD)" -f event=push | python -c 'import json,sys; runs=json.load(sys.stdin)["workflow_runs"]; assert any(r["conclusion"] == "success" for r in runs), "Release commit has no successful test workflow"'
+      - name: Install build tools
+        run: python -m pip install 'build>=1.2' 'twine>=5.0' 'PyYAML>=6'
+      - name: Check matching release metadata
+        id: metadata
+        env:
+          RELEASE_TAG: ${{ inputs.tag }}
+        run: |
+          python - <<'PY'
+          import ast
+          import os
+          from pathlib import Path
+          import tomllib
+          import yaml
+
+          version = os.environ['RELEASE_TAG'][1:]
+          project = tomllib.loads(Path('pyproject.toml').read_text())['project']
+          assert project['name'] == 'ndx-cell-culture'
+          assert project['version'] == version
+          namespace = yaml.safe_load(Path('spec/ndx-cell-culture.namespace.yaml').read_text())['namespaces'][0]
+          assert namespace['version'] == version
+          assert yaml.safe_load(Path('docs/catalog/ndx-meta.yaml.template').read_text())['version'] == version
+          for path, names in [('scripts/create_extension_spec.py', ['VERSION']), ('docs/source/source/conf.py', ['version', 'release'])]:
+              assignments = {target.id: ast.literal_eval(node.value) for node in ast.parse(Path(path).read_text()).body
+                             if isinstance(node, ast.Assign) and isinstance(node.value, ast.Constant)
+                             for target in node.targets if isinstance(target, ast.Name)}
+              assert all(assignments[name] == version for name in names), path
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
+              output.write('version={}\n'.format(version))
+          PY
+      - name: Build once or reuse verified GitHub release assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.tag }}
+          RELEASE_VERSION: ${{ steps.metadata.outputs.version }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p bundle/dist
+          gh release view "$RELEASE_TAG" --json assets > "$RUNNER_TEMP/release-assets.json"
+          asset_count=$(python -c 'import json,sys; print(len(json.load(open(sys.argv[1]))["assets"]))' "$RUNNER_TEMP/release-assets.json")
+          if [[ "$asset_count" == 0 ]]; then
+            python -m build --sdist --wheel --outdir bundle/dist
+            (cd bundle/dist && sha256sum *.whl *.tar.gz > ../SHA256SUMS)
+          else
+            gh release download "$RELEASE_TAG" --pattern "ndx_cell_culture-$RELEASE_VERSION-py3-none-any.whl" --pattern "ndx_cell_culture-$RELEASE_VERSION.tar.gz" --dir bundle/dist
+            gh release download "$RELEASE_TAG" --pattern SHA256SUMS --dir bundle
+          fi
+          (cd bundle/dist && sha256sum --check ../SHA256SUMS)
+          python -m twine check bundle/dist/*
+      - name: Smoke-test the built wheel in a clean environment
+        env:
+          RELEASE_VERSION: ${{ steps.metadata.outputs.version }}
+        run: |
+          python -m venv "$RUNNER_TEMP/release-smoke"
+          "$RUNNER_TEMP/release-smoke/bin/python" -m pip install --index-url https://pypi.org/simple bundle/dist/*.whl
+          "$RUNNER_TEMP/release-smoke/bin/python" scripts/smoke_test_release.py --version "$RELEASE_VERSION"
+      - name: Attach new verified artifacts to the GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.tag }}
+        run: |
+          if python -c 'import json,sys; sys.exit(bool(json.load(open(sys.argv[1]))["assets"]))' "$RUNNER_TEMP/release-assets.json"; then
+            gh release upload "$RELEASE_TAG" bundle/dist/* bundle/SHA256SUMS
+          fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-${{ inputs.tag }}
+          path: bundle/
+          if-no-files-found: error
+
+  testpypi:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment:
+      name: testpypi
+      url: https://test.pypi.org/project/ndx-cell-culture/
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: release-${{ inputs.tag }}
+          path: bundle
+      - run: sha256sum --check ../SHA256SUMS
+        working-directory: bundle/dist
+      - uses: pypa/gh-action-pypi-publish@dc37677b2e1c63e2034f94d8a5b11f265b73ba33 # release/v1
+        with:
+          repository-url: https://test.pypi.org/legacy/
+          packages-dir: bundle/dist/
+          skip-existing: true
+
+  verify-testpypi:
+    needs: [build, testpypi]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag }}
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/download-artifact@v4
+        with:
+          name: release-${{ inputs.tag }}
+          path: bundle
+      - name: Verify TestPyPI files and clean installation
+        env:
+          RELEASE_VERSION: ${{ needs.build.outputs.version }}
+        run: |
+          python scripts/verify_release_index.py --index testpypi --version "$RELEASE_VERSION" --dist-dir bundle/dist
+          python -m pip install --index-url https://pypi.org/simple bundle/dist/*.whl
+          python -m pip uninstall -y ndx-cell-culture
+          python -m pip install --no-deps --no-cache-dir --index-url https://test.pypi.org/simple "ndx-cell-culture==$RELEASE_VERSION"
+          python scripts/smoke_test_release.py --version "$RELEASE_VERSION"
+
+  pypi:
+    needs: [build, verify-testpypi]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment:
+      name: pypi
+      url: https://pypi.org/project/ndx-cell-culture/
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: release-${{ inputs.tag }}
+          path: bundle
+      - run: sha256sum --check ../SHA256SUMS
+        working-directory: bundle/dist
+      - uses: pypa/gh-action-pypi-publish@dc37677b2e1c63e2034f94d8a5b11f265b73ba33 # release/v1
+        with:
+          packages-dir: bundle/dist/
+          skip-existing: true
+
+  verify-pypi:
+    needs: [build, pypi]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag }}
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/download-artifact@v4
+        with:
+          name: release-${{ inputs.tag }}
+          path: bundle
+      - name: Verify PyPI files and clean installation
+        env:
+          RELEASE_VERSION: ${{ needs.build.outputs.version }}
+        run: |
+          python scripts/verify_release_index.py --index pypi --version "$RELEASE_VERSION" --dist-dir bundle/dist
+          python -m pip install --no-cache-dir --index-url https://pypi.org/simple "ndx-cell-culture==$RELEASE_VERSION"
+          python scripts/smoke_test_release.py --version "$RELEASE_VERSION"
