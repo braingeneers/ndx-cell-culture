@@ -4,6 +4,21 @@ Release Notes
 1.0rc4
 ------
 
+.. warning::
+
+   This release changes the recording-context schema. Files from earlier
+   release candidates that use ``CultureExperimentContext`` are not supported
+   by the current schema. Reading them with RC4 can omit their recording
+   context from ``NWBFile.lab_meta_data``; exporting the resulting object can
+   lose that metadata, including pharmacology records.
+
+   Read existing files with the extension version used to create them until
+   they can be regenerated from source metadata or explicitly migrated while
+   preserving recording context and pharmacology. Changing only the embedded
+   namespace version does not migrate a file. The parent-vector compatibility
+   described below applies to files without the changed recording-context or
+   variant fields.
+
 * Limits ``CellLine.parent_cell_line`` to one immediate parent when present,
   with schema, constructor, and write-time validation.
 * Reads singleton parent vectors from earlier release candidates and

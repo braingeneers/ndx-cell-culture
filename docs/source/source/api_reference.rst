@@ -50,7 +50,9 @@ objects, for example ``culture.source_lines[:]`` or
 multiple inputs.
 
 Files from earlier release candidates with no parent dataset or a singleton
-parent vector remain readable. Empty parent vectors are normalized to ``None``
+parent vector remain readable when they do not use the changed recording-context
+or variant fields; see the compatibility warning in :doc:`release_notes`.
+Empty parent vectors are normalized to ``None``
 and omitted when exporting with ``NWBHDF5IO.export``. Files containing multiple
 parents for a ``CellLine`` raise an error identifying the affected line;
 resolve the lineage before exporting with the current schema.
