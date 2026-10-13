@@ -55,6 +55,9 @@ by the revised schema. Regenerate them from their source metadata with the
 current API; do not merely change the embedded namespace version. Parent-line
 provenance files without the changed context or variant fields retain the
 normalization and export support covered by the parent-line regression tests.
+For files created from an untagged development snapshot, keep its original
+source commit as well as the embedded version; the version label alone may
+identify more than one development schema.
 Update callers as follows:
 
 - Replace `CultureExperimentContext(experiment_context=experiment, ...)` with

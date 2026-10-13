@@ -12,7 +12,7 @@ Release Notes
    context from ``NWBFile.lab_meta_data``; exporting the resulting object can
    lose that metadata, including pharmacology records.
 
-   Read existing files with the extension version used to create them until
+   Read existing files with the original extension build used to create them until
    they can be regenerated from source metadata or explicitly migrated while
    preserving recording context and pharmacology. Changing only the embedded
    namespace version does not migrate a file. The parent-vector compatibility
