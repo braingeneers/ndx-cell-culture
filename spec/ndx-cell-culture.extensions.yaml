@@ -324,7 +324,12 @@ groups:
 - neurodata_type_def: CellCultureSubject
   neurodata_type_inc: Subject
   doc: NWB Subject wrapper for a recorded or described cultured neural
-    preparation.
+    preparation. For DANDI deposition, supply the inherited subject_id, species,
+    sex, and either age or date_of_birth fields. Use sex U when unknown. Subject
+    age describes the donor/source at collection, with a birth or gestational
+    reference; culture age belongs in CellCulture.age or
+    ExperimentContext.age_at_recording. These core fields retain NWB
+    optionality; validate DANDI requirements with NWB Inspector's dandi profile.
   groups:
   - neurodata_type_inc: CellLine
     doc: CellLine objects needed to interpret the subject culture provenance.

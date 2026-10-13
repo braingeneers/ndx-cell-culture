@@ -4,7 +4,7 @@ import sys
 
 from dateutil.tz import tzlocal
 from hdmf.utils import get_docval
-from nwbinspector import Importance, inspect_nwbfile
+from nwbinspector import Importance, inspect_nwbfile, load_config
 from pynwb import NWBHDF5IO, NWBFile, validate
 import pytest
 
@@ -32,17 +32,10 @@ def _assert_no_inspector_violations(path):
     messages = list(
         inspect_nwbfile(
             nwbfile_path=str(path),
+            config=load_config("dandi"),
             importance_threshold=Importance.BEST_PRACTICE_VIOLATION,
         )
     )
-    messages = [
-        message
-        for message in messages
-        if not (
-            message.check_function_name == "check_subject_age"
-            and message.object_type == "CellCultureSubject"
-        )
-    ]
     assert messages == []
 
 
@@ -169,6 +162,7 @@ def _build_roundtrip_file():
         subject_id="SUBJ-EX-ORG-001",
         species="Homo sapiens",
         sex="F",
+        age="P30Y",
         description="Recorded cortical organoid on MEA",
         culture=culture,
         cell_lines=[line],
@@ -220,6 +214,8 @@ def test_write_read_roundtrip(tmp_path):
         assert read.subject.culture.culture_id == "CULT-EX-ORG-001"
         assert read.subject.culture.culture_type == "organoid"
         assert read.subject.sex == "F"
+        assert read.subject.age == "P30Y"
+        assert read.subject.culture.age == "P120D"
         assert read.subject.cell_cultures["CULT-EX-ORG-001"] is read.subject.culture
         assert read.subject.cell_lines["CL-EX-CTRL-001"] is read.subject.culture.source_lines[0]
         context = next(iter(read.lab_meta_data.values()))

@@ -28,6 +28,8 @@ Core Usage Pattern
 4. Use core NWB ``Device`` / ``DeviceModel`` for hardware identity.
 5. Add ``ExperimentContext`` directly to ``NWBFile.lab_meta_data`` and store
    optional ``Pharmacology`` records as its children.
+6. For DANDI deposition, supply inherited ``subject_id``, ``species``, ``sex``,
+   and either donor/source ``age`` or ``date_of_birth`` on ``CellCultureSubject``.
 
 The public Python API uses ``pharmacologies`` for repeated ``Pharmacology``
 records, including constructor input and
@@ -76,6 +78,8 @@ Smallest Useful Example
 This example records only the cultured preparation identity. It is enough when
 you need a valid NWB file with a cultured subject, but do not yet need source
 line provenance or recording-session metadata.
+The donor age in this example is a synthetic value at collection; it is
+independent of the culture's 120-day age.
 
 .. code-block:: python
 
@@ -101,7 +105,8 @@ line provenance or recording-session metadata.
        subject_id="SUBJ-SYN-ORG-001",
        species="Homo sapiens",
        sex="U",
-       description="Synthetic cortical organoid",
+       age="P30Y",  # Synthetic donor age at collection, not culture age.
+       description="Synthetic cortical organoid; donor age at collection: 30 years",
        culture=culture,
    )
 
@@ -172,7 +177,8 @@ one recording context.
        subject_id="SUBJ-SYN-ORG-001",
        species="Homo sapiens",
        sex="U",
-       description="Synthetic cortical organoid recording",
+       age="P30Y",  # Synthetic donor age at collection, not culture age.
+       description="Synthetic cortical organoid recording; donor age at collection: 30 years",
        culture=culture,
    )
 
@@ -220,12 +226,15 @@ an environment where ``ndx-cell-culture`` is installed:
        io.read()
    PY
 
-   nwbinspector synthetic_organoid.nwb --modules ndx_cell_culture --threshold BEST_PRACTICE_VIOLATION
+   nwbinspector synthetic_organoid.nwb --modules ndx_cell_culture --config dandi --threshold BEST_PRACTICE_VIOLATION
 
 If NWB Inspector reports that ``CellCultureSubject`` is missing ``age`` and
-``date_of_birth``, do not put culture age in ``NWB.Subject.age``. Use
-``CellCulture.age`` and ``ExperimentContext.age_at_recording`` for culture
-timing.
+``date_of_birth``, the file is not ready for DANDI deposition. Supply documented
+donor/source age at collection in ISO-8601 duration format, or a scientifically
+meaningful source birth date. Use ``U`` for unknown sex. Culture timing remains
+in ``CellCulture.age`` and ``ExperimentContext.age_at_recording``; do not copy
+it into core subject age or use culture initiation as the source birth date.
+See :doc:`validation_dandi` for source-age ranges and embryonic preparations.
 
 Run the opt-in recommended-term validator for vocabulary guidance:
 

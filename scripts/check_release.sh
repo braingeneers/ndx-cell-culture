@@ -22,7 +22,7 @@ python - <<'PY'
 from pathlib import Path
 
 import ndx_cell_culture as ndx
-from nwbinspector import Importance, inspect_nwbfile
+from nwbinspector import Importance, inspect_nwbfile, load_config
 from pynwb import NWBHDF5IO, validate
 
 
@@ -39,17 +39,10 @@ def assert_no_inspector_violations(path):
     messages = list(
         inspect_nwbfile(
             nwbfile_path=str(path),
+            config=load_config("dandi"),
             importance_threshold=Importance.BEST_PRACTICE_VIOLATION,
         )
     )
-    messages = [
-        message
-        for message in messages
-        if not (
-            message.check_function_name == "check_subject_age"
-            and message.object_type == "CellCultureSubject"
-        )
-    ]
     assert messages == [], (path, messages)
 
 

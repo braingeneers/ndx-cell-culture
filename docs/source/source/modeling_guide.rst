@@ -89,6 +89,12 @@ Culture-specific timing belongs in
 ``CellCulture.age`` or ``ExperimentContext.age_at_recording``, not in
 ``NWB.Subject.age``.
 
+For DANDI deposition, also supply the inherited ``subject_id``, ``species``,
+``sex``, and either ``age`` or ``date_of_birth``. These core fields describe the
+donor/source, with age at collection for extracted or cultured samples. Use
+``U`` when source sex is unknown. Culture timing does not fulfill the core
+subject-age requirement. See :doc:`validation_dandi` for the DANDI checks.
+
 ``CellCulture`` describes the preparation itself: type, subtype, culture age,
 batch label, disease or diagnosis, reference genome, attached variants,
 construct applications, and culture protocol metadata.

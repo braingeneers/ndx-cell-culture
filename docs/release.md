@@ -13,7 +13,8 @@ Use this checklist when preparing a versioned `ndx-cell-culture` release.
   - `ExperimentContext` is stored directly in `lab_meta_data` and owns pharmacology;
   - `parent_cell_line`, `source_lines`, and `parent_cultures` references round-trip;
   - recording hardware is represented with core NWB `Device` / `DeviceModel`;
-  - NWB Inspector has no best-practice violations except the intentionally ignored core subject-age warning.
+  - NWB Inspector's DANDI profile has no best-practice violations, including
+    missing core subject-age/birth-date or sex findings.
 - Review public README and ReadTheDocs source for stale internal or planning terms before publishing.
 
 ## Versioning
@@ -45,8 +46,9 @@ Before recommending broad production use, review the extension with NWB maintain
 
 ## Unpublished RC API Changes (1.0rc4)
 
-Issues #2, #3, #4, and #6 are addressed in this iteration. Issues #1 (DANDI age
-semantics) and #5 (parent-line representation) are handled separately.
+The recording-context and provenance changes address issues #2, #3, #4, and
+#6. The singleton parent-line constraint addresses #5. DANDI schema guidance,
+examples, and unsuppressed subject validation address #1 in this repository.
 
 Earlier RC files using the previous recording-context model are not supported
 by the revised schema. Regenerate them from their source metadata with the
@@ -71,5 +73,15 @@ Update callers as follows:
   collections remain useful for additional objects and for choosing application
   ownership. New references added afterward still require explicit storage.
 
-The subject-age Inspector exclusion remains in place pending #1. Passing these
-release checks does not establish DANDI acceptance.
+Core subject fields retain NWB optionality because DANDI's age-or-birth-date
+requirement is a deposition constraint, not two independently required NWB
+datasets. DANDI-facing examples provide documented synthetic donor/source ages,
+and release checks no longer exclude subject-age findings. Regression tests
+write/read both age-based and birth-date-based subjects and prove that culture
+age alone does not satisfy the DANDI subject checks.
+
+The DANDI Inspector profile is not a complete archive acceptance test. Validate
+with the intended DANDI client and review extracted asset metadata before
+publication, especially the age reference for embryonic sources. Existing
+Uploader authoring, publication workers, and already-uploaded RC files require
+separate reviewed updates; this repository change does not migrate them.

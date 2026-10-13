@@ -194,7 +194,15 @@ def build_specs():
     cell_culture_subject = NWBGroupSpec(
         neurodata_type_def="CellCultureSubject",
         neurodata_type_inc="Subject",
-        doc="NWB Subject wrapper for a recorded or described cultured neural preparation.",
+        doc=(
+            "NWB Subject wrapper for a recorded or described cultured neural preparation. "
+            "For DANDI deposition, supply the inherited subject_id, species, sex, and "
+            "either age or date_of_birth fields. Use sex U when unknown. Subject age "
+            "describes the donor/source at collection, with a birth or gestational "
+            "reference; culture age belongs in CellCulture.age or "
+            "ExperimentContext.age_at_recording. These core fields retain NWB "
+            "optionality; validate DANDI requirements with NWB Inspector's dandi profile."
+        ),
         links=[
             object_link("culture", "CellCulture", "Link to the recorded or described subject-contained CellCulture.", quantity=1),
         ],

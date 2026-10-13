@@ -23,6 +23,13 @@ Inherited fields from ``NWB.Subject`` are not redefined by this extension:
 ``age__reference``, ``date_of_birth``, ``genotype``, ``strain``, and
 ``weight``. Culture age should not be stored in ``NWB.Subject.age``.
 
+For DANDI deposition, ``subject_id``, ``species``, ``sex``, and either ``age``
+or ``date_of_birth`` are required. They retain core NWB optionality in the
+extension schema. Use ``U`` for unknown sex. Subject age describes the
+donor/source at collection, using a birth or gestational reference; a birth
+date must describe the source rather than culture initiation. See
+:doc:`validation_dandi` for validation and source-age ranges.
+
 Extension-owned fields:
 
 .. list-table::

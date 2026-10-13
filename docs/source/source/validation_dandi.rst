@@ -20,14 +20,44 @@ environment where ``ndx-cell-culture`` is installed. Replace
        io.read()
    PY
 
-   nwbinspector path/to/file.nwb --modules ndx_cell_culture --threshold BEST_PRACTICE_VIOLATION
+   nwbinspector path/to/file.nwb --modules ndx_cell_culture --config dandi --threshold BEST_PRACTICE_VIOLATION
 
-Core NWB Inspector may report that ``CellCultureSubject`` is missing
-``age`` and ``date_of_birth``. For cultured preparations, do not put culture
-age in ``NWB.Subject.age`` just to silence that message. Use
-``CellCulture.age`` and ``ExperimentContext.age_at_recording`` for culture
-timing, and use inherited subject age or date of birth only when those core
-subject fields are scientifically meaningful for the donor/source metadata.
+DANDI requires inherited core subject metadata even when cultured-preparation
+metadata is present in the extension:
+
+* ``subject_id`` and ``species``;
+* explicit ``sex``: ``F``, ``M``, ``U`` (unknown), or ``O`` (other);
+* either ``age`` or ``date_of_birth``.
+
+For extracted or cultured samples, core subject age describes the donor/source
+at collection. Use ISO-8601 duration text such as ``P30Y`` for a 30-year-old
+donor, or ``P25Y/P35Y`` for a documented 25-35-year age range. The
+``age__reference`` is ``birth`` by default; use ``gestational`` for source age
+measured from conception, for example an embryonic preparation. A source birth
+date must be scientifically meaningful, rather than a culture initiation date.
+Keep culture timing in ``CellCulture.age`` and
+``ExperimentContext.age_at_recording`` with the appropriate culture reference.
+
+These inherited fields retain core NWB optionality. A schema-valid file can
+therefore fail DANDI readiness checks. Missing core age/birth date or sex must
+be resolved before deposition; do not invent ages or substitute culture timing.
+For multiple source donors, provide core metadata only when it meaningfully
+describes those sources, rather than inventing an aggregate donor age.
+
+Repository examples use invented donor ages as synthetic fixture data. They
+are not defaults for real samples. The release checks run the DANDI Inspector
+profile without suppressing subject-age or sex findings. Format validation
+cannot establish that the supplied ages or sex accurately describe the sources.
+
+Also run the DANDI client's validation in the intended upload environment and
+review the extracted asset metadata before deposition:
+
+.. code-block:: bash
+
+   dandi validate path/to/file.nwb
+
+The Inspector profile checks NWB best practices required by DANDI; it does not
+replace the client's additional file, metadata, and organization checks.
 
 When developing this package itself, run the repository test suite:
 

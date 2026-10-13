@@ -1,4 +1,8 @@
-"""Reusable synthetic NWBFile builders for ndx-cell-culture scenarios."""
+"""Reusable synthetic NWBFile builders for ndx-cell-culture scenarios.
+
+Donor ages are invented fixture values, distinct from culture ages. They are
+not defaults to use for real samples with unknown donor/source metadata.
+"""
 
 from datetime import datetime
 
@@ -116,7 +120,8 @@ def build_basic_organoid():
         subject_id="SUBJ-EX-ORG-001",
         species="Homo sapiens",
         sex="F",
-        description="Recorded cortical organoid on MEA",
+        age="P30Y",
+        description="Synthetic cortical organoid on MEA; donor age at collection: 30 years",
         culture=culture,
         cell_lines=[line],
     )
@@ -196,7 +201,8 @@ def build_slice_patch_clamp():
         subject_id="SUBJ-EX-SLICE-001",
         species="Homo sapiens",
         sex="U",
-        description="Example organoid-derived slice",
+        age="P30Y",
+        description="Synthetic organoid-derived slice; donor age at collection: 30 years",
         culture=slice_culture,
         cell_lines=[line],
         related_cultures=[parent_organoid],
@@ -312,7 +318,8 @@ def build_edited_ipsc_organoid_mea():
         subject_id="SUBJ-SYN-EDITED-ORG-001",
         species="Homo sapiens",
         sex="M",
-        description="Synthetic edited organoid subject",
+        age="P25Y/P35Y",
+        description="Synthetic edited organoid; donor age at collection: 25-35 years",
         culture=culture,
         cell_lines=[parental, derived],
     )
@@ -407,7 +414,8 @@ def build_biological_metadata_only_organoid():
         subject_id="SUBJ-SYN-EDITED-ORG-002",
         species="Homo sapiens",
         sex="M",
-        description="Synthetic edited organoid subject without recording context",
+        age="P25Y/P35Y",
+        description="Synthetic edited organoid without recording context; donor age at collection: 25-35 years",
         culture=culture,
         cell_lines=[parental, derived],
     )
@@ -456,7 +464,9 @@ def build_pharmacology_titration_organoid():
         subject_id="SUBJ-SYN-PHARM-ORG-001",
         species="Homo sapiens",
         sex="F",
-        description="Synthetic organoid subject for pharmacology titration",
+        age="P5D",
+        age__reference="gestational",
+        description="Synthetic organoid for pharmacology titration; embryonic source collected at gestational day 5",
         culture=culture,
         cell_lines=[line],
     )
@@ -559,7 +569,8 @@ def build_directoid():
         subject_id="SUBJ-EX-DIRECTOID-001",
         species="Homo sapiens",
         sex="U",
-        description="Example cortico-thalamic directoid",
+        age="P30Y",
+        description="Synthetic cortico-thalamic directoid; both source donors were 30 years old at collection",
         culture=directoid,
         cell_lines=[cortical_line, thalamic_line],
         related_cultures=[cortical_organoid, thalamic_organoid],
@@ -601,7 +612,8 @@ def build_two_line_assembloid():
         subject_id="SUBJ-EX-ASSEMBLOID-2LINE-001",
         species="Homo sapiens",
         sex="U",
-        description="Example assembloid from two distinct source lines",
+        age="P30Y",
+        description="Synthetic two-line assembloid; both source donors were 30 years old at collection",
         culture=culture,
         cell_lines=[line_a, line_b],
     )
@@ -649,7 +661,8 @@ def build_donor_derived_variant_organoid():
         subject_id="SUBJ-SYN-DDX3X-ORG-001",
         species="Homo sapiens",
         sex="U",
-        description="Synthetic organoid carrying a donor-derived DDX3X variant",
+        age="P10Y",
+        description="Synthetic organoid carrying a donor-derived DDX3X variant; donor age at collection: 10 years",
         culture=culture,
         cell_lines=[line],
     )

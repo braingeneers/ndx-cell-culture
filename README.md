@@ -94,6 +94,13 @@ and related applications referenced by its biological objects during constructio
 Every `GeneticVariant` requires an explicit, non-empty `origin`; use `unknown`
 when its origin is not known.
 
+For DANDI deposition, populate the inherited `subject_id`, `species`, `sex`,
+and either `age` or `date_of_birth` fields. Use `U` for unknown sex. Core subject
+age describes the donor/source at collection; culture age stays in
+`CellCulture.age` or `ExperimentContext.age_at_recording`. These fields retain
+core NWB optionality, so schema validation alone does not establish DANDI
+readiness. Run NWB Inspector with `--config dandi` before deposition.
+
 ## Installation
 
 Install the current release candidate from GitHub:
@@ -136,7 +143,7 @@ Run all synthetic scenario examples:
 python examples/create_synthetic_scenarios.py
 ```
 
-Generated `.nwb` files are written under `examples/` and ignored by git. The scenarios cover organoid recordings, slices, edited cell lines, pharmacology, directoid-style preparations, and two-line assembloids using synthetic identifiers.
+Generated `.nwb` files are written under `examples/` and ignored by git. The scenarios cover organoid recordings, slices, edited cell lines, pharmacology, directoid-style preparations, and two-line assembloids using synthetic identifiers. Donor ages are synthetic fixture values, separate from culture timing; do not copy them as defaults for real data.
 
 ## Development
 
@@ -159,7 +166,7 @@ python -m pip install -e ".[docs]"
 make -C docs/source html
 ```
 
-The generated site is written to `docs/_build/html`. Continuous integration runs the same release-check script across supported Python versions, including schema regeneration, PyNWB round-trip tests, example writers, NWB Inspector, docs build, clean wheel installation, and wheel/source distribution checks.
+The generated site is written to `docs/_build/html`. Continuous integration runs the same release-check script across supported Python versions, including schema regeneration, PyNWB round-trip tests, example writers, NWB Inspector with its DANDI profile and no subject-age exclusion, docs build, clean wheel installation, and wheel/source distribution checks.
 
 ## Status
 

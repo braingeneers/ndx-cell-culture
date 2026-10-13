@@ -18,3 +18,6 @@ Release Notes
 * Genetic variants require an explicit, non-empty preparation-oriented origin.
 * Subject construction collects referenced biological provenance and reports
   ambiguous ownership or conflicting object names.
+* Schema guidance and examples make DANDI's inherited core subject requirements
+  explicit, with donor/source age separate from culture timing. Release checks
+  use the DANDI Inspector profile without suppressing subject-age findings.
